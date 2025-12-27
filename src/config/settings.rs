@@ -27,6 +27,10 @@ pub struct Config {
 
     #[serde(default)]
     pub terminal: TerminalConfig,
+
+    /// Kawaii mode - cuter UI elements when enabled
+    #[serde(default)]
+    pub kawaii_mode: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -127,6 +131,12 @@ impl Config {
     /// Set theme name and save
     pub fn set_theme(&mut self, theme_name: &str) -> std::io::Result<()> {
         self.theme.name = Some(theme_name.to_string());
+        self.save()
+    }
+
+    /// Set kawaii mode and save
+    pub fn set_kawaii_mode(&mut self, enabled: bool) -> std::io::Result<()> {
+        self.kawaii_mode = enabled;
         self.save()
     }
 }

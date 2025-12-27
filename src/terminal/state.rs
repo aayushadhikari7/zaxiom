@@ -8,7 +8,8 @@ use std::collections::HashMap;
 use std::env;
 use std::path::PathBuf;
 
-use crate::config::theme::{icons, ThemeName};
+use crate::config::settings::Config;
+use crate::config::theme::{icons, kawaii_icons, ThemeName};
 use crate::git::prompt::get_git_branch;
 
 /// Terminal state
@@ -25,6 +26,8 @@ pub struct TerminalState {
     pub requested_theme: Option<ThemeName>,
     /// Current active theme
     pub current_theme: ThemeName,
+    /// Kawaii mode - cuter UI elements
+    pub kawaii_mode: bool,
 }
 
 impl TerminalState {
@@ -36,6 +39,10 @@ impl TerminalState {
         // Set the process cwd as well
         let _ = env::set_current_dir(&cwd);
 
+        // Load kawaii mode from config
+        let config = Config::load();
+        let kawaii_mode = config.kawaii_mode;
+
         Self {
             cwd,
             home,
@@ -43,7 +50,16 @@ impl TerminalState {
             prev_cwd: None,
             requested_theme: None,
             current_theme: ThemeName::CatppuccinMocha, // Default theme
+            kawaii_mode,
         }
+    }
+
+    /// Set kawaii mode and persist to config
+    pub fn set_kawaii_mode(&mut self, enabled: bool) {
+        self.kawaii_mode = enabled;
+        // Persist to config
+        let mut config = Config::load();
+        let _ = config.set_kawaii_mode(enabled);
     }
 
     /// Get current working directory
@@ -71,20 +87,27 @@ impl TerminalState {
     }
 
     /// Format prompt string with iTerm/Warp-style icons
-    /// Format:  ~/path/to/dir  branch ❯
+    /// Format:  ~/path/to/dir  branch ❯  (or ♡ in kawaii mode)
     pub fn format_prompt(&self) -> String {
         let (icon, display_path) = self.format_path_display();
         let git_branch = get_git_branch(&self.cwd);
+
+        // Use kawaii icons when kawaii mode is enabled
+        let (prompt_icon, git_icon) = if self.kawaii_mode {
+            (kawaii_icons::PROMPT, kawaii_icons::GIT_BRANCH)
+        } else {
+            (icons::PROMPT, icons::GIT_BRANCH)
+        };
 
         match git_branch {
             Some(branch) => format!(
                 "{} {}  {} {} ",
                 icon,
                 display_path,
-                icons::GIT_BRANCH,
+                git_icon,
                 branch
             ),
-            None => format!("{} {} {} ", icon, display_path, icons::PROMPT),
+            None => format!("{} {} {} ", icon, display_path, prompt_icon),
         }
     }
 

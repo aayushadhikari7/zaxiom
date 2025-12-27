@@ -1123,4 +1123,48 @@ impl Theme {
 
         theme
     }
+
+    /// Apply kawaii mode transformations - softer, cuter colors
+    pub fn apply_kawaii(&self) -> Self {
+        let mut theme = self.clone();
+
+        // Make accents more pastel pink/lavender
+        theme.accent = Color32::from_rgb(0xff, 0xb7, 0xc5);           // Pastel pink
+        theme.accent_secondary = Color32::from_rgb(0xe0, 0xb0, 0xff); // Pastel lavender
+
+        // Softer selection color with pink tint
+        let (r, g, b, _) = theme.selection.to_tuple();
+        theme.selection = Color32::from_rgba_unmultiplied(
+            ((r as u16 + 255) / 2) as u8,  // Blend with pink
+            ((g as u16 + 182) / 2) as u8,
+            ((b as u16 + 193) / 2) as u8,
+            100,
+        );
+
+        // Cuter cursor - pink heart cursor feel
+        theme.cursor = Color32::from_rgb(0xff, 0x69, 0xb4);          // Hot pink
+
+        // Softer prompt color
+        theme.prompt_color = Color32::from_rgb(0xff, 0xb7, 0xc5);    // Pastel pink
+
+        // Keep success/error distinguishable but softer
+        theme.success_color = Color32::from_rgb(0x98, 0xfb, 0x98);   // Pale green
+        theme.error_color = Color32::from_rgb(0xff, 0xb6, 0xc1);     // Light pink (softer red)
+
+        theme
+    }
+}
+
+/// Kawaii mode icons - cuter alternatives
+pub mod kawaii_icons {
+    pub const PROMPT: &str = "♡";           // Heart prompt
+    pub const PROMPT_ALT: &str = "✿";       // Flower prompt
+    pub const FOLDER: &str = "📁";          // Emoji folder
+    pub const HOME: &str = "🏠";            // House emoji
+    pub const SUCCESS: &str = "✨";          // Sparkles
+    pub const ERROR: &str = "💔";           // Broken heart
+    pub const WARNING: &str = "⚠️";         // Warning (but cuter context)
+    pub const GIT_BRANCH: &str = "🌸";      // Cherry blossom for git
+    pub const STAR: &str = "⭐";            // Star
+    pub const HEART: &str = "💕";           // Hearts
 }

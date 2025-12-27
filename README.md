@@ -82,6 +82,11 @@ Zaxiom is a **terminal emulator** (not just a CLI tool) that brings the Linux te
 #### Fun Commands
 `fortune` `cowsay` `coffee` `matrix` `neofetch` `pet`
 
+#### Robot Mascot Features
+- **14 expressive moods** - Idle, Thinking, Happy, Sad, Excited, Sleepy, Waving, Love, Surprised, Proud, Confused, Dancing, Celebrating, Typing
+- **Context-aware reactions** - Reacts to command success/failure, errors, and special keywords
+- **Smooth animations** - Eye expressions, bounce effects, arm movements, special effects (confetti, question marks)
+
 #### AI Integration (Ollama)
 `ollama` `# <prompt>` (AI chat with context)
 
@@ -191,7 +196,7 @@ cal                   # Show calendar
 neofetch
 ```
 
-### Themes
+### Themes & Personalization
 
 ```bash
 # List all available themes
@@ -212,6 +217,10 @@ theme catppuccin-mocha   # Default theme
 # one-dark, solarized-dark, solarized-light, monokai-pro,
 # palenight, ayu-dark, ayu-mirage, kanagawa, rose-pine,
 # rose-pine-moon, everforest-dark, night-owl
+
+# Enhanced visual mode with softer aesthetics
+theme --kawaii           # Enable softer UI mode (pastel accents, rounded corners)
+theme --normal           # Disable enhanced mode (default appearance)
 ```
 
 ### Hash & Encoding

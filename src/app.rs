@@ -313,6 +313,8 @@ pub struct ZaxiomApp {
     clipboard_feedback: Option<(String, std::time::Instant)>,
     /// Command palette (Ctrl+P)
     command_palette: CommandPalette,
+    /// Kawaii mode - cuter UI elements
+    kawaii_mode: bool,
 }
 
 impl ZaxiomApp {
@@ -359,7 +361,12 @@ impl ZaxiomApp {
             .as_ref()
             .and_then(|name| ThemeName::from_string(name))
             .unwrap_or_default();
-        let theme = Theme::from_name(theme_name);
+        let kawaii_mode = config.kawaii_mode;
+        let theme = if kawaii_mode {
+            Theme::from_name(theme_name).apply_kawaii()
+        } else {
+            Theme::from_name(theme_name)
+        };
         let mut style = (*cc.egui_ctx.style()).clone();
 
         // Set base font sizes using theme settings
@@ -387,6 +394,18 @@ impl ZaxiomApp {
         // Set comfortable spacing
         style.spacing.item_spacing = egui::vec2(8.0, theme.font_size * (theme.line_height - 1.0));
 
+        // Apply kawaii mode visual adjustments
+        if kawaii_mode {
+            // More rounded corners for a cuter look
+            style.visuals.window_corner_radius = egui::CornerRadius::same(12);
+            style.visuals.menu_corner_radius = egui::CornerRadius::same(10);
+            // Softer widget styling
+            style.visuals.widgets.noninteractive.corner_radius = egui::CornerRadius::same(8);
+            style.visuals.widgets.inactive.corner_radius = egui::CornerRadius::same(8);
+            style.visuals.widgets.hovered.corner_radius = egui::CornerRadius::same(8);
+            style.visuals.widgets.active.corner_radius = egui::CornerRadius::same(8);
+        }
+
         cc.egui_ctx.set_style(style);
 
         // Always start fresh (no session restore - like a normal terminal)
@@ -413,6 +432,7 @@ impl ZaxiomApp {
             clipboard,
             clipboard_feedback: None,
             command_palette: CommandPalette::new(),
+            kawaii_mode,
         }
     }
 
@@ -763,7 +783,12 @@ impl ZaxiomApp {
 
         // Handle theme change after pane borrow ends
         if let Some(new_theme_name) = theme_to_apply {
-            self.theme = Theme::from_name(new_theme_name);
+            let base_theme = Theme::from_name(new_theme_name);
+            self.theme = if self.kawaii_mode {
+                base_theme.apply_kawaii()
+            } else {
+                base_theme
+            };
             self.theme_name = new_theme_name;
             // Update current_theme on all panes
             for tab in &mut self.tabs {
@@ -774,6 +799,22 @@ impl ZaxiomApp {
             // Save to config file
             if let Err(e) = self.config.set_theme(new_theme_name.config_key()) {
                 eprintln!("Failed to save theme config: {}", e);
+            }
+        }
+
+        // Check for kawaii mode change from any pane
+        let focused_tab = &self.tabs[self.active_tab];
+        let focused_pane_id = focused_tab.splits.focused_pane_id();
+        if let Some(pane) = focused_tab.panes.get(&focused_pane_id) {
+            if pane.state.kawaii_mode != self.kawaii_mode {
+                self.kawaii_mode = pane.state.kawaii_mode;
+                // Re-apply theme with kawaii mode
+                let base_theme = Theme::from_name(self.theme_name);
+                self.theme = if self.kawaii_mode {
+                    base_theme.apply_kawaii()
+                } else {
+                    base_theme
+                };
             }
         }
 

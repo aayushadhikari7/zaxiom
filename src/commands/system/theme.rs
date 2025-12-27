@@ -18,18 +18,35 @@ impl Command for ThemeCommand {
     }
 
     fn usage(&self) -> &'static str {
-        "theme [name]\n\n\
+        "theme [name] [--kawaii|--normal]\n\n\
          Examples:\n  \
          theme           - List all available themes\n  \
          theme dracula   - Switch to Dracula theme\n  \
          theme nord      - Switch to Nord theme\n  \
-         theme list      - List all themes with descriptions"
+         theme list      - List all themes with descriptions\n  \
+         theme --kawaii  - Enable kawaii mode (cuter UI)\n  \
+         theme --normal  - Disable kawaii mode"
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
+        // Handle kawaii mode flags
+        if let Some(first_arg) = args.first() {
+            match first_arg.as_str() {
+                "--kawaii" | "-k" => {
+                    state.set_kawaii_mode(true);
+                    return Ok("Kawaii mode enabled! ♡(◕‿◕)♡ Everything is cuter now~".to_string());
+                }
+                "--normal" | "-n" => {
+                    state.set_kawaii_mode(false);
+                    return Ok("Kawaii mode disabled. Back to normal mode.".to_string());
+                }
+                _ => {}
+            }
+        }
+
         if args.is_empty() || args.first().map(|s| s.as_str()) == Some("list") {
             // List all themes with current theme highlighted
-            return Ok(self.list_themes(state.current_theme));
+            return Ok(self.list_themes(state.current_theme, state.kawaii_mode));
         }
 
         let theme_name = args.join(" ").to_lowercase();
@@ -58,8 +75,13 @@ impl Command for ThemeCommand {
 }
 
 impl ThemeCommand {
-    fn list_themes(&self, current: ThemeName) -> String {
-        let mut output = format!("Current theme: {} ✨\n\n", current.display_name());
+    fn list_themes(&self, current: ThemeName, kawaii_mode: bool) -> String {
+        let kawaii_status = if kawaii_mode { "on ♡" } else { "off" };
+        let mut output = format!(
+            "Current theme: {} ✨  (kawaii mode: {})\n\n",
+            current.display_name(),
+            kawaii_status
+        );
         output.push_str("Available themes:\n\n");
 
         // Dark themes

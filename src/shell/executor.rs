@@ -27,7 +27,9 @@ impl Executor {
         }
     }
 
-    /// Execute a command line
+    /// Execute a command line (simplified API without history context)
+    /// Kept for API compatibility - use execute_with_history for full functionality
+    #[allow(dead_code)]
     pub fn execute(&self, input: &str, state: &mut TerminalState) -> Result<String> {
         self.execute_with_history(input, state, None)
     }

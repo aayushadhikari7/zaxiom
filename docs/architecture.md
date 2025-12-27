@@ -58,7 +58,7 @@ zaxiom/
 │   │   └── settings.rs      # Config persistence (~/.config/zaxiom/config.toml)
 │   │
 │   └── mascot/              # Robot mascot
-│       └── mod.rs           # Mascot animations & reactions
+│       └── mod.rs           # Mascot state machine (14 moods, animations, reactions)
 │
 ├── assets/
 │   └── fonts/               # Hurmit Nerd Font Mono
@@ -570,6 +570,67 @@ Theme {
 Theme selection is persisted to `~/.config/zaxiom/config.toml`.
 
 Use `theme <name>` command to switch themes at runtime.
+
+### Enhanced UI Mode
+
+Toggle enhanced visual mode with softer aesthetics:
+- `theme --kawaii` - Enable enhanced mode (pastel accents, rounded corners)
+- `theme --normal` - Restore default appearance
+
+When enabled:
+- Accent colors shift to pastel pink/lavender
+- UI corner radii increase for softer appearance
+- Prompt symbol changes from `❯` to `♡`
+- Git branch icon changes from `` to `🌸`
+
+## Mascot System
+
+The robot mascot provides contextual visual feedback through a state machine:
+
+```
+Mascot
+├── mood: MascotMood          # Current emotional state
+├── frame: u64                # Animation frame counter
+├── mood_timer: Duration      # Time remaining in current mood
+├── activity_timer: Duration  # Time since last interaction
+└── particles: Vec<Particle>  # Special effect particles (confetti, etc.)
+
+MascotMood (enum) - 14 Expressions
+├── Idle         # Default resting state (._. eyes)
+├── Thinking     # Processing animation
+├── Happy        # Success reactions (^_^ eyes)
+├── Sad          # Failure reactions
+├── Excited      # High-activity state
+├── Sleepy       # After inactivity (-.-)
+├── Waving       # Interactive greeting
+├── Love         # Heart eyes (◕‿◕)♡
+├── Surprised    # Unexpected events (O_O)
+├── Proud        # Build/test success (★_★)
+├── Confused     # Unknown commands (?_?)
+├── Dancing      # Celebration (^o^)
+├── Celebrating  # Major success with confetti (★▽★)
+└── Typing       # While user is typing (._ .)
+```
+
+### Mood Triggers
+
+| Event | Triggered Mood |
+|-------|----------------|
+| Command success | Happy |
+| Command failure | Sad |
+| Unknown command | Confused |
+| Build/test pass | Celebrating |
+| Extended inactivity | Sleepy |
+| `pet` command | Love, Dancing, etc. |
+| Keywords (party, dance) | Dancing |
+
+### Animation System
+
+- **Bounce**: Vertical oscillation using `sin(frame * speed)`
+- **Sway**: Horizontal movement for Dancing/Confused moods
+- **Eye Expressions**: Per-mood eye rendering (sparkles, spirals, hearts)
+- **Arm Poses**: Contextual arm positions (typing, waving, celebrating)
+- **Particle Effects**: Confetti for Celebrating, question marks for Confused
 
 ## Session Persistence
 

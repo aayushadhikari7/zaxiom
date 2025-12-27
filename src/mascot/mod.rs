@@ -15,9 +15,13 @@ pub enum MascotMood {
     Excited,
     Sleepy,
     Waving,
-    Love,      // Heart eyes! (◕‿◕)♡
-    Surprised, // O_O
-    Proud,     // Sparkly eyes for success
+    Love,        // Heart eyes! (◕‿◕)♡
+    Surprised,   // O_O
+    Proud,       // Sparkly eyes for success
+    Confused,    // ?_? spiral eyes
+    Dancing,     // ^o^ happy dance
+    Celebrating, // ★▽★ confetti time!
+    Typing,      // ._. focused typing
 }
 
 /// Color palette for the mascot
@@ -109,6 +113,10 @@ impl Mascot {
             MascotMood::Love => Duration::from_secs(3),
             MascotMood::Surprised => Duration::from_secs(1),
             MascotMood::Proud => Duration::from_secs(3),
+            MascotMood::Confused => Duration::from_secs(2),
+            MascotMood::Dancing => Duration::from_secs(4),
+            MascotMood::Celebrating => Duration::from_secs(3),
+            MascotMood::Typing => Duration::from_secs(999999), // Stays until done typing
             _ => Duration::from_secs(999999),
         };
 
@@ -136,13 +144,19 @@ impl Mascot {
     pub fn on_command(&mut self, command: &str, success: bool) {
         self.activity();
 
-        if !success {
-            self.set_mood(MascotMood::Sad);
-            return;
-        }
-
         let cmd = command.split_whitespace().next().unwrap_or("");
         let cmd_lower = command.to_lowercase();
+
+        // Check for confused state on unknown command (failure)
+        if !success {
+            // Check if it looks like an unknown command
+            if cmd_lower.contains("not found") || cmd_lower.contains("unknown") {
+                self.set_mood(MascotMood::Confused);
+            } else {
+                self.set_mood(MascotMood::Sad);
+            }
+            return;
+        }
 
         // Check for special keywords first
         if cmd_lower.contains("love") || cmd_lower.contains("cute") || cmd_lower.contains("kawaii") {
@@ -151,6 +165,14 @@ impl Mascot {
         }
         if cmd_lower.contains("thank") || cmd_lower.contains("nice") || cmd_lower.contains("good") {
             self.set_mood(MascotMood::Happy);
+            return;
+        }
+        if cmd_lower.contains("party") || cmd_lower.contains("dance") || cmd_lower.contains("music") {
+            self.set_mood(MascotMood::Dancing);
+            return;
+        }
+        if cmd_lower.contains("yay") || cmd_lower.contains("success") || cmd_lower.contains("woohoo") {
+            self.set_mood(MascotMood::Celebrating);
             return;
         }
 
@@ -167,13 +189,17 @@ impl Mascot {
             "curl" | "wget" | "ping" | "find" | "grep" => {
                 self.set_mood(MascotMood::Thinking);
             }
-            // Proud for builds and tests
+            // Celebrating for successful builds!
             "cargo" | "npm" | "make" | "build" => {
-                self.set_mood(MascotMood::Proud);
+                self.set_mood(MascotMood::Celebrating);
             }
             // Love for fun commands
-            "fortune" | "cowsay" | "neofetch" | "coffee" => {
+            "fortune" | "cowsay" | "neofetch" | "coffee" | "pet" => {
                 self.set_mood(MascotMood::Love);
+            }
+            // Dancing for party!
+            "party" | "matrix" => {
+                self.set_mood(MascotMood::Dancing);
             }
             // Surprised for danger zone
             "rm" | "kill" => {
@@ -204,10 +230,31 @@ impl Mascot {
             MascotMood::Excited => (self.frame as f32 * 0.4).sin() * 4.0,
             MascotMood::Happy => (self.frame as f32 * 0.25).sin() * 2.5,
             MascotMood::Sleepy => (self.frame as f32 * 0.08).sin() * 1.5,
+            MascotMood::Dancing => (self.frame as f32 * 0.35).sin() * 3.5,
+            MascotMood::Celebrating => (self.frame as f32 * 0.5).sin().abs() * 6.0, // Jump!
+            MascotMood::Confused => (self.frame as f32 * 0.15).sin() * 1.0,
+            MascotMood::Typing => (self.frame as f32 * 0.1).sin() * 0.5, // Subtle
             _ => (self.frame as f32 * 0.12).sin() * 1.0,
         };
 
-        let head_center = Pos2::new(center.x, rect.top() + 28.0 + bounce);
+        // Side-to-side sway for dancing
+        let sway = if self.mood == MascotMood::Dancing {
+            (self.frame as f32 * 0.2).sin() * 5.0
+        } else if self.mood == MascotMood::Confused {
+            (self.frame as f32 * 0.3).sin() * 2.0 // Head tilt
+        } else {
+            0.0
+        };
+
+        let head_center = Pos2::new(center.x + sway, rect.top() + 28.0 + bounce);
+
+        // Draw special effects first (behind mascot)
+        if self.mood == MascotMood::Celebrating {
+            self.draw_confetti(&painter, center);
+        }
+        if self.mood == MascotMood::Confused {
+            self.draw_question_mark(&painter, head_center);
+        }
 
         // Draw antenna
         self.draw_antenna(&painter, head_center);
@@ -336,11 +383,49 @@ impl Mascot {
             // Tiny highlight
             painter.circle_filled(Pos2::new(left_eye.x - 2.0, left_eye.y - 2.0), 1.5, self.colors.highlight);
             painter.circle_filled(Pos2::new(right_eye.x - 2.0, right_eye.y - 2.0), 1.5, self.colors.highlight);
-        } else if self.mood == MascotMood::Proud {
+        } else if self.mood == MascotMood::Proud || self.mood == MascotMood::Celebrating {
             // Sparkly star eyes ★‿★
             let star_color = Color32::from_rgb(255, 220, 100);
             self.draw_star(painter, left_eye, 5.0, star_color);
             self.draw_star(painter, right_eye, 5.0, star_color);
+        } else if self.mood == MascotMood::Confused {
+            // Spiral/question eyes ?_?
+            let spiral_color = Color32::from_rgb(150, 150, 255);
+            // Draw spiral-like pattern
+            painter.circle_stroke(left_eye, 4.0, Stroke::new(2.0, spiral_color));
+            painter.circle_stroke(left_eye, 2.0, Stroke::new(1.5, spiral_color));
+            painter.circle_stroke(right_eye, 4.0, Stroke::new(2.0, spiral_color));
+            painter.circle_stroke(right_eye, 2.0, Stroke::new(1.5, spiral_color));
+        } else if self.mood == MascotMood::Dancing {
+            // Happy closed eyes ^o^
+            let happy_color = Color32::from_rgb(255, 180, 200);
+            // Draw ^ shapes
+            painter.line_segment(
+                [Pos2::new(left_eye.x - 3.0, left_eye.y + 2.0), Pos2::new(left_eye.x, left_eye.y - 2.0)],
+                Stroke::new(2.0, happy_color),
+            );
+            painter.line_segment(
+                [Pos2::new(left_eye.x, left_eye.y - 2.0), Pos2::new(left_eye.x + 3.0, left_eye.y + 2.0)],
+                Stroke::new(2.0, happy_color),
+            );
+            painter.line_segment(
+                [Pos2::new(right_eye.x - 3.0, right_eye.y + 2.0), Pos2::new(right_eye.x, right_eye.y - 2.0)],
+                Stroke::new(2.0, happy_color),
+            );
+            painter.line_segment(
+                [Pos2::new(right_eye.x, right_eye.y - 2.0), Pos2::new(right_eye.x + 3.0, right_eye.y + 2.0)],
+                Stroke::new(2.0, happy_color),
+            );
+        } else if self.mood == MascotMood::Typing {
+            // Focused dot eyes ._.
+            let focus_color = self.colors.eye_cyan;
+            painter.circle_filled(left_eye, 2.5, focus_color);
+            painter.circle_filled(right_eye, 2.5, focus_color);
+            // Small concentration line between eyes
+            painter.line_segment(
+                [Pos2::new(left_eye.x + 4.0, eye_y + 3.0), Pos2::new(right_eye.x - 4.0, eye_y + 3.0)],
+                Stroke::new(1.0, Color32::from_rgb(100, 100, 120)),
+            );
         } else {
             // Normal eye colors based on mood
             let (left_color, right_color) = match self.mood {
@@ -428,22 +513,38 @@ impl Mascot {
     fn draw_arms(&self, painter: &egui::Painter, body_center: Pos2) {
         let arm_y = body_center.y - 5.0;
 
-        // Waving animation for right arm
-        let right_arm_angle = if self.mood == MascotMood::Waving {
-            -0.8 + (self.frame as f32 * 0.3).sin() * 0.3
-        } else {
-            0.3
+        // Arm angles based on mood
+        let (left_arm_angle, right_arm_angle) = match self.mood {
+            MascotMood::Waving => (0.3, -0.8 + (self.frame as f32 * 0.3).sin() * 0.3),
+            MascotMood::Typing => {
+                // Both arms forward, alternating movement
+                let typing_offset = (self.frame as f32 * 0.4).sin() * 0.15;
+                (-0.2 + typing_offset, -0.2 - typing_offset)
+            }
+            MascotMood::Dancing => {
+                // Arms up and swaying
+                let dance_offset = (self.frame as f32 * 0.25).sin() * 0.3;
+                (-0.6 + dance_offset, -0.6 - dance_offset)
+            }
+            MascotMood::Celebrating => {
+                // Both arms up!
+                (-1.0, -1.0)
+            }
+            _ => (0.3, 0.3),
         };
 
         // Left arm
         let left_arm_start = Pos2::new(body_center.x - 18.0, arm_y);
-        let left_arm_end = Pos2::new(body_center.x - 26.0, arm_y + 8.0);
+        let arm_len = 12.0;
+        let left_arm_end = Pos2::new(
+            left_arm_start.x - arm_len * left_arm_angle.cos(),
+            left_arm_start.y + arm_len * left_arm_angle.sin(),
+        );
         painter.line_segment([left_arm_start, left_arm_end], Stroke::new(4.0, self.colors.body_white));
         painter.circle_filled(left_arm_end, 4.0, self.colors.body_pink);
 
-        // Right arm (can wave)
+        // Right arm
         let right_arm_start = Pos2::new(body_center.x + 18.0, arm_y);
-        let arm_len = 12.0;
         let right_arm_end = Pos2::new(
             right_arm_start.x + arm_len * right_arm_angle.cos(),
             right_arm_start.y + arm_len * right_arm_angle.sin(),
@@ -477,5 +578,89 @@ impl Mascot {
             2.0,
             Color32::from_rgba_unmultiplied(255, 255, 255, 60),
         );
+    }
+
+    /// Draw confetti for celebrating mood
+    fn draw_confetti(&self, painter: &egui::Painter, center: Pos2) {
+        let confetti_colors = [
+            Color32::from_rgb(255, 100, 150), // Pink
+            Color32::from_rgb(100, 200, 255), // Cyan
+            Color32::from_rgb(255, 220, 100), // Yellow
+            Color32::from_rgb(150, 255, 150), // Green
+            Color32::from_rgb(200, 150, 255), // Purple
+        ];
+
+        // Animated confetti particles
+        for i in 0..12 {
+            let seed = (self.frame as f32 * 0.05 + i as f32 * 0.8).sin();
+            let x_offset = (seed * 40.0) + (i as f32 - 6.0) * 8.0;
+            let y_offset = ((self.frame as f32 * 0.1 + i as f32 * 0.5).sin() * 20.0) - 30.0;
+            let fall = (self.frame % 60) as f32 * 0.8;
+
+            let pos = Pos2::new(
+                center.x + x_offset,
+                center.y + y_offset - 20.0 + fall,
+            );
+
+            let color = confetti_colors[i % confetti_colors.len()];
+            let size = 2.0 + (seed.abs() * 2.0);
+
+            // Rotate confetti based on frame
+            if i % 2 == 0 {
+                painter.circle_filled(pos, size, color);
+            } else {
+                let rect = Rect::from_center_size(pos, Vec2::new(size * 2.0, size));
+                painter.rect_filled(rect, CornerRadius::ZERO, color);
+            }
+        }
+    }
+
+    /// Draw question mark for confused mood
+    fn draw_question_mark(&self, painter: &egui::Painter, head_center: Pos2) {
+        let qm_center = Pos2::new(head_center.x + 25.0, head_center.y - 25.0);
+        let bob = (self.frame as f32 * 0.15).sin() * 2.0;
+        let qm_pos = Pos2::new(qm_center.x, qm_center.y + bob);
+
+        // Question mark background bubble
+        painter.circle_filled(qm_pos, 12.0, Color32::from_rgba_unmultiplied(255, 255, 255, 200));
+        painter.circle_stroke(qm_pos, 12.0, Stroke::new(1.5, Color32::from_rgb(200, 150, 200)));
+
+        // Draw "?" using simple shapes
+        let q_color = Color32::from_rgb(150, 100, 180);
+
+        // Top curve of ?
+        painter.circle_stroke(
+            Pos2::new(qm_pos.x, qm_pos.y - 3.0),
+            4.0,
+            Stroke::new(2.5, q_color),
+        );
+
+        // Stem
+        painter.line_segment(
+            [Pos2::new(qm_pos.x + 4.0, qm_pos.y - 1.0), Pos2::new(qm_pos.x, qm_pos.y + 2.0)],
+            Stroke::new(2.5, q_color),
+        );
+
+        // Dot
+        painter.circle_filled(Pos2::new(qm_pos.x, qm_pos.y + 6.0), 1.5, q_color);
+    }
+
+    /// Set typing mood (called when user is typing)
+    /// Reserved for future use: integrate with input handling to show typing animation
+    #[allow(dead_code)]
+    pub fn on_typing(&mut self) {
+        self.activity();
+        if self.mood == MascotMood::Idle || self.mood == MascotMood::Sleepy {
+            self.set_mood(MascotMood::Typing);
+        }
+    }
+
+    /// Stop typing mood
+    /// Reserved for future use: integrate with input handling to show typing animation
+    #[allow(dead_code)]
+    pub fn on_typing_done(&mut self) {
+        if self.mood == MascotMood::Typing {
+            self.set_mood(MascotMood::Idle);
+        }
     }
 }

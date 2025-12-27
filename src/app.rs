@@ -19,6 +19,7 @@ use crate::terminal::split::{SplitDirection, SplitManager};
 use crate::terminal::state::TerminalState;
 use crate::terminal::vi_mode::{ViMode, ViAction, ViState};
 use crate::terminal::palette::CommandPalette;
+use crate::terminal::fuzzy::{FuzzyFinder, FuzzyMode, FuzzyAction};
 
 /// ASCII art logo only (shown after clear)
 const ASCII_LOGO: &str = r#"
@@ -99,6 +100,8 @@ pub struct PaneSession {
     pub vi_mode: ViMode,
     /// Scroll to selected hint on next frame (after Tab cycling)
     pub hints_scroll_to_selected: bool,
+    /// Fuzzy finder (Ctrl+R/Ctrl+Shift+F/Ctrl+G)
+    pub fuzzy_finder: FuzzyFinder,
 }
 
 impl PaneSession {
@@ -151,6 +154,7 @@ impl PaneSession {
             hints_mode: HintsMode::new(),
             vi_mode: ViMode::new(),
             hints_scroll_to_selected: false,
+            fuzzy_finder: FuzzyFinder::new(),
         }
     }
 
@@ -994,6 +998,16 @@ impl eframe::App for ZaxiomApp {
         let mut editor_down = false;
         let mut editor_left = false;
         let mut editor_right = false;
+        let mut fuzzy_history = false;
+        let mut fuzzy_files = false;
+        let mut fuzzy_branches = false;
+        let mut fuzzy_up = false;
+        let mut fuzzy_down = false;
+        let mut fuzzy_enter = false;
+        let mut fuzzy_ctrl_enter = false;
+        let mut fuzzy_escape = false;
+        let mut fuzzy_char: Option<char> = None;
+        let mut fuzzy_backspace = false;
 
         // Check focused pane's mode states
         let focused_in_search = self.tabs[self.active_tab]
@@ -1007,6 +1021,10 @@ impl eframe::App for ZaxiomApp {
         let focused_in_vi = self.tabs[self.active_tab]
             .focused_pane()
             .map(|p| p.vi_mode.active)
+            .unwrap_or(false);
+        let focused_in_fuzzy = self.tabs[self.active_tab]
+            .focused_pane()
+            .map(|p| p.fuzzy_finder.active)
             .unwrap_or(false);
 
         // Handle keyboard shortcuts
@@ -1144,9 +1162,11 @@ impl eframe::App for ZaxiomApp {
             if i.modifiers.ctrl && i.modifiers.shift && i.key_pressed(egui::Key::H) {
                 toggle_hints = true;
             }
-            // Escape: Exit hints/vi mode, or toggle vi mode when idle
+            // Escape: Exit hints/vi/fuzzy mode
             if i.key_pressed(egui::Key::Escape) {
-                if focused_in_hints {
+                if focused_in_fuzzy {
+                    fuzzy_escape = true;
+                } else if focused_in_hints {
                     toggle_hints = true;
                 } else if focused_in_vi {
                     toggle_vi_mode = true;
@@ -1155,6 +1175,41 @@ impl eframe::App for ZaxiomApp {
             // Ctrl+Shift+M: Toggle vi mode (like Alacritty)
             if i.modifiers.ctrl && i.modifiers.shift && i.key_pressed(egui::Key::M) {
                 toggle_vi_mode = true;
+            }
+            // Ctrl+R: Fuzzy history search
+            if i.modifiers.ctrl && !i.modifiers.shift && i.key_pressed(egui::Key::R) && !focused_in_fuzzy {
+                fuzzy_history = true;
+            }
+            // Ctrl+Shift+F: Fuzzy file search (Ctrl+F is for search in buffer)
+            if i.modifiers.ctrl && i.modifiers.shift && i.key_pressed(egui::Key::F) {
+                fuzzy_files = true;
+            }
+            // Ctrl+G: Fuzzy git branches
+            if i.modifiers.ctrl && !i.modifiers.shift && i.key_pressed(egui::Key::G) && !focused_in_fuzzy {
+                fuzzy_branches = true;
+            }
+            // Handle fuzzy finder keyboard input
+            if focused_in_fuzzy {
+                if i.key_pressed(egui::Key::ArrowUp) { fuzzy_up = true; }
+                if i.key_pressed(egui::Key::ArrowDown) { fuzzy_down = true; }
+                if i.key_pressed(egui::Key::Enter) {
+                    if i.modifiers.ctrl {
+                        fuzzy_ctrl_enter = true;
+                    } else {
+                        fuzzy_enter = true;
+                    }
+                }
+                if i.key_pressed(egui::Key::Backspace) { fuzzy_backspace = true; }
+                // Capture text input for query
+                for event in &i.events {
+                    if let egui::Event::Text(text) = event {
+                        for ch in text.chars() {
+                            if !ch.is_control() {
+                                fuzzy_char = Some(ch);
+                            }
+                        }
+                    }
+                }
             }
             // Handle hints mode keyboard input
             if focused_in_hints && !i.modifiers.ctrl && !i.modifiers.alt {
@@ -1580,6 +1635,109 @@ impl eframe::App for ZaxiomApp {
             }
         }
 
+        // Handle fuzzy finder activation
+        if fuzzy_history {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                let cwd = pane.state.cwd().to_path_buf();
+                pane.fuzzy_finder.activate(FuzzyMode::History, &cwd);
+                // Populate with history items
+                let history_items: Vec<(String, Option<String>)> = pane.history.all()
+                    .map(|e| (e.command.clone(), Some(e.cwd.display().to_string())))
+                    .collect();
+                pane.fuzzy_finder.set_history_items(history_items);
+            }
+        }
+        if fuzzy_files {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                let cwd = pane.state.cwd().to_path_buf();
+                pane.fuzzy_finder.activate(FuzzyMode::Files, &cwd);
+            }
+        }
+        if fuzzy_branches {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                let cwd = pane.state.cwd().to_path_buf();
+                pane.fuzzy_finder.activate(FuzzyMode::GitBranches, &cwd);
+            }
+        }
+
+        // Handle fuzzy finder input
+        if fuzzy_escape {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                pane.fuzzy_finder.deactivate();
+            }
+        }
+        if fuzzy_up {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                pane.fuzzy_finder.select_up();
+            }
+        }
+        if fuzzy_down {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                pane.fuzzy_finder.select_down();
+            }
+        }
+        if fuzzy_backspace {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                pane.fuzzy_finder.pop_char();
+            }
+        }
+        if let Some(ch) = fuzzy_char {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                pane.fuzzy_finder.push_char(ch);
+            }
+        }
+
+        // Handle fuzzy finder selection
+        let mut fuzzy_action: Option<FuzzyAction> = None;
+        if fuzzy_enter || fuzzy_ctrl_enter {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                if let Some(item) = pane.fuzzy_finder.get_selected() {
+                    if fuzzy_ctrl_enter {
+                        fuzzy_action = Some(FuzzyAction::Execute(item.value.clone()));
+                    } else {
+                        fuzzy_action = Some(FuzzyAction::Insert(item.value.clone()));
+                    }
+                }
+                pane.fuzzy_finder.deactivate();
+            }
+        }
+
+        // Process fuzzy finder action
+        if let Some(action) = fuzzy_action {
+            match action {
+                FuzzyAction::Insert(value) => {
+                    if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                        pane.input = value;
+                        pane.cursor_to_end = true;
+                    }
+                }
+                FuzzyAction::Execute(value) => {
+                    if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                        pane.input = value.clone();
+                        // Execute immediately
+                        let cwd_display = pane.state.cwd().display().to_string();
+                        let prompt = format!("{} ❯ {}", cwd_display, value);
+                        pane.buffer.push_line(&prompt);
+                        let history_cmds = pane.history.recent_commands(10);
+                        match self.executor.execute_with_history(&value, &mut pane.state, Some(&history_cmds)) {
+                            Ok(output) => {
+                                for line in output.lines() {
+                                    pane.buffer.push_line(line);
+                                }
+                            }
+                            Err(e) => {
+                                pane.buffer.push_error(&format!("Error: {}", e));
+                            }
+                        }
+                        pane.history.add(&value, pane.state.cwd().to_path_buf(), None);
+                        pane.input.clear();
+                        pane.scroll_to_bottom = true;
+                    }
+                }
+                _ => {}
+            }
+        }
+
         // Handle command palette actions
         let mut palette_command: Option<String> = None;
         if palette_escape {
@@ -1850,6 +2008,124 @@ impl eframe::App for ZaxiomApp {
                             });
                         });
                 });
+        }
+
+        // Fuzzy finder overlay (bottom-anchored, like fzf)
+        if let Some(pane) = self.tabs[self.active_tab].focused_pane() {
+            if pane.fuzzy_finder.active {
+                let fuzzy_bg = self.theme.background_secondary;
+                let fuzzy_accent = self.theme.accent;
+                let fuzzy_fg = self.theme.foreground;
+                let fuzzy_comment = self.theme.comment_color;
+                let fuzzy_success = self.theme.success_color;
+
+                egui::Area::new(egui::Id::new("fuzzy_finder"))
+                    .anchor(egui::Align2::CENTER_BOTTOM, [0.0, -20.0])
+                    .order(egui::Order::Foreground)
+                    .show(ctx, |ui| {
+                        egui::Frame::default()
+                            .fill(fuzzy_bg)
+                            .stroke(egui::Stroke::new(2.0, fuzzy_accent))
+                            .corner_radius(egui::CornerRadius::same(8))
+                            .inner_margin(egui::Margin::same(12))
+                            .shadow(egui::epaint::Shadow { spread: 8, blur: 16, color: egui::Color32::from_black_alpha(120), offset: [0, -4].into() })
+                            .show(ui, |ui| {
+                                ui.set_min_width(500.0);
+                                ui.set_max_width(600.0);
+
+                                // Results list (bottom-up style - results above input)
+                                egui::ScrollArea::vertical().max_height(250.0).show(ui, |ui| {
+                                    let items: Vec<_> = pane.fuzzy_finder.visible_items().collect();
+                                    for (idx, item) in items.iter() {
+                                        let is_selected = *idx == pane.fuzzy_finder.selected;
+                                        let bg = if is_selected { fuzzy_accent.linear_multiply(0.3) } else { egui::Color32::TRANSPARENT };
+
+                                        egui::Frame::default().fill(bg).corner_radius(egui::CornerRadius::same(4)).inner_margin(egui::Margin::symmetric(8, 4)).show(ui, |ui| {
+                                            ui.horizontal(|ui| {
+                                                // Selection indicator
+                                                if is_selected {
+                                                    ui.add(egui::Label::new(egui::RichText::new("▶").color(fuzzy_success).size(10.0)));
+                                                } else {
+                                                    ui.add_space(14.0);
+                                                }
+
+                                                // Icon
+                                                ui.add(egui::Label::new(egui::RichText::new(item.icon).size(12.0)));
+
+                                                // Display text with match highlighting
+                                                let display_text = &item.display;
+                                                if item.match_positions.is_empty() {
+                                                    ui.add(egui::Label::new(egui::RichText::new(display_text).color(if is_selected { fuzzy_accent } else { fuzzy_fg }).size(13.0).monospace()));
+                                                } else {
+                                                    // Build highlighted text
+                                                    let mut job = egui::text::LayoutJob::default();
+                                                    let chars: Vec<char> = display_text.chars().collect();
+                                                    for (i, ch) in chars.iter().enumerate() {
+                                                        let color = if item.match_positions.contains(&i) {
+                                                            fuzzy_accent
+                                                        } else if is_selected {
+                                                            fuzzy_fg
+                                                        } else {
+                                                            fuzzy_comment
+                                                        };
+                                                        job.append(&ch.to_string(), 0.0, egui::TextFormat {
+                                                            font_id: egui::FontId::monospace(13.0),
+                                                            color,
+                                                            ..Default::default()
+                                                        });
+                                                    }
+                                                    ui.label(job);
+                                                }
+
+                                                // Preview text (right-aligned)
+                                                if let Some(ref preview) = item.preview {
+                                                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                                        ui.add(egui::Label::new(egui::RichText::new(preview).color(fuzzy_comment).size(10.0).monospace()));
+                                                    });
+                                                }
+                                            });
+                                        });
+                                    }
+                                    if pane.fuzzy_finder.items.is_empty() && !pane.fuzzy_finder.query.is_empty() {
+                                        ui.add(egui::Label::new(egui::RichText::new("No matches found").color(fuzzy_comment).size(12.0)));
+                                    }
+                                });
+
+                                ui.add_space(8.0);
+                                ui.separator();
+                                ui.add_space(4.0);
+
+                                // Query input line
+                                ui.horizontal(|ui| {
+                                    ui.add(egui::Label::new(egui::RichText::new(pane.fuzzy_finder.mode_icon()).size(14.0)));
+                                    ui.add(egui::Label::new(egui::RichText::new(pane.fuzzy_finder.mode_name()).color(fuzzy_accent).size(12.0).strong()));
+                                    ui.add(egui::Label::new(egui::RichText::new(" > ").color(fuzzy_comment).size(12.0)));
+
+                                    // Query with cursor
+                                    let query_display = if pane.fuzzy_finder.query.is_empty() {
+                                        "type to search...".to_string()
+                                    } else {
+                                        format!("{}▏", pane.fuzzy_finder.query)
+                                    };
+                                    ui.add(egui::Label::new(egui::RichText::new(&query_display)
+                                        .color(if pane.fuzzy_finder.query.is_empty() { fuzzy_comment } else { fuzzy_fg })
+                                        .size(13.0).monospace()));
+
+                                    // Status (match count)
+                                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                        ui.add(egui::Label::new(egui::RichText::new(&pane.fuzzy_finder.status_text())
+                                            .color(fuzzy_comment).size(11.0).monospace()));
+                                    });
+                                });
+
+                                ui.add_space(4.0);
+                                // Keyboard hints
+                                ui.horizontal(|ui| {
+                                    ui.add(egui::Label::new(egui::RichText::new("↑↓ navigate  ↵ insert  ^↵ execute  esc close").color(fuzzy_comment).size(10.0)));
+                                });
+                            });
+                    });
+            }
         }
 
         // Editor overlay (full screen when editing a file)

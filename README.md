@@ -529,6 +529,24 @@ Extracts clickable/copyable items from terminal output:
 
 Press Escape to exit hints mode.
 
+### Fuzzy Finder (Ctrl+R / Ctrl+Shift+F / Ctrl+G)
+
+fzf-like fuzzy search for history, files, and git branches:
+- **Ctrl+R** - Search command history
+- **Ctrl+Shift+F** - Search files in current directory
+- **Ctrl+G** - Search git branches
+- **Type** - Filter results with fuzzy matching
+- **Up/Down** - Navigate results
+- **Enter** - Insert selected into command line
+- **Ctrl+Enter** - Execute selected immediately
+- **Escape** - Close fuzzy finder
+
+Features:
+- Match highlighting shows which characters matched
+- Smart scoring (exact > prefix > contains > fuzzy)
+- File search respects common ignore patterns (node_modules, target, .git)
+- Git branch search shows both local and remote branches
+
 ### Vi Mode (Ctrl+Shift+M)
 
 Vim-style navigation for terminal scrollback:
@@ -574,6 +592,17 @@ Vim-style navigation for terminal scrollback:
 |----------|--------|
 | `Ctrl+Shift+H` | Toggle hints mode (extract URLs, paths, hashes) |
 | `Ctrl+Shift+M` | Toggle vi mode (vim-style navigation) |
+
+### Fuzzy Finder
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+R` | Fuzzy search history |
+| `Ctrl+Shift+F` | Fuzzy search files |
+| `Ctrl+G` | Fuzzy search git branches |
+| `↑` / `↓` | Navigate results |
+| `Enter` | Insert selected into command line |
+| `Ctrl+Enter` | Execute selected immediately |
+| `Escape` | Close fuzzy finder |
 
 ### Clipboard & Line Editing
 | Shortcut | Action |
@@ -626,6 +655,7 @@ zaxiom/
 │   │   ├── ansi.rs          # ANSI escape code parser
 │   │   ├── hints.rs         # Smart text extraction (URLs, paths, git hashes)
 │   │   ├── vi_mode.rs       # Vim-style terminal navigation
+│   │   ├── fuzzy.rs         # Fuzzy finder (fzf-like search)
 │   │   └── img.rs           # Inline image display support
 │   ├── shell/               # Shell parsing & execution
 │   │   ├── parser.rs        # Command parsing (pipes, redirects)

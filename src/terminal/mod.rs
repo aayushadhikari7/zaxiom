@@ -6,6 +6,7 @@ pub mod ansi;
 pub mod autocomplete;
 pub mod buffer;
 pub mod format;
+pub mod fuzzy;
 pub mod hints;
 pub mod history;
 pub mod img;

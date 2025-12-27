@@ -26,6 +26,7 @@ zaxiom/
 │   │   ├── hints.rs         # Smart text extraction (URLs, paths, hashes)
 │   │   ├── smart_history.rs # Context-aware history with fuzzy search
 │   │   ├── vi_mode.rs       # Vim-style terminal navigation
+│   │   ├── fuzzy.rs         # Fuzzy finder (fzf-like search)
 │   │   ├── input.rs         # Input handling
 │   │   └── render.rs        # Rendering utilities
 │   │
@@ -92,6 +93,7 @@ PaneSession
 ├── input: String             # Current input line
 ├── saved_input: String       # Saved input during history navigation
 ├── suggestions: Vec<Suggestion>  # Autocomplete suggestions
+├── fuzzy_finder: FuzzyFinder # fzf-like fuzzy search
 └── search_*                  # Search state
 ```
 
@@ -328,6 +330,17 @@ HistoryEntry
 | Ctrl+Shift+H | Toggle hints mode |
 | Ctrl+Shift+M | Toggle vi mode |
 
+### Fuzzy Finder
+| Shortcut | Action |
+|----------|--------|
+| Ctrl+R | Fuzzy search history |
+| Ctrl+Shift+F | Fuzzy search files |
+| Ctrl+G | Fuzzy search git branches |
+| Up/Down | Navigate results |
+| Enter | Insert selected |
+| Ctrl+Enter | Execute selected |
+| Escape | Close fuzzy finder |
+
 ### Clipboard & Line Editing
 | Shortcut | Action |
 |----------|--------|
@@ -389,6 +402,65 @@ User Input (# prompt)
 │  Response       │  ← Display in terminal
 └─────────────────┘
 ```
+
+## Fuzzy Finder System
+
+The FuzzyFinder module provides fzf-like search functionality:
+
+```
+FuzzyFinder
+├── active: bool              # Whether fuzzy finder is open
+├── mode: FuzzyMode           # History, Files, or GitBranches
+├── query: String             # Current search query
+├── all_items: Vec<FuzzyItem> # All available items
+├── items: Vec<FuzzyItem>     # Filtered/scored results
+├── selected: usize           # Currently selected index
+├── max_display: usize        # Max items to show (10)
+└── scroll_offset: usize      # For scrolling long lists
+
+FuzzyItem
+├── display: String           # What user sees
+├── value: String             # Value to insert/execute
+├── preview: Option<String>   # Right-side description
+├── score: i32                # Match score (higher = better)
+├── match_positions: Vec<usize>  # For highlighting
+└── icon: &'static str        # Item icon
+
+FuzzyMode (enum)
+├── History                   # Command history (Ctrl+R)
+├── Files                     # File search (Ctrl+Shift+F)
+└── GitBranches               # Git branches (Ctrl+G)
+
+FuzzyAction (enum)
+├── None                      # Still searching
+├── Insert(String)            # Enter - insert into command line
+├── Execute(String)           # Ctrl+Enter - run immediately
+└── Cancelled                 # Escape pressed
+```
+
+### Scoring Algorithm
+
+| Match Type | Score |
+|------------|-------|
+| Exact match | +1000 |
+| Starts with query | +500 |
+| Contains as substring | +200 |
+| Fuzzy (chars in order) | +10/char |
+| Consecutive char bonus | +5 |
+| Word boundary bonus | +10 |
+
+### Data Loaders
+
+- **History**: Populated from SmartHistory entries (command + cwd preview)
+- **Files**: Uses walkdir, max depth 4, ignores common patterns (node_modules, target, .git, __pycache__, dist, build)
+- **Git Branches**: Reads from .git/refs/heads (local) and .git/refs/remotes (remote)
+
+### UI Features
+
+- Bottom-anchored overlay (like real fzf)
+- Match highlighting with accent color
+- Keyboard hints shown at bottom
+- Match count display (filtered/total)
 
 ## Built-in Editor (nano/vim/vi/edit)
 

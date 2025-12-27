@@ -1,0 +1,22 @@
+# Build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Local config
+.env
+.env.local
+
+# Logs
+*.log

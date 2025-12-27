@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0f0f1a"/>
+    </linearGradient>
+    <linearGradient id="zGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a855f7"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#6366f1"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect x="32" y="32" width="448" height="448" rx="64" ry="64" fill="url(#bgGrad)"/>
+
+  <!-- Border glow -->
+  <rect x="32" y="32" width="448" height="448" rx="64" ry="64"
+        fill="none" stroke="url(#zGrad)" stroke-width="4" opacity="0.5"/>
+
+  <!-- Terminal window frame -->
+  <rect x="72" y="100" width="368" height="312" rx="16" ry="16"
+        fill="#0a0a14" stroke="#333" stroke-width="2"/>
+
+  <!-- Terminal title bar -->
+  <rect x="72" y="100" width="368" height="32" rx="16" ry="0" fill="#1a1a2e"/>
+  <rect x="72" y="116" width="368" height="16" fill="#1a1a2e"/>
+
+  <!-- Window buttons -->
+  <circle cx="96" cy="116" r="6" fill="#ff5f56"/>
+  <circle cx="116" cy="116" r="6" fill="#ffbd2e"/>
+  <circle cx="136" cy="116" r="6" fill="#27ca40"/>
+
+  <!-- Big stylized Z -->
+  <g filter="url(#glow)">
+    <path d="M 160 180
+             L 340 180
+             L 340 210
+             L 220 340
+             L 340 340
+             L 340 380
+             L 160 380
+             L 160 350
+             L 280 210
+             L 160 210
+             Z"
+          fill="url(#zGrad)"/>
+  </g>
+
+  <!-- Cursor blink -->
+  <rect x="350" y="340" width="16" height="40" fill="#a855f7" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Small axolotl/lizard silhouette in corner -->
+  <g transform="translate(380, 70) scale(0.4)" fill="#a855f7" opacity="0.6">
+    <ellipse cx="40" cy="35" rx="30" ry="20"/>
+    <circle cx="25" cy="30" r="5"/>
+    <circle cx="55" cy="30" r="5"/>
+    <path d="M 10 35 Q 0 25 5 15" stroke="#a855f7" stroke-width="4" fill="none"/>
+    <path d="M 70 35 Q 80 25 75 15" stroke="#a855f7" stroke-width="4" fill="none"/>
+    <path d="M 40 55 Q 40 80 30 95" stroke="#a855f7" stroke-width="6" fill="none"/>
+  </g>
+</svg>

@@ -1,0 +1,84 @@
+[package]
+name = "zaxiom"
+version = "0.1.0"
+edition = "2021"
+authors = ["jacky"]
+description = "A Linux-style terminal for Windows, built in Rust"
+license = "MIT"
+repository = "https://github.com/jacky/zaxiom"
+
+[dependencies]
+# UI
+eframe = "0.31"
+egui = "0.31"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Command parsing
+nom = "8"
+
+# Configuration
+serde = { version = "1", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Filesystem utilities
+dirs = "6"
+walkdir = "2"
+
+# Text processing
+regex = "1"
+
+# Hash & encoding
+md-5 = "0.10"
+sha1 = "0.10"
+sha2 = "0.10"
+blake3 = "1.5"
+base64 = "0.22"
+hex = "0.4"
+
+# Compression
+flate2 = "1.0"
+tar = "0.4"
+zip = "2.2"
+
+# Time/dates for ls
+chrono = "0.4"
+
+# Git operations
+git2 = "0.20"
+
+# HTTP client for curl
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+
+# Error handling
+anyhow = "1"
+thiserror = "2"
+
+# Lazy initialization
+once_cell = "1.19"
+
+# System info
+sysinfo = "0.32"
+
+# Image processing
+image = "0.25"
+
+# Open URLs in browser
+open = "5"
+
+# Clipboard access
+arboard = "3"
+
+# Syntax highlighting
+syntect = "5"
+
+[build-dependencies]
+winresource = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

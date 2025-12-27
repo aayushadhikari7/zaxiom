@@ -1,0 +1,32 @@
+# Zaxiom Configuration
+# Copy this to ~/.config/zaxiom/config.toml to customize
+
+[theme]
+name = "zaxiom-dark"
+background = "#0a0e14"
+foreground = "#b3b1ad"
+cursor = "#e6b450"
+selection = "#273747"
+
+[theme.syntax]
+command = "#ffb454"
+path = "#95e6cb"
+string = "#c2d94c"
+error = "#ff3333"
+
+[font]
+family = "Hurmit Nerd Font Mono"
+size = 14
+
+[prompt]
+format = "{cwd} {git_branch} → "
+
+[terminal]
+scrollback_lines = 10000
+history_size = 1000
+
+[aliases.commands]
+ll = "ls -la"
+la = "ls -a"
+".." = "cd .."
+"..." = "cd ../.."

@@ -685,6 +685,10 @@ impl TerminalGrid {
 
     /// Resize the grid
     pub fn resize(&mut self, new_rows: usize, new_cols: usize) {
+        // Ensure minimum dimensions to avoid empty grid panics
+        let new_rows = new_rows.max(1);
+        let new_cols = new_cols.max(1);
+
         // Resize each existing row
         for row in &mut self.cells {
             row.resize(new_cols, Cell::default());

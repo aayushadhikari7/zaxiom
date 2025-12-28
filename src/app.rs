@@ -242,6 +242,11 @@ impl PaneSession {
     /// Resize the PTY if active and size has changed
     pub fn resize_pty(&mut self, width: f32, height: f32, font_size: f32, line_height: f32) {
         if let Some(ref pty) = self.pty_session {
+            // Skip resize if dimensions are invalid
+            if width <= 0.0 || height <= 0.0 || font_size <= 0.0 || line_height <= 0.0 {
+                return;
+            }
+
             // Calculate character dimensions (approximate for monospace)
             let char_width = font_size * 0.6;  // Approximate monospace ratio
             let char_height = font_size * line_height;

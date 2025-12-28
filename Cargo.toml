@@ -3,7 +3,7 @@ name = "zaxiom"
 version = "0.2.0"
 edition = "2021"
 authors = ["jacky"]
-description = "A Linux-style terminal for Windows, built in Rust"
+description = "A native terminal for Windows with full PTY support"
 license = "MIT"
 repository = "https://github.com/jacky/zaxiom"
 

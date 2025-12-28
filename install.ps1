@@ -74,8 +74,8 @@ function Build-Project {
 
     Push-Location $ScriptDir
     try {
-        $process = Start-Process -FilePath "cargo" -ArgumentList "build","--release" -Wait -PassThru -NoNewWindow
-        if ($process.ExitCode -ne 0) {
+        & cargo build --release
+        if ($LASTEXITCODE -ne 0) {
             Write-Err "Build failed!"
             return $false
         }

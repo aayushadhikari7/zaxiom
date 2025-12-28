@@ -24,7 +24,7 @@ use super::shell::{AliasCommand, EnvCommand, ExportCommand, SleepCommand, WatchC
 use super::ai::OllamaCommand;
 use super::tools::{
     // Node.js
-    NpmCommand, NpxCommand, YarnCommand, PnpmCommand, BunCommand, NodeCommand, DenoCommand,
+    NpmCommand, NpxCommand, YarnCommand, PnpmCommand, BunCommand, NodeCommand, DenoCommand, ZammyCommand,
     // Python
     PythonCommand, Python3Command, PipCommand, Pip3Command, UvCommand, PoetryCommand,
     // Rust
@@ -240,6 +240,7 @@ impl CommandRegistry {
         commands.insert("bun", Arc::new(BunCommand));
         commands.insert("node", Arc::new(NodeCommand));
         commands.insert("deno", Arc::new(DenoCommand));
+        commands.insert("zammy", Arc::new(ZammyCommand));
 
         // Python ecosystem
         commands.insert("python", Arc::new(PythonCommand));

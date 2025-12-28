@@ -1124,32 +1124,42 @@ impl Theme {
         theme
     }
 
-    /// Apply kawaii mode transformations - softer, cuter colors
+    /// Apply kawaii mode transformations - lofi aesthetic, cozy vibes
     pub fn apply_kawaii(&self) -> Self {
         let mut theme = self.clone();
 
-        // Make accents more pastel pink/lavender
-        theme.accent = Color32::from_rgb(0xff, 0xb7, 0xc5);           // Pastel pink
-        theme.accent_secondary = Color32::from_rgb(0xe0, 0xb0, 0xff); // Pastel lavender
+        // Lofi cozy backgrounds - warm purple/brown tones
+        theme.background = Color32::from_rgb(0x1a, 0x14, 0x1f);           // Deep purple-black
+        theme.background_secondary = Color32::from_rgb(0x2a, 0x1f, 0x2f); // Warm purple
+        theme.foreground = Color32::from_rgb(0xe8, 0xdc, 0xd0);           // Warm cream white
 
-        // Softer selection color with pink tint
-        let (r, g, b, _) = theme.selection.to_tuple();
-        theme.selection = Color32::from_rgba_unmultiplied(
-            ((r as u16 + 255) / 2) as u8,  // Blend with pink
-            ((g as u16 + 182) / 2) as u8,
-            ((b as u16 + 193) / 2) as u8,
-            100,
-        );
+        // Sunset pink/orange accents
+        theme.accent = Color32::from_rgb(0xf4, 0xa2, 0x9c);               // Salmon pink
+        theme.accent_secondary = Color32::from_rgb(0xc9, 0x9c, 0xd3);     // Muted lavender
 
-        // Cuter cursor - pink heart cursor feel
-        theme.cursor = Color32::from_rgb(0xff, 0x69, 0xb4);          // Hot pink
+        // Warm selection
+        theme.selection = Color32::from_rgba_unmultiplied(0xf4, 0xa2, 0x9c, 50);
 
-        // Softer prompt color
-        theme.prompt_color = Color32::from_rgb(0xff, 0xb7, 0xc5);    // Pastel pink
+        // Cozy cursor - warm pink
+        theme.cursor = Color32::from_rgb(0xf4, 0x8f, 0xb1);
 
-        // Keep success/error distinguishable but softer
-        theme.success_color = Color32::from_rgb(0x98, 0xfb, 0x98);   // Pale green
-        theme.error_color = Color32::from_rgb(0xff, 0xb6, 0xc1);     // Light pink (softer red)
+        // Warm prompt color
+        theme.prompt_color = Color32::from_rgb(0xf4, 0xa2, 0x9c);
+
+        // Muted comment color - dusty purple
+        theme.comment_color = Color32::from_rgb(0x8a, 0x7a, 0x9a);
+
+        // Soft muted success/error
+        theme.success_color = Color32::from_rgb(0xa8, 0xd8, 0xb9);        // Sage green
+        theme.error_color = Color32::from_rgb(0xe8, 0x8a, 0x8a);          // Muted coral
+
+        // Lofi syntax colors
+        theme.command_color = Color32::from_rgb(0xf4, 0xa2, 0x9c);        // Salmon commands
+        theme.string_color = Color32::from_rgb(0xa8, 0xd8, 0xb9);         // Sage green strings
+        theme.number_color = Color32::from_rgb(0xf4, 0xc4, 0x9c);         // Peach numbers
+        theme.flag_color = Color32::from_rgb(0x9c, 0xc4, 0xf4);           // Muted blue flags
+        theme.path_color = Color32::from_rgb(0xc9, 0x9c, 0xd3);           // Lavender paths
+        theme.link_color = Color32::from_rgb(0x9c, 0xc4, 0xf4);           // Muted blue links
 
         theme
     }

@@ -1027,6 +1027,7 @@ impl eframe::App for ZaxiomApp {
         let mut palette_up = false;
         let mut palette_down = false;
         let mut palette_enter = false;
+        let mut palette_ctrl_enter = false;
         let mut palette_escape = false;
         let mut palette_char: Option<char> = None;
         let mut palette_backspace = false;
@@ -1046,6 +1047,7 @@ impl eframe::App for ZaxiomApp {
         let mut editor_ctrl_home = false;
         let mut editor_ctrl_end = false;
         let editor_is_open = self.editor.is_some();
+        let palette_was_open = self.command_palette.is_open;
         let mut fuzzy_history = false;
         let mut fuzzy_files = false;
         let mut fuzzy_branches = false;
@@ -1119,7 +1121,13 @@ impl eframe::App for ZaxiomApp {
             // Handle command palette keyboard when open - palette consumes all input
             if self.command_palette.is_open {
                 if i.key_pressed(egui::Key::Escape) { palette_escape = true; }
-                if i.key_pressed(egui::Key::Enter) { palette_enter = true; }
+                if i.key_pressed(egui::Key::Enter) {
+                    if i.modifiers.ctrl {
+                        palette_ctrl_enter = true;
+                    } else {
+                        palette_enter = true;
+                    }
+                }
                 if i.key_pressed(egui::Key::ArrowUp) { palette_up = true; }
                 if i.key_pressed(egui::Key::ArrowDown) { palette_down = true; }
                 if i.key_pressed(egui::Key::Backspace) { palette_backspace = true; }
@@ -1453,10 +1461,14 @@ impl eframe::App for ZaxiomApp {
             }
         }
 
-        // Handle Ctrl+L clear screen
+        // Handle Ctrl+L clear screen (same as clear command - show logo after)
         if clear_screen {
             if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
                 pane.buffer.clear();
+                // Show just the ASCII logo after clear (like the clear command)
+                for line in ASCII_LOGO.lines() {
+                    pane.buffer.push_line(line);
+                }
             }
         }
 
@@ -1825,14 +1837,26 @@ impl eframe::App for ZaxiomApp {
             self.command_palette.query.push(ch);
             self.command_palette.update_search();
         }
+        // Enter: copy command to input (don't execute)
         if palette_enter && self.command_palette.is_open {
+            if let Some(cmd) = self.command_palette.get_selected_command() {
+                // Just copy to input, don't execute
+                if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                    pane.input = cmd;
+                }
+            }
+            self.command_palette.close();
+        }
+
+        // Ctrl+Enter: execute command immediately
+        if palette_ctrl_enter && self.command_palette.is_open {
             if let Some(cmd) = self.command_palette.get_selected_command() {
                 palette_command = Some(cmd);
             }
             self.command_palette.close();
         }
 
-        // Execute palette command
+        // Execute palette command (only on Ctrl+Enter)
         if let Some(cmd) = palette_command {
             // Handle special actions
             match cmd.as_str() {
@@ -1846,12 +1870,34 @@ impl eframe::App for ZaxiomApp {
                 "Clear" => {
                     if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
                         pane.buffer.clear();
+                        for line in ASCII_LOGO.lines() {
+                            pane.buffer.push_line(line);
+                        }
                     }
                 }
                 _ => {
                     // Execute as terminal command
                     if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
-                        pane.input = cmd;
+                        let cwd = pane.state.cwd().clone();
+                        pane.history.add(&cmd, cwd, None);
+                        pane.history.reset_position();
+                        pane.saved_input.clear();
+                        pane.buffer.start_block(&cmd);
+                        let prompt = pane.state.format_prompt();
+                        pane.buffer.push_line(&format!("{}{}", prompt, cmd));
+                        let history = pane.history.recent_commands(10);
+                        match self.executor.execute_with_history(&cmd, &mut pane.state, Some(&history)) {
+                            Ok(output) => {
+                                if !output.is_empty() && !output.starts_with("\x1b[") {
+                                    for line in output.lines() {
+                                        pane.buffer.push_line(line);
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                pane.buffer.push_error(&e.to_string());
+                            }
+                        }
                     }
                 }
             }
@@ -2042,13 +2088,13 @@ impl eframe::App for ZaxiomApp {
                             ui.separator();
                             ui.add_space(8.0);
 
-                            // Results list (scrollable)
+                            // Results list (scrollable with auto-scroll to selection)
                             egui::ScrollArea::vertical().max_height(300.0).auto_shrink([false, false]).show(ui, |ui| {
                                 for (i, entry) in self.command_palette.entries.iter().enumerate() {
                                     let is_selected = i == self.command_palette.selected;
                                     let bg = if is_selected { palette_accent.linear_multiply(0.3) } else { egui::Color32::TRANSPARENT };
 
-                                    egui::Frame::default().fill(bg).corner_radius(egui::CornerRadius::same(4)).inner_margin(egui::Margin::symmetric(8, 4)).show(ui, |ui| {
+                                    let response = egui::Frame::default().fill(bg).corner_radius(egui::CornerRadius::same(4)).inner_margin(egui::Margin::symmetric(8, 4)).show(ui, |ui| {
                                         ui.horizontal(|ui| {
                                             if is_selected {
                                                 ui.add(egui::Label::new(egui::RichText::new("▶").color(palette_success).size(10.0)));
@@ -2065,6 +2111,11 @@ impl eframe::App for ZaxiomApp {
                                             }
                                         });
                                     });
+
+                                    // Auto-scroll to keep selected item visible
+                                    if is_selected {
+                                        response.response.scroll_to_me(Some(egui::Align::Center));
+                                    }
                                 }
                                 if self.command_palette.entries.is_empty() {
                                     ui.add(egui::Label::new(egui::RichText::new("No matching commands").color(palette_comment).size(12.0)));
@@ -2073,7 +2124,7 @@ impl eframe::App for ZaxiomApp {
 
                             ui.add_space(4.0);
                             ui.horizontal(|ui| {
-                                ui.add(egui::Label::new(egui::RichText::new("↑↓ navigate  ↵ select  esc close").color(palette_comment).size(10.0)));
+                                ui.add(egui::Label::new(egui::RichText::new("↑↓ navigate  ↵ copy to input  ^↵ execute  esc close").color(palette_comment).size(10.0)));
                             });
                         });
                 });
@@ -3198,13 +3249,13 @@ impl eframe::App for ZaxiomApp {
                         }
 
                         let text_edit_id = ui.make_persistent_id("input_field");
-                        let modal_active = pane.hints_mode.active || pane.vi_mode.active;
+                        let modal_active = pane.hints_mode.active || pane.vi_mode.active || palette_was_open || editor_is_open;
                         let text_edit = egui::TextEdit::singleline(&mut pane.input)
                             .id(text_edit_id)
                             .font(egui::TextStyle::Monospace)
                             .desired_width(input_width.max(200.0))
                             .frame(false)
-                            .interactive(!modal_active);  // Disable input when hints/vi mode is active
+                            .interactive(!modal_active);  // Disable input when modal/overlay is active
 
                         let response = ui.add(text_edit);
 
@@ -3222,14 +3273,15 @@ impl eframe::App for ZaxiomApp {
                             input_changed = true;
                         }
 
-                        // Auto-focus the input
-                        if response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                        // Handle keyboard input (only when no overlays are active)
+                        // Use palette_was_open to prevent Enter from executing after palette closes
+                        let overlay_active = editor_is_open || palette_was_open || pane.fuzzy_finder.active;
+
+                        // Auto-focus the input and execute on Enter (only if no overlay)
+                        if !overlay_active && response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                             command_to_execute = Some(std::mem::take(&mut pane.input));
                             response.request_focus();
                         }
-
-                        // Handle keyboard input (only when no overlays are active)
-                        let overlay_active = editor_is_open || self.command_palette.is_open || pane.fuzzy_finder.active;
                         if response.has_focus() && !overlay_active {
                             let has_suggestions = !pane.suggestions.is_empty();
 

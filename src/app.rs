@@ -8,7 +8,8 @@ use crate::commands::files::EditorState;
 use crate::config::theme::{Theme, ThemeName};
 use crate::config::settings::Config;
 use crate::mascot::Mascot;
-use crate::shell::executor::Executor;
+use crate::pty::{InputMode, PtyBuffer, PtyOutput, PtySession, TerminalGrid, input::key_to_bytes, input::char_to_bytes};
+use crate::shell::executor::{ExecutionTarget, Executor};
 use crate::terminal::ansi;
 use crate::terminal::autocomplete::{Autocomplete, Suggestion, SuggestionKind};
 use crate::terminal::buffer::{LineType, OutputBuffer};
@@ -41,7 +42,7 @@ const STARTUP_BANNER: &str = r#"
     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
 
         ╭──────────────────────────────────────────╮
-        │  ♡  Welcome to Zaxiom v0.1.0~            │
+        │  ♡  Welcome to Zaxiom v0.2.0~            │
         │      Linux vibes on Windows! (◕‿◕)♡     │
         │                                          │
         │  Your kawaii robot companion is here! →  │
@@ -102,6 +103,16 @@ pub struct PaneSession {
     pub hints_scroll_to_selected: bool,
     /// Fuzzy finder (Ctrl+R/Ctrl+Shift+F/Ctrl+G)
     pub fuzzy_finder: FuzzyFinder,
+    /// PTY session for this pane (for external/interactive commands)
+    pub pty_session: Option<PtySession>,
+    /// PTY output buffer (for streaming output - legacy)
+    pub pty_buffer: PtyBuffer,
+    /// Terminal grid for proper ANSI/cursor handling (used for interactive apps)
+    pub pty_grid: TerminalGrid,
+    /// Input mode: Normal (line editing) or Raw (PTY passthrough)
+    pub input_mode: InputMode,
+    /// Accumulator for incomplete PTY output lines
+    pub pty_line_buffer: String,
 }
 
 impl PaneSession {
@@ -155,6 +166,95 @@ impl PaneSession {
             vi_mode: ViMode::new(),
             hints_scroll_to_selected: false,
             fuzzy_finder: FuzzyFinder::new(),
+            pty_session: None,  // PTY spawned on-demand for external commands
+            pty_buffer: PtyBuffer::new(24, 80),
+            pty_grid: TerminalGrid::new(24, 80),
+            input_mode: InputMode::Normal,
+            pty_line_buffer: String::new(),
+        }
+    }
+
+    /// Spawn a PTY session for a specific command
+    pub fn spawn_pty_command(&mut self, program: &str, args: &[String]) -> anyhow::Result<()> {
+        // Close any existing PTY session
+        self.pty_session = None;
+
+        // Clear the terminal grid for fresh output
+        self.pty_grid.clear();
+
+        // Spawn new PTY with the command directly
+        let pty = PtySession::new_with_command(program, args, 24, 80, self.state.cwd())?;
+        self.pty_session = Some(pty);
+        Ok(())
+    }
+
+    /// Poll for PTY output (non-blocking)
+    pub fn poll_pty_output(&mut self) {
+        // Collect outputs first to avoid borrow issues
+        let outputs: Vec<PtyOutput> = if let Some(ref pty) = self.pty_session {
+            let mut collected = Vec::new();
+            while let Some(output) = pty.try_recv() {
+                collected.push(output);
+            }
+            collected
+        } else {
+            return;
+        };
+
+        // Process collected outputs
+        let mut should_close_pty = false;
+        for output in outputs {
+            match output {
+                PtyOutput::Data(data) => {
+                    // Feed raw data to the terminal grid - it handles all ANSI sequences
+                    self.pty_grid.process(&data);
+                    self.scroll_to_bottom = true;
+                }
+                PtyOutput::Exited(code) => {
+                    let msg = match code {
+                        Some(c) => format!("[Process exited with code {}]", c),
+                        None => "[Process exited]".to_string(),
+                    };
+                    self.buffer.push_line(&msg);
+                    should_close_pty = true;
+                }
+                PtyOutput::Error(e) => {
+                    self.buffer.push_error(&format!("[PTY Error: {}]", e));
+                }
+            }
+        }
+
+        if should_close_pty {
+            self.pty_session = None;
+            self.input_mode = InputMode::Normal;
+            // Clear the grid when PTY exits
+            self.pty_grid.clear();
+        }
+    }
+
+    /// Run a command via PTY (spawns the command directly)
+    pub fn run_via_pty(&mut self, program: &str, args: &[String]) -> anyhow::Result<()> {
+        // Spawn the command directly attached to PTY
+        self.spawn_pty_command(program, args)?;
+        Ok(())
+    }
+
+    /// Resize the PTY if active and size has changed
+    pub fn resize_pty(&mut self, width: f32, height: f32, font_size: f32, line_height: f32) {
+        if let Some(ref pty) = self.pty_session {
+            // Calculate character dimensions (approximate for monospace)
+            let char_width = font_size * 0.6;  // Approximate monospace ratio
+            let char_height = font_size * line_height;
+
+            let cols = (width / char_width).max(1.0) as u16;
+            let rows = (height / char_height).max(1.0) as u16;
+
+            let (current_rows, current_cols) = pty.size();
+            if rows != current_rows || cols != current_cols {
+                let _ = pty.resize(rows, cols);
+                self.pty_buffer.resize(rows as usize, cols as usize);
+                self.pty_grid.resize(rows as usize, cols as usize);
+            }
         }
     }
 
@@ -675,48 +775,98 @@ impl ZaxiomApp {
             let prompt = pane.state.format_prompt();
             pane.buffer.push_line(&format!("{}{}", prompt, command));
 
-            // Execute the command (pass history for AI context)
+            // Route the command to determine execution target
+            let target = self.executor.route_command(command);
+
+            // Execute based on routing
             let history = pane.history.recent_commands(10);
-            let success = match self.executor.execute_with_history(command, &mut pane.state, Some(&history)) {
-                Ok(output) => {
-                    // Check for special command markers
-                    if output.starts_with("\x1b[CLEAR]") {
-                        pane.buffer.clear();
-                        // Show just the ASCII logo after clear (not full banner)
-                        for line in ASCII_LOGO.lines() {
-                            pane.buffer.push_line(line);
-                        }
-                    } else if output.starts_with("\x1b[EXIT") {
-                        self.should_exit = true;
-                    } else if output.starts_with("\x1b[EDIT]") {
-                        // Open the editor with the specified file
-                        let file_path = output.trim_start_matches("\x1b[EDIT]");
-                        let path = std::path::PathBuf::from(file_path);
-                        match EditorState::new(path.clone()) {
-                            Ok(editor_state) => {
-                                self.editor = Some(editor_state);
-                                pane.buffer.push_line(&format!("📝 Opening {} ...", path.display()));
+            let success = match target {
+                ExecutionTarget::External => {
+                    // Execute as external command (no PTY, no visible window)
+                    let cwd = pane.state.cwd().to_path_buf();
+                    match self.executor.execute_external(command, &cwd) {
+                        Ok(output) => {
+                            if !output.is_empty() {
+                                for line in output.lines() {
+                                    pane.buffer.push_line(line);
+                                }
                             }
-                            Err(e) => {
-                                pane.buffer.push_error(&format!("Failed to open file: {}", e));
-                            }
+                            true
                         }
-                    } else if !output.is_empty() {
-                        for line in output.lines() {
-                            pane.buffer.push_line(line);
+                        Err(e) => {
+                            pane.buffer.push_error(&format!("{}", e));
+                            false
                         }
                     }
-                    true
                 }
-                Err(e) => {
-                    // Kawaii error messages!
-                    let sad_faces = ["(´;ω;`)", "(◞‸◟)", "(´・ω・`)", "(｡•́︿•̀｡)", "(っ◞‸◟c)"];
-                    let idx = std::time::SystemTime::now()
-                        .duration_since(std::time::UNIX_EPOCH)
-                        .map(|d| d.as_nanos() as usize % sad_faces.len())
-                        .unwrap_or(0);
-                    pane.buffer.push_error(&format!("{} Oopsie~ {}", sad_faces[idx], e));
-                    false
+                ExecutionTarget::PtyRaw => {
+                    // Parse command to get program and args
+                    let parts: Vec<&str> = command.split_whitespace().collect();
+                    if parts.is_empty() {
+                        pane.buffer.push_error("Empty command");
+                        false
+                    } else {
+                        let program = parts[0];
+                        let args: Vec<String> = parts[1..].iter().map(|s| s.to_string()).collect();
+
+                        // Spawn command directly via PTY (no shell intermediary)
+                        match pane.run_via_pty(program, &args) {
+                            Ok(()) => {
+                                pane.input_mode = InputMode::Raw;
+                                pane.buffer.push_line(&format!("[PTY: {}]", command));
+                                true
+                            }
+                            Err(e) => {
+                                pane.buffer.push_error(&format!("PTY error: {}", e));
+                                false
+                            }
+                        }
+                    }
+                }
+                ExecutionTarget::Native | ExecutionTarget::Special => {
+                    // Execute as native command (instant!)
+                    match self.executor.execute_with_history(command, &mut pane.state, Some(&history)) {
+                        Ok(output) => {
+                            // Check for special command markers
+                            if output.starts_with("\x1b[CLEAR]") {
+                                pane.buffer.clear();
+                                // Show just the ASCII logo after clear (not full banner)
+                                for line in ASCII_LOGO.lines() {
+                                    pane.buffer.push_line(line);
+                                }
+                            } else if output.starts_with("\x1b[EXIT") {
+                                self.should_exit = true;
+                            } else if output.starts_with("\x1b[EDIT]") {
+                                // Open the editor with the specified file
+                                let file_path = output.trim_start_matches("\x1b[EDIT]");
+                                let path = std::path::PathBuf::from(file_path);
+                                match EditorState::new(path.clone()) {
+                                    Ok(editor_state) => {
+                                        self.editor = Some(editor_state);
+                                        pane.buffer.push_line(&format!("📝 Opening {} ...", path.display()));
+                                    }
+                                    Err(e) => {
+                                        pane.buffer.push_error(&format!("Failed to open file: {}", e));
+                                    }
+                                }
+                            } else if !output.is_empty() {
+                                for line in output.lines() {
+                                    pane.buffer.push_line(line);
+                                }
+                            }
+                            true
+                        }
+                        Err(e) => {
+                            // Kawaii error messages!
+                            let sad_faces = ["(´;ω;`)", "(◞‸◟)", "(´・ω・`)", "(｡•́︿•̀｡)", "(っ◞‸◟c)"];
+                            let idx = std::time::SystemTime::now()
+                                .duration_since(std::time::UNIX_EPOCH)
+                                .map(|d| d.as_nanos() as usize % sad_faces.len())
+                                .unwrap_or(0);
+                            pane.buffer.push_error(&format!("{} Oopsie~ {}", sad_faces[idx], e));
+                            false
+                        }
+                    }
                 }
             };
 
@@ -1000,6 +1150,21 @@ impl eframe::App for ZaxiomApp {
             return;
         }
 
+        // Poll PTY output for all panes (non-blocking)
+        for tab in &mut self.tabs {
+            for pane in tab.panes.values_mut() {
+                pane.poll_pty_output();
+            }
+        }
+
+        // Request repaint if any PTY is active (for streaming output)
+        let has_active_pty = self.tabs.iter().any(|tab| {
+            tab.panes.values().any(|pane| pane.pty_session.is_some())
+        });
+        if has_active_pty {
+            ctx.request_repaint();
+        }
+
         // Track search toggle
         let mut toggle_search = false;
         let mut search_next = false;
@@ -1058,6 +1223,9 @@ impl eframe::App for ZaxiomApp {
         let mut fuzzy_escape = false;
         let mut fuzzy_char: Option<char> = None;
         let mut fuzzy_backspace = false;
+        let mut pty_raw_key: Option<egui::Key> = None;
+        let mut pty_raw_char: Option<char> = None;
+        let mut pty_raw_modifiers = egui::Modifiers::NONE;
 
         // Check focused pane's mode states
         let focused_in_search = self.tabs[self.active_tab]
@@ -1075,6 +1243,10 @@ impl eframe::App for ZaxiomApp {
         let focused_in_fuzzy = self.tabs[self.active_tab]
             .focused_pane()
             .map(|p| p.fuzzy_finder.active)
+            .unwrap_or(false);
+        let focused_in_pty_raw = self.tabs[self.active_tab]
+            .focused_pane()
+            .map(|p| p.input_mode == InputMode::Raw)
             .unwrap_or(false);
 
         // Handle keyboard shortcuts
@@ -1110,13 +1282,64 @@ impl eframe::App for ZaxiomApp {
                 return;
             }
 
-            // Ctrl+T: New tab
-            if i.modifiers.ctrl && i.key_pressed(egui::Key::T) {
+            // Zaxiom shortcuts that always work (even in raw PTY mode)
+            let is_zaxiom_shortcut =
+                (i.modifiers.ctrl && !i.modifiers.shift && (
+                    i.key_pressed(egui::Key::T) ||  // New tab
+                    i.key_pressed(egui::Key::P) ||  // Command palette
+                    i.key_pressed(egui::Key::W) ||  // Close pane/tab
+                    i.key_pressed(egui::Key::Tab)   // Switch focus
+                )) ||
+                (i.modifiers.ctrl && i.modifiers.shift && (
+                    i.key_pressed(egui::Key::E) ||  // Split horizontal
+                    i.key_pressed(egui::Key::D)     // Split vertical
+                ));
+
+            // Handle these shortcuts FIRST, before raw PTY mode
+            if i.modifiers.ctrl && !i.modifiers.shift && i.key_pressed(egui::Key::T) {
                 self.new_tab();
             }
-            // Ctrl+P: Toggle command palette
-            if i.modifiers.ctrl && i.key_pressed(egui::Key::P) {
+            if i.modifiers.ctrl && !i.modifiers.shift && i.key_pressed(egui::Key::P) {
                 self.command_palette.toggle();
+            }
+
+            // Handle raw PTY mode - pass non-Zaxiom input directly to PTY
+            if focused_in_pty_raw && !is_zaxiom_shortcut {
+                // Escape exits raw mode
+                if i.key_pressed(egui::Key::Escape) {
+                    // Will be handled below to exit raw mode
+                }
+                // Capture key presses for PTY
+                for key in [
+                    egui::Key::Enter, egui::Key::Backspace, egui::Key::Tab,
+                    egui::Key::Escape, egui::Key::Delete, egui::Key::Insert,
+                    egui::Key::Home, egui::Key::End, egui::Key::PageUp, egui::Key::PageDown,
+                    egui::Key::ArrowUp, egui::Key::ArrowDown, egui::Key::ArrowLeft, egui::Key::ArrowRight,
+                    egui::Key::F1, egui::Key::F2, egui::Key::F3, egui::Key::F4,
+                    egui::Key::F5, egui::Key::F6, egui::Key::F7, egui::Key::F8,
+                    egui::Key::F9, egui::Key::F10, egui::Key::F11, egui::Key::F12,
+                    egui::Key::A, egui::Key::B, egui::Key::C, egui::Key::D, egui::Key::E,
+                    egui::Key::F, egui::Key::G, egui::Key::H, egui::Key::I, egui::Key::J,
+                    egui::Key::K, egui::Key::L, egui::Key::M, egui::Key::N, egui::Key::O,
+                    egui::Key::P, egui::Key::Q, egui::Key::R, egui::Key::S, egui::Key::T,
+                    egui::Key::U, egui::Key::V, egui::Key::W, egui::Key::X, egui::Key::Y, egui::Key::Z,
+                ] {
+                    if i.key_pressed(key) {
+                        pty_raw_key = Some(key);
+                        pty_raw_modifiers = i.modifiers;
+                        break;
+                    }
+                }
+                // Capture text input for regular characters
+                for event in &i.events {
+                    if let egui::Event::Text(text) = event {
+                        for ch in text.chars() {
+                            pty_raw_char = Some(ch);
+                        }
+                    }
+                }
+                // Raw mode consumes remaining input (Zaxiom shortcuts already handled above)
+                return;
             }
             // Handle command palette keyboard when open - palette consumes all input
             if self.command_palette.is_open {
@@ -1896,6 +2119,43 @@ impl eframe::App for ZaxiomApp {
                             }
                             Err(e) => {
                                 pane.buffer.push_error(&e.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Handle raw PTY input
+        if focused_in_pty_raw {
+            if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                // Check for Escape to exit raw mode
+                if pty_raw_key == Some(egui::Key::Escape) && !pty_raw_modifiers.ctrl {
+                    pane.input_mode = InputMode::Normal;
+                    pane.buffer.push_line("[Exited raw mode]");
+                } else {
+                    // Send key to PTY
+                    // Priority:
+                    // 1. For Ctrl/Alt combos, use key_to_bytes (for Ctrl+C, etc.)
+                    // 2. For regular text input, use char_to_bytes (for letters, numbers, symbols)
+                    // 3. For special keys (arrows, function keys, etc.), use key_to_bytes
+                    let bytes_to_send = if pty_raw_modifiers.ctrl || pty_raw_modifiers.alt {
+                        // Ctrl/Alt combo - use key_to_bytes
+                        pty_raw_key.and_then(|key| key_to_bytes(key, &pty_raw_modifiers))
+                    } else if let Some(ch) = pty_raw_char {
+                        // Regular text input - use char_to_bytes
+                        Some(char_to_bytes(ch))
+                    } else if let Some(key) = pty_raw_key {
+                        // Special key (arrows, Enter, etc.) - use key_to_bytes
+                        key_to_bytes(key, &pty_raw_modifiers)
+                    } else {
+                        None
+                    };
+
+                    if let Some(bytes) = bytes_to_send {
+                        if let Some(ref mut pty) = pane.pty_session {
+                            if let Err(e) = pty.write(&bytes) {
+                                pane.buffer.push_error(&format!("PTY write error: {}", e));
                             }
                         }
                     }
@@ -2717,6 +2977,14 @@ impl eframe::App for ZaxiomApp {
 
                 // Terminal output area (scrollable)
                 let available_height = ui.available_height() - 30.0;
+                let available_width = ui.available_width();
+
+                // Resize PTY if needed
+                let font_size = self.theme.font_size;
+                let line_height = self.theme.line_height;
+                if let Some(pane) = self.tabs[self.active_tab].panes.get_mut(&focused_pane_id) {
+                    pane.resize_pty(available_width, available_height, font_size, line_height);
+                }
 
                 // Get theme colors for output
                 let error_color = self.theme.error_color;
@@ -2728,7 +2996,131 @@ impl eframe::App for ZaxiomApp {
                 // Track block copy request
                 let mut block_to_copy: Option<(usize, String)> = None;
 
-                if let Some(pane) = self.tabs[self.active_tab].panes.get(&focused_pane_id) {
+                // Check if we're in PTY Raw mode - render terminal grid instead of normal buffer
+                let is_pty_mode = self.tabs[self.active_tab]
+                    .panes
+                    .get(&focused_pane_id)
+                    .map(|p| p.input_mode == InputMode::Raw && p.pty_session.is_some())
+                    .unwrap_or(false);
+
+                if is_pty_mode {
+                    // Render PTY terminal grid
+                    if let Some(pane) = self.tabs[self.active_tab].panes.get(&focused_pane_id) {
+                        let grid_lines = pane.pty_grid.get_lines();
+                        let (cursor_row, cursor_col) = pane.pty_grid.cursor_position();
+
+                        egui::ScrollArea::vertical()
+                            .max_height(available_height)
+                            .stick_to_bottom(true)
+                            .auto_shrink([false; 2])
+                            .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
+                            .show(ui, |ui| {
+                                let margin = if show_mascot { 90.0 } else { 10.0 };
+                                ui.set_max_width(ui.available_width() - margin);
+
+                                // Render each line from the terminal grid
+                                for (row_idx, line) in grid_lines.iter().enumerate() {
+                                    // Check if line has ANSI codes
+                                    let has_ansi = ansi::has_ansi(line);
+
+                                    if has_ansi {
+                                        // Parse and render ANSI-styled segments
+                                        ui.horizontal(|ui| {
+                                            let segments = ansi::parse_ansi(line);
+                                            let mut col = 0;
+                                            for segment in segments {
+                                                let color = segment.fg_color
+                                                    .map(|(r, g, b)| egui::Color32::from_rgb(r, g, b))
+                                                    .unwrap_or(foreground);
+
+                                                let mut rich_text = egui::RichText::new(&segment.text)
+                                                    .monospace()
+                                                    .color(color);
+
+                                                if segment.bold {
+                                                    rich_text = rich_text.strong();
+                                                }
+                                                if segment.italic {
+                                                    rich_text = rich_text.italics();
+                                                }
+                                                if segment.underline {
+                                                    rich_text = rich_text.underline();
+                                                }
+
+                                                ui.add(egui::Label::new(rich_text));
+                                                col += segment.text.chars().count();
+                                            }
+
+                                            // Show cursor on current line
+                                            if row_idx == cursor_row && col <= cursor_col {
+                                                // Pad to cursor position if needed
+                                                let padding = cursor_col.saturating_sub(col);
+                                                if padding > 0 {
+                                                    ui.add(egui::Label::new(
+                                                        egui::RichText::new(" ".repeat(padding))
+                                                            .monospace()
+                                                    ));
+                                                }
+                                                // Show blinking cursor
+                                                ui.add(egui::Label::new(
+                                                    egui::RichText::new("▏")
+                                                        .monospace()
+                                                        .color(self.theme.accent)
+                                                ));
+                                            }
+                                        });
+                                    } else if !line.is_empty() {
+                                        // Simple text without ANSI
+                                        ui.horizontal(|ui| {
+                                            ui.add(egui::Label::new(
+                                                egui::RichText::new(line)
+                                                    .monospace()
+                                                    .color(foreground)
+                                            ));
+
+                                            // Show cursor on current line
+                                            if row_idx == cursor_row {
+                                                let line_len = line.chars().count();
+                                                let padding = cursor_col.saturating_sub(line_len);
+                                                if padding > 0 {
+                                                    ui.add(egui::Label::new(
+                                                        egui::RichText::new(" ".repeat(padding))
+                                                            .monospace()
+                                                    ));
+                                                }
+                                                ui.add(egui::Label::new(
+                                                    egui::RichText::new("▏")
+                                                        .monospace()
+                                                        .color(self.theme.accent)
+                                                ));
+                                            }
+                                        });
+                                    } else {
+                                        // Empty line - just show cursor if applicable
+                                        if row_idx == cursor_row {
+                                            ui.horizontal(|ui| {
+                                                let padding = cursor_col;
+                                                if padding > 0 {
+                                                    ui.add(egui::Label::new(
+                                                        egui::RichText::new(" ".repeat(padding))
+                                                            .monospace()
+                                                    ));
+                                                }
+                                                ui.add(egui::Label::new(
+                                                    egui::RichText::new("▏")
+                                                        .monospace()
+                                                        .color(self.theme.accent)
+                                                ));
+                                            });
+                                        } else {
+                                            ui.add(egui::Label::new(egui::RichText::new(" ").monospace()));
+                                        }
+                                    }
+                                }
+                            });
+                    }
+                } else if let Some(pane) = self.tabs[self.active_tab].panes.get(&focused_pane_id) {
+                    // Normal mode: render output buffer
                     // Get block content map for copy buttons
                     let block_contents: std::collections::HashMap<usize, String> = pane.buffer.blocks()
                         .iter()
@@ -3228,32 +3620,81 @@ impl eframe::App for ZaxiomApp {
                         });
                 }
 
-                ui.add_space(4.0);
+                ui.add_space(2.0);
+
+                // PTY mode indicator (shown above input when in raw mode)
+                if let Some(pane) = self.tabs[self.active_tab].panes.get(&focused_pane_id) {
+                    if pane.input_mode == InputMode::Raw {
+                        ui.horizontal(|ui| {
+                            ui.add(egui::Label::new(
+                                egui::RichText::new("📡 [PTY Raw Mode]")
+                                    .monospace()
+                                    .size(11.0)
+                                    .color(self.theme.accent),
+                            ));
+                            ui.add_space(8.0);
+
+                            // Show the current incomplete line from PTY with cursor
+                            let current_line = &pane.pty_line_buffer;
+                            if !current_line.is_empty() {
+                                ui.add(egui::Label::new(
+                                    egui::RichText::new(format!("{}▏", current_line))
+                                        .monospace()
+                                        .color(self.theme.foreground),
+                                ));
+                            }
+
+                            // Escape hint on the right
+                            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                ui.add(egui::Label::new(
+                                    egui::RichText::new("Press Escape to exit")
+                                        .monospace()
+                                        .italics()
+                                        .size(10.0)
+                                        .color(self.theme.comment_color),
+                                ));
+                            });
+                        });
+                        ui.add_space(2.0);
+                    }
+                }
 
                 // Input line with prompt
                 if let Some(pane) = self.tabs[self.active_tab].panes.get_mut(&focused_pane_id) {
-                    let prompt = pane.state.format_prompt();
+                    let is_raw_mode = pane.input_mode == InputMode::Raw;
 
                     ui.horizontal(|ui| {
-                        ui.add(egui::Label::new(
-                            egui::RichText::new(&prompt)
-                                .monospace()
-                                .color(path_color),
-                        ));
-
-                        // Input field (leave space for mascot)
-                        let input_width = ui.available_width() - 100.0;
-                        let move_cursor_to_end = pane.cursor_to_end;
-                        if pane.cursor_to_end {
-                            pane.cursor_to_end = false;
+                        // In raw PTY mode, show minimal prompt
+                        if is_raw_mode {
+                            ui.add(egui::Label::new(
+                                egui::RichText::new("› ")
+                                    .monospace()
+                                    .color(self.theme.comment_color),
+                            ));
+                        } else {
+                            let prompt = pane.state.format_prompt();
+                            ui.add(egui::Label::new(
+                                egui::RichText::new(&prompt)
+                                    .monospace()
+                                    .color(path_color),
+                            ));
                         }
 
-                        let text_edit_id = ui.make_persistent_id("input_field");
-                        let modal_active = pane.hints_mode.active || pane.vi_mode.active || palette_was_open || editor_is_open;
-                        let text_edit = egui::TextEdit::singleline(&mut pane.input)
-                            .id(text_edit_id)
-                            .font(egui::TextStyle::Monospace)
-                            .desired_width(input_width.max(200.0))
+                        // Only show input field when NOT in raw mode
+                        if !is_raw_mode {
+                            // Input field (leave space for mascot)
+                            let input_width = ui.available_width() - 100.0;
+                            let move_cursor_to_end = pane.cursor_to_end;
+                            if pane.cursor_to_end {
+                                pane.cursor_to_end = false;
+                            }
+
+                            let text_edit_id = ui.make_persistent_id("input_field");
+                            let modal_active = pane.hints_mode.active || pane.vi_mode.active || palette_was_open || editor_is_open;
+                            let text_edit = egui::TextEdit::singleline(&mut pane.input)
+                                .id(text_edit_id)
+                                .font(egui::TextStyle::Monospace)
+                                .desired_width(input_width.max(200.0))
                             .frame(false)
                             .interactive(!modal_active);  // Disable input when modal/overlay is active
 
@@ -3316,8 +3757,9 @@ impl eframe::App for ZaxiomApp {
                             }
                         }
 
-                        // Keep focus on input
-                        response.request_focus();
+                            // Keep focus on input
+                            response.request_focus();
+                        } // End of !is_raw_mode block
                     });
                 }
             });

@@ -13,6 +13,19 @@ use crate::commands::ai::handle_ai_chat_with_context;
 use crate::terminal::state::TerminalState;
 use super::parser::{parse_command_line, ParsedCommand, RedirectType};
 
+/// Indicates how a command should be executed
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ExecutionTarget {
+    /// Execute as a built-in native command (instant)
+    Native,
+    /// Execute as external command with streaming output (no PTY needed)
+    External,
+    /// Send to PTY in raw mode (interactive - vim, less, etc.)
+    PtyRaw,
+    /// Special handling (python mode, AI chat, easter eggs)
+    Special,
+}
+
 /// Command executor
 pub struct Executor {
     /// Registry of built-in commands
@@ -286,6 +299,147 @@ impl Executor {
             "420" => Some("🌿 blazingly fast terminal, you might say".to_string()),
             "axolotl" | "zaxiom" | "axiom" => Some("🦎 That's me! Your friendly neighborhood terminal! 💜".to_string()),
             _ => None,
+        }
+    }
+
+    /// Check if a command is interactive (requires raw PTY mode)
+    pub fn is_interactive(&self, cmd: &str) -> bool {
+        matches!(cmd,
+            // Editors
+            "vim" | "vi" | "nvim" | "neovim" | "emacs" | "nano" | "pico" | "joe" |
+            // Pagers
+            "less" | "more" | "most" | "man" |
+            // System monitors
+            "top" | "htop" | "btop" | "atop" | "iotop" | "nmon" |
+            // Remote access
+            "ssh" | "telnet" | "ftp" | "sftp" |
+            // REPLs (without args - interactive mode)
+            "python" | "python3" | "node" | "irb" | "ghci" | "lua" | "ruby" |
+            "ipython" | "bpython" | "ptpython" |
+            // Interactive tools
+            "fzf" | "sk" | "peco" | "gum" |
+            // Debuggers
+            "gdb" | "lldb" | "pdb" |
+            // Multiplexers
+            "tmux" | "screen" |
+            // AI/CLI tools that need TTY
+            "claude" | "zammy" |
+            // Other
+            "psql" | "mysql" | "sqlite3" | "redis-cli" | "mongo" | "mongosh"
+        )
+    }
+
+    /// Determine how a command should be executed
+    pub fn route_command(&self, input: &str) -> ExecutionTarget {
+        let input = input.trim();
+
+        // Special modes first
+        if input.starts_with('!') && input.ends_with('!') && input.len() > 2 {
+            return ExecutionTarget::Special; // Python mode
+        }
+        if input.starts_with('#') {
+            return ExecutionTarget::Special; // AI chat
+        }
+        if self.check_easter_eggs(input).is_some() {
+            return ExecutionTarget::Special; // Easter egg
+        }
+
+        // Parse to get the command
+        let pipeline = match parse_command_line(input) {
+            Ok(p) => p,
+            Err(_) => return ExecutionTarget::External, // Let shell handle malformed input
+        };
+
+        // For pipelines, check if all commands are built-in
+        if !pipeline.is_single() {
+            let all_builtin = pipeline.commands.iter()
+                .all(|cmd| self.registry.has_command(&cmd.command));
+            if all_builtin {
+                return ExecutionTarget::Native;
+            } else {
+                return ExecutionTarget::External; // Run external pipeline via shell
+            }
+        }
+
+        // Single command
+        if let Some(cmd) = pipeline.first() {
+            let cmd_name = cmd.command.as_str();
+
+            // Check for interactive commands first - use PTY for these
+            if self.is_interactive(cmd_name) {
+                return ExecutionTarget::PtyRaw;
+            }
+
+            // Check if it's a built-in command
+            if self.registry.has_command(cmd_name) {
+                return ExecutionTarget::Native;
+            }
+
+            // Check for git shortcuts
+            if self.expand_git_shortcut(cmd_name, &cmd.args).is_some() {
+                return ExecutionTarget::Native; // Git shortcuts are fast
+            }
+
+            // Unknown command - run as external process
+            return ExecutionTarget::External;
+        }
+
+        ExecutionTarget::External
+    }
+
+    /// Check if the command registry has a specific command
+    pub fn has_command(&self, cmd: &str) -> bool {
+        self.registry.has_command(cmd)
+    }
+
+    /// Execute an external command using the system shell
+    /// Returns the output as a string (blocking)
+    pub fn execute_external(&self, input: &str, cwd: &std::path::Path) -> Result<String> {
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+            let output = Command::new("cmd")
+                .args(["/C", input])
+                .current_dir(cwd)
+                .creation_flags(CREATE_NO_WINDOW)
+                .output()
+                .map_err(|e| anyhow!("Failed to execute: {}", e))?;
+
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let stderr = String::from_utf8_lossy(&output.stderr);
+
+            if !output.status.success() && !stderr.is_empty() {
+                return Err(anyhow!("{}", stderr.trim()));
+            }
+
+            let mut result = stdout.to_string();
+            if !stderr.is_empty() {
+                if !result.is_empty() {
+                    result.push('\n');
+                }
+                result.push_str(&stderr);
+            }
+            Ok(result.trim().to_string())
+        }
+
+        #[cfg(not(windows))]
+        {
+            let output = Command::new("sh")
+                .args(["-c", input])
+                .current_dir(cwd)
+                .output()
+                .map_err(|e| anyhow!("Failed to execute: {}", e))?;
+
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let stderr = String::from_utf8_lossy(&output.stderr);
+
+            if !output.status.success() && !stderr.is_empty() {
+                return Err(anyhow!("{}", stderr.trim()));
+            }
+
+            Ok(stdout.trim().to_string())
         }
     }
 }

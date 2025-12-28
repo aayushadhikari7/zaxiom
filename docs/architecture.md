@@ -30,9 +30,16 @@ zaxiom/
 │   │   ├── input.rs         # Input handling
 │   │   └── render.rs        # Rendering utilities
 │   │
+│   ├── pty/                 # PTY (Pseudo-Terminal) support
+│   │   ├── mod.rs           # Module exports
+│   │   ├── session.rs       # PtySession - ConPTY spawning & I/O
+│   │   ├── buffer.rs        # PtyBuffer - streaming output
+│   │   ├── grid.rs          # TerminalGrid - VT100/ANSI cell-based rendering
+│   │   └── input.rs         # InputMode - raw key-to-bytes conversion
+│   │
 │   ├── shell/               # Shell engine
 │   │   ├── parser.rs        # Command parsing (pipes, redirects, quotes)
-│   │   └── executor.rs      # Command execution & routing
+│   │   └── executor.rs      # Hybrid command execution (native/external/PTY)
 │   │
 │   ├── commands/            # 160+ Commands (100 native + 60 external)
 │   │   ├── nav/             # ls, cd, pwd, tree, clear, help
@@ -94,6 +101,9 @@ PaneSession
 ├── saved_input: String       # Saved input during history navigation
 ├── suggestions: Vec<Suggestion>  # Autocomplete suggestions
 ├── fuzzy_finder: FuzzyFinder # fzf-like fuzzy search
+├── pty_session: Option<PtySession>  # Active PTY session for interactive commands
+├── pty_grid: TerminalGrid    # VT100/ANSI terminal grid for PTY output
+├── pty_mode: bool            # Whether PTY is active
 └── search_*                  # Search state
 ```
 
@@ -132,11 +142,12 @@ User Input
     │
     ▼
 ┌─────────────────┐
-│     Router      │  ← Check: Native? External tool? Alias? Git shortcut?
+│     Router      │  ← Hybrid: Native? External? PTY?
 └─────────────────┘
     │
-    ├── Native Command ──► Execute Rust implementation
+    ├── Native Command ──► Execute Rust implementation (fast, no process spawn)
     ├── External Tool ──► Spawn system process (npm, cargo, docker, etc.)
+    ├── PTY Mode ──► Route through ConPTY for full terminal emulation
     ├── User Alias ──► Expand & re-route
     └── Git Shortcut ──► Map to git command
             │
@@ -146,9 +157,133 @@ User Input
 └─────────────────┘
     │
     ▼
+┌─────────────────────────────────┐
+│  Buffer (Native) or Grid (PTY) │  ← Store output
+└─────────────────────────────────┘
+```
+
+## PTY Architecture
+
+The PTY system enables full interactive terminal support using ConPTY on Windows:
+
+```
 ┌─────────────────┐
-│     Buffer      │  ← Store output in blocks
-└─────────────────┘
+│  User Input     │
+└────────┬────────┘
+         │
+    ┌────▼────┐
+    │ Router  │ ← Is it native? Is it interactive?
+    └────┬────┘
+         │
+   ┌─────┴─────┐
+   │           │
+┌──▼──┐    ┌───▼───┐
+│Built│    │  PTY  │
+│-in  │    │Session│ ← ConPTY (Windows) / native PTY (Unix)
+└──┬──┘    └───┬───┘
+   │           │
+   └─────┬─────┘
+         │
+   ┌─────▼─────┐
+   │ Terminal  │ ← Grid for PTY, Buffer for native
+   │   Grid    │
+   └───────────┘
+```
+
+### PTY Session
+
+```rust
+PtySession
+├── master: Box<dyn MasterPty>    # PTY master for resizing
+├── child: Box<dyn Child>         # Child process handle
+├── writer: Box<dyn Write>        # Send input to PTY
+├── output_rx: Receiver<PtyOutput>  # Receive output from reader thread
+└── size: PtySize                 # Current terminal dimensions
+
+PtyOutput (enum)
+├── Data(Vec<u8>)                 # Raw output bytes
+├── Exited(Option<u32>)           # Process exited
+└── Error(String)                 # Error occurred
+```
+
+### Terminal Grid (VT100/ANSI Emulation)
+
+```rust
+TerminalGrid
+├── cells: Vec<Vec<Cell>>         # 2D cell array (rows x cols)
+├── cursor_row: usize             # Current cursor position
+├── cursor_col: usize
+├── scroll_region: (usize, usize) # Scrolling region
+├── current_fg: Color             # Current foreground color
+├── current_bg: Color             # Current background color
+├── utf8_buffer: Vec<u8>          # Multi-byte UTF-8 accumulator
+└── state: ParserState            # CSI escape sequence parser
+
+Cell
+├── char: char                    # Character to display
+├── fg: Color                     # Foreground color
+└── bg: Color                     # Background color
+
+ParserState (enum)
+├── Normal                        # Regular text
+├── Escape                        # Saw ESC (0x1B)
+└── Csi(Vec<u8>)                  # Collecting CSI sequence
+```
+
+### Supported ANSI/VT100 Sequences
+
+| Sequence | Action |
+|----------|--------|
+| `ESC[H` | Cursor home |
+| `ESC[<n>A/B/C/D` | Cursor up/down/forward/back |
+| `ESC[<r>;<c>H` | Cursor position |
+| `ESC[J` | Clear screen (0=below, 1=above, 2=all) |
+| `ESC[K` | Clear line (0=right, 1=left, 2=all) |
+| `ESC[<n>m` | SGR (colors, bold, etc.) |
+| `ESC[?25h/l` | Show/hide cursor |
+| Carriage return | Move to column 0 |
+| Newline | Move down, scroll if needed |
+| Backspace | Move cursor left |
+
+### UTF-8 Multi-byte Handling
+
+The terminal grid properly handles UTF-8 multi-byte sequences:
+
+```rust
+// Detect UTF-8 start bytes and expected length
+fn utf8_char_len(first_byte: u8) -> usize {
+    if first_byte < 0x80 { 1 }       // ASCII
+    else if first_byte < 0xE0 { 2 }  // 2-byte
+    else if first_byte < 0xF0 { 3 }  // 3-byte
+    else { 4 }                        // 4-byte
+}
+
+// Accumulate bytes until complete, then decode
+if is_utf8_start(byte) {
+    utf8_buffer.push(byte);
+} else if is_utf8_continuation(byte) {
+    utf8_buffer.push(byte);
+    if complete { decode_and_render(); }
+}
+```
+
+### Hybrid Command Execution
+
+```rust
+fn route_command(cmd: &str, args: &[String]) -> ExecutionTarget {
+    // 1. Built-in commands → native execution (fastest)
+    if registry.has_command(cmd) {
+        return ExecutionTarget::Native;
+    }
+
+    // 2. Known external tools → PTY for streaming output
+    if is_external_tool(cmd) {
+        return ExecutionTarget::Pty;
+    }
+
+    // 3. Unknown → try PTY
+    ExecutionTarget::Pty
+}
 ```
 
 ## External Tools System
@@ -662,6 +797,7 @@ Sessions are saved as JSON in `~/.local/share/zaxiom/sessions/`:
 |-------|---------|
 | eframe/egui | GPU-accelerated UI framework |
 | tokio | Async runtime |
+| portable-pty | Cross-platform PTY (ConPTY on Windows) |
 | serde/serde_json | JSON serialization |
 | regex | Pattern matching |
 | walkdir | Directory traversal |

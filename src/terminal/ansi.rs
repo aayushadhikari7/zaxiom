@@ -7,9 +7,27 @@
 use regex::Regex;
 use once_cell::sync::Lazy;
 
-/// Regex to match ANSI escape codes
-static ANSI_REGEX: Lazy<Regex> = Lazy::new(|| {
+/// Regex to match ANSI SGR (color/style) escape codes
+static ANSI_SGR_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"\x1b\[([0-9;]*)m").unwrap()
+});
+
+/// Regex to match ALL ANSI escape sequences (CSI, OSC, etc.)
+static ANSI_ALL_REGEX: Lazy<Regex> = Lazy::new(|| {
+    // Matches:
+    // - CSI sequences: \x1b[ ... (letter)
+    // - OSC sequences: \x1b] ... (BEL or ST)
+    // - Simple escapes: \x1b followed by single char
+    // - DCS/PM/APC: \x1b P/^/_ ... ST
+    Regex::new(concat!(
+        r"\x1b\[[0-9;?]*[A-Za-z~]",   // CSI sequences (cursor, erase, etc.)
+        r"|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)?",  // OSC sequences
+        r"|\x1b[PX^_][^\x1b]*\x1b\\",  // DCS/PM/APC sequences
+        r"|\x1b[NO].",                 // SS2/SS3
+        r"|\x1b[78]",                  // Save/restore cursor
+        r"|\x1b[=>c]",                 // Keypad/charset modes
+        r"|\x1b[A-Za-z]",              // Simple escape sequences
+    )).unwrap()
 });
 
 /// A text segment with optional ANSI styling
@@ -75,7 +93,7 @@ pub fn parse_ansi(text: &str) -> Vec<StyledSegment> {
     let mut state = StyleState::default();
     let mut last_end = 0;
 
-    for caps in ANSI_REGEX.captures_iter(text) {
+    for caps in ANSI_SGR_REGEX.captures_iter(text) {
         let whole_match = caps.get(0).unwrap();
         let codes_str = caps.get(1).map(|m| m.as_str()).unwrap_or("");
 
@@ -250,14 +268,19 @@ fn color_256_to_rgb(n: u8) -> (u8, u8, u8) {
     }
 }
 
-/// Strip all ANSI codes from text
+/// Strip all ANSI escape sequences from text (comprehensive)
 pub fn strip_ansi(text: &str) -> String {
-    ANSI_REGEX.replace_all(text, "").to_string()
+    ANSI_ALL_REGEX.replace_all(text, "").to_string()
+}
+
+/// Strip only SGR (color/style) codes, keep other sequences
+pub fn strip_ansi_colors(text: &str) -> String {
+    ANSI_SGR_REGEX.replace_all(text, "").to_string()
 }
 
 /// Check if text contains ANSI codes
 pub fn has_ansi(text: &str) -> bool {
-    ANSI_REGEX.is_match(text)
+    ANSI_ALL_REGEX.is_match(text)
 }
 
 #[cfg(test)]

@@ -33,6 +33,9 @@ Zaxiom is a **terminal emulator** (not just a CLI tool) that brings the Linux te
 ## Features
 
 ### Core Terminal Features
+- **Full PTY support** - ConPTY on Windows for interactive CLI tools (vim, ssh, npm packages like zammy)
+- **VT100/ANSI emulation** - Terminal grid with cursor positioning, colors, and UTF-8 support
+- **Hybrid command execution** - Native commands for speed, PTY for interactive tools
 - **Multi-tab support** - Ctrl+T (new), Ctrl+W (close), Ctrl+Tab (switch)
 - **Split panes** - Ctrl+Shift+D (horizontal), Ctrl+Shift+E (vertical), Alt+Arrows (navigate)
 - **Intelligent autocomplete** - Tab completion for commands, paths, git branches, flags
@@ -670,9 +673,15 @@ zaxiom/
 │   │   ├── vi_mode.rs       # Vim-style terminal navigation
 │   │   ├── fuzzy.rs         # Fuzzy finder (fzf-like search)
 │   │   └── img.rs           # Inline image display support
+│   ├── pty/                 # PTY (Pseudo-Terminal) support
+│   │   ├── mod.rs           # Module exports
+│   │   ├── session.rs       # PTY session management (ConPTY on Windows)
+│   │   ├── buffer.rs        # Streaming output buffer
+│   │   ├── grid.rs          # VT100/ANSI terminal grid with cursor positioning
+│   │   └── input.rs         # Raw input mode for interactive apps
 │   ├── shell/               # Shell parsing & execution
 │   │   ├── parser.rs        # Command parsing (pipes, redirects)
-│   │   └── executor.rs      # Command execution
+│   │   └── executor.rs      # Hybrid command execution (native/external/PTY)
 │   ├── config/              # Configuration
 │   │   ├── theme.rs         # 20 built-in themes (Catppuccin, Dracula, Nord, etc.)
 │   │   └── settings.rs      # Config file management (~/.config/zaxiom/config.toml)
@@ -691,6 +700,7 @@ zaxiom/
 |-------|---------|
 | `eframe` / `egui` | GUI framework (GPU-accelerated) |
 | `tokio` | Async runtime |
+| `portable-pty` | Cross-platform PTY support (ConPTY on Windows) |
 | `serde` / `toml` | Configuration |
 | `regex` | Pattern matching |
 | `walkdir` | Directory traversal |

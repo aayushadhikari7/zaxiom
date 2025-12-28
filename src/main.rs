@@ -10,6 +10,7 @@ mod commands;
 mod config;
 mod git;
 mod mascot;
+mod pty;
 mod shell;
 mod terminal;
 

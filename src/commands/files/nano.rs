@@ -29,6 +29,10 @@ pub struct EditorState {
     pub active: bool,
     /// Status message
     pub status: String,
+    /// Scroll offset (first visible line)
+    pub scroll_offset: usize,
+    /// Visible lines (set by renderer)
+    pub visible_lines: usize,
 }
 
 impl EditorState {
@@ -47,7 +51,9 @@ impl EditorState {
             cursor_line: 0,
             cursor_col: 0,
             active: true,
-            status: "^X Exit  ^S Save  ^G Help".to_string(),
+            status: String::new(),
+            scroll_offset: 0,
+            visible_lines: 30,
         })
     }
 
@@ -68,6 +74,91 @@ impl EditorState {
     pub fn insert(&mut self, text: &str) {
         self.content.push_str(text);
         self.modified = true;
+    }
+
+    /// Ensure cursor is visible by adjusting scroll offset
+    pub fn ensure_cursor_visible(&mut self) {
+        if self.cursor_line < self.scroll_offset {
+            self.scroll_offset = self.cursor_line;
+        } else if self.cursor_line >= self.scroll_offset + self.visible_lines {
+            self.scroll_offset = self.cursor_line.saturating_sub(self.visible_lines - 1);
+        }
+    }
+
+    /// Move cursor up
+    pub fn cursor_up(&mut self) {
+        if self.cursor_line > 0 {
+            self.cursor_line -= 1;
+            let lines: Vec<&str> = self.content.lines().collect();
+            if let Some(line) = lines.get(self.cursor_line) {
+                self.cursor_col = self.cursor_col.min(line.len());
+            }
+            self.ensure_cursor_visible();
+        }
+    }
+
+    /// Move cursor down
+    pub fn cursor_down(&mut self) {
+        let line_count = self.content.lines().count();
+        if self.cursor_line < line_count.saturating_sub(1) {
+            self.cursor_line += 1;
+            let lines: Vec<&str> = self.content.lines().collect();
+            if let Some(line) = lines.get(self.cursor_line) {
+                self.cursor_col = self.cursor_col.min(line.len());
+            }
+            self.ensure_cursor_visible();
+        }
+    }
+
+    /// Page up
+    pub fn page_up(&mut self) {
+        let jump = self.visible_lines.saturating_sub(2);
+        self.cursor_line = self.cursor_line.saturating_sub(jump);
+        self.scroll_offset = self.scroll_offset.saturating_sub(jump);
+        let lines: Vec<&str> = self.content.lines().collect();
+        if let Some(line) = lines.get(self.cursor_line) {
+            self.cursor_col = self.cursor_col.min(line.len());
+        }
+    }
+
+    /// Page down
+    pub fn page_down(&mut self) {
+        let line_count = self.content.lines().count();
+        let jump = self.visible_lines.saturating_sub(2);
+        self.cursor_line = (self.cursor_line + jump).min(line_count.saturating_sub(1));
+        self.scroll_offset = (self.scroll_offset + jump).min(line_count.saturating_sub(self.visible_lines));
+        let lines: Vec<&str> = self.content.lines().collect();
+        if let Some(line) = lines.get(self.cursor_line) {
+            self.cursor_col = self.cursor_col.min(line.len());
+        }
+    }
+
+    /// Go to start of file
+    pub fn go_to_start(&mut self) {
+        self.cursor_line = 0;
+        self.cursor_col = 0;
+        self.scroll_offset = 0;
+    }
+
+    /// Go to end of file
+    pub fn go_to_end(&mut self) {
+        let lines: Vec<&str> = self.content.lines().collect();
+        self.cursor_line = lines.len().saturating_sub(1);
+        self.cursor_col = lines.last().map(|l| l.len()).unwrap_or(0);
+        self.ensure_cursor_visible();
+    }
+
+    /// Go to start of line
+    pub fn go_to_line_start(&mut self) {
+        self.cursor_col = 0;
+    }
+
+    /// Go to end of line
+    pub fn go_to_line_end(&mut self) {
+        let lines: Vec<&str> = self.content.lines().collect();
+        if let Some(line) = lines.get(self.cursor_line) {
+            self.cursor_col = line.len();
+        }
     }
 }
 

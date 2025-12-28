@@ -466,8 +466,12 @@ FuzzyAction (enum)
 
 Full-screen text editor overlay:
 - **Ctrl+S** - Save file
-- **Ctrl+X** - Exit editor
+- **Ctrl+X / Esc** - Exit editor
 - **Arrow keys** - Navigate
+- **PgUp / PgDn** - Scroll page
+- **Home / End** - Start/end of line
+- **Ctrl+Home** - Start of file
+- **Ctrl+End** - End of file
 - Line numbers display
 - Modified indicator `[+]`
 - Cursor position (Line X, Col Y)

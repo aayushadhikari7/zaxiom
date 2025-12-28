@@ -1039,6 +1039,13 @@ impl eframe::App for ZaxiomApp {
         let mut editor_down = false;
         let mut editor_left = false;
         let mut editor_right = false;
+        let mut editor_page_up = false;
+        let mut editor_page_down = false;
+        let mut editor_home = false;
+        let mut editor_end = false;
+        let mut editor_ctrl_home = false;
+        let mut editor_ctrl_end = false;
+        let editor_is_open = self.editor.is_some();
         let mut fuzzy_history = false;
         let mut fuzzy_files = false;
         let mut fuzzy_branches = false;
@@ -1070,6 +1077,37 @@ impl eframe::App for ZaxiomApp {
 
         // Handle keyboard shortcuts
         ctx.input(|i| {
+            // Handle editor keyboard when open - editor consumes all input FIRST
+            if editor_is_open {
+                if i.key_pressed(egui::Key::Escape) { editor_exit = true; }
+                if i.modifiers.ctrl && i.key_pressed(egui::Key::X) { editor_exit = true; }
+                if i.modifiers.ctrl && i.key_pressed(egui::Key::S) { editor_save = true; }
+                if i.key_pressed(egui::Key::Backspace) { editor_backspace = true; }
+                if i.key_pressed(egui::Key::Enter) { editor_enter = true; }
+                if i.key_pressed(egui::Key::ArrowUp) { editor_up = true; }
+                if i.key_pressed(egui::Key::ArrowDown) { editor_down = true; }
+                if i.key_pressed(egui::Key::ArrowLeft) { editor_left = true; }
+                if i.key_pressed(egui::Key::ArrowRight) { editor_right = true; }
+                if i.key_pressed(egui::Key::PageUp) { editor_page_up = true; }
+                if i.key_pressed(egui::Key::PageDown) { editor_page_down = true; }
+                if i.key_pressed(egui::Key::Home) {
+                    if i.modifiers.ctrl { editor_ctrl_home = true; } else { editor_home = true; }
+                }
+                if i.key_pressed(egui::Key::End) {
+                    if i.modifiers.ctrl { editor_ctrl_end = true; } else { editor_end = true; }
+                }
+                // Capture text input
+                for event in &i.events {
+                    if let egui::Event::Text(text) = event {
+                        for ch in text.chars() {
+                            editor_char = Some(ch);
+                        }
+                    }
+                }
+                // Early return - editor consumes all keyboard input
+                return;
+            }
+
             // Ctrl+T: New tab
             if i.modifiers.ctrl && i.key_pressed(egui::Key::T) {
                 self.new_tab();
@@ -1078,7 +1116,7 @@ impl eframe::App for ZaxiomApp {
             if i.modifiers.ctrl && i.key_pressed(egui::Key::P) {
                 self.command_palette.toggle();
             }
-            // Handle command palette keyboard when open
+            // Handle command palette keyboard when open - palette consumes all input
             if self.command_palette.is_open {
                 if i.key_pressed(egui::Key::Escape) { palette_escape = true; }
                 if i.key_pressed(egui::Key::Enter) { palette_enter = true; }
@@ -1096,6 +1134,10 @@ impl eframe::App for ZaxiomApp {
                     (egui::Key::S, 's'), (egui::Key::T, 't'), (egui::Key::U, 'u'),
                     (egui::Key::V, 'v'), (egui::Key::W, 'w'), (egui::Key::X, 'x'),
                     (egui::Key::Y, 'y'), (egui::Key::Z, 'z'),
+                    (egui::Key::Num0, '0'), (egui::Key::Num1, '1'), (egui::Key::Num2, '2'),
+                    (egui::Key::Num3, '3'), (egui::Key::Num4, '4'), (egui::Key::Num5, '5'),
+                    (egui::Key::Num6, '6'), (egui::Key::Num7, '7'), (egui::Key::Num8, '8'),
+                    (egui::Key::Num9, '9'),
                 ] {
                     if i.key_pressed(key) && !i.modifiers.ctrl {
                         palette_char = Some(ch);
@@ -1104,25 +1146,8 @@ impl eframe::App for ZaxiomApp {
                 }
                 if i.key_pressed(egui::Key::Space) { palette_char = Some(' '); }
                 if i.key_pressed(egui::Key::Minus) { palette_char = Some('-'); }
-            }
-            // Handle editor keyboard when open
-            if self.editor.is_some() {
-                if i.modifiers.ctrl && i.key_pressed(egui::Key::X) { editor_exit = true; }
-                if i.modifiers.ctrl && i.key_pressed(egui::Key::S) { editor_save = true; }
-                if i.key_pressed(egui::Key::Backspace) { editor_backspace = true; }
-                if i.key_pressed(egui::Key::Enter) { editor_enter = true; }
-                if i.key_pressed(egui::Key::ArrowUp) { editor_up = true; }
-                if i.key_pressed(egui::Key::ArrowDown) { editor_down = true; }
-                if i.key_pressed(egui::Key::ArrowLeft) { editor_left = true; }
-                if i.key_pressed(egui::Key::ArrowRight) { editor_right = true; }
-                // Capture text input
-                for event in &i.events {
-                    if let egui::Event::Text(text) = event {
-                        for ch in text.chars() {
-                            editor_char = Some(ch);
-                        }
-                    }
-                }
+                // Early return - palette consumes all keyboard input
+                return;
             }
             // Ctrl+W: Close current tab (or pane if multiple)
             if i.modifiers.ctrl && i.key_pressed(egui::Key::W) {
@@ -1229,7 +1254,7 @@ impl eframe::App for ZaxiomApp {
             if i.modifiers.ctrl && !i.modifiers.shift && i.key_pressed(egui::Key::G) && !focused_in_fuzzy {
                 fuzzy_branches = true;
             }
-            // Handle fuzzy finder keyboard input
+            // Handle fuzzy finder keyboard input - fuzzy finder consumes all input
             if focused_in_fuzzy {
                 if i.key_pressed(egui::Key::ArrowUp) { fuzzy_up = true; }
                 if i.key_pressed(egui::Key::ArrowDown) { fuzzy_down = true; }
@@ -1251,6 +1276,8 @@ impl eframe::App for ZaxiomApp {
                         }
                     }
                 }
+                // Early return - fuzzy finder consumes all keyboard input
+                return;
             }
             // Handle hints mode keyboard input
             if focused_in_hints && !i.modifiers.ctrl && !i.modifiers.alt {
@@ -1929,21 +1956,10 @@ impl eframe::App for ZaxiomApp {
                 }
                 editor.content = new_content;
                 editor.modified = true;
-            } else if editor_up && editor.cursor_line > 0 {
-                editor.cursor_line -= 1;
-                let lines: Vec<&str> = editor.content.lines().collect();
-                if let Some(line) = lines.get(editor.cursor_line) {
-                    editor.cursor_col = editor.cursor_col.min(line.len());
-                }
+            } else if editor_up {
+                editor.cursor_up();
             } else if editor_down {
-                let line_count = editor.content.lines().count();
-                if editor.cursor_line < line_count.saturating_sub(1) {
-                    editor.cursor_line += 1;
-                    let lines: Vec<&str> = editor.content.lines().collect();
-                    if let Some(line) = lines.get(editor.cursor_line) {
-                        editor.cursor_col = editor.cursor_col.min(line.len());
-                    }
-                }
+                editor.cursor_down();
             } else if editor_left && editor.cursor_col > 0 {
                 editor.cursor_col -= 1;
             } else if editor_right {
@@ -1953,6 +1969,18 @@ impl eframe::App for ZaxiomApp {
                         editor.cursor_col += 1;
                     }
                 }
+            } else if editor_page_up {
+                editor.page_up();
+            } else if editor_page_down {
+                editor.page_down();
+            } else if editor_home {
+                editor.go_to_line_start();
+            } else if editor_end {
+                editor.go_to_line_end();
+            } else if editor_ctrl_home {
+                editor.go_to_start();
+            } else if editor_ctrl_end {
+                editor.go_to_end();
             }
         }
 
@@ -2014,9 +2042,9 @@ impl eframe::App for ZaxiomApp {
                             ui.separator();
                             ui.add_space(8.0);
 
-                            // Results list
-                            egui::ScrollArea::vertical().max_height(300.0).show(ui, |ui| {
-                                for (i, entry) in self.command_palette.entries.iter().take(15).enumerate() {
+                            // Results list (scrollable)
+                            egui::ScrollArea::vertical().max_height(300.0).auto_shrink([false, false]).show(ui, |ui| {
+                                for (i, entry) in self.command_palette.entries.iter().enumerate() {
                                     let is_selected = i == self.command_palette.selected;
                                     let bg = if is_selected { palette_accent.linear_multiply(0.3) } else { egui::Color32::TRANSPARENT };
 
@@ -2306,23 +2334,53 @@ impl eframe::App for ZaxiomApp {
                                     }
                                 });
 
-                            // Status bar
+                            // Keyboard hints bar
                             egui::Frame::default()
                                 .fill(self.theme.background_secondary)
-                                .inner_margin(egui::Margin::symmetric(12, 6))
+                                .inner_margin(egui::Margin::symmetric(12, 8))
                                 .show(ui, |ui| {
                                     ui.horizontal(|ui| {
+                                        // Left side: position info
                                         ui.add(egui::Label::new(
                                             egui::RichText::new(format!("Line {}, Col {}", editor.cursor_line + 1, editor.cursor_col + 1))
                                                 .color(editor_comment)
                                                 .size(11.0),
                                         ));
                                         ui.add_space(20.0);
-                                        ui.add(egui::Label::new(
-                                            egui::RichText::new(&editor.status)
-                                                .color(editor_fg)
-                                                .size(11.0),
-                                        ));
+
+                                        // Show status message if any
+                                        if !editor.status.is_empty() {
+                                            ui.add(egui::Label::new(
+                                                egui::RichText::new(&editor.status)
+                                                    .color(self.theme.success_color)
+                                                    .size(11.0),
+                                            ));
+                                            ui.add_space(20.0);
+                                        }
+
+                                        // Keyboard shortcuts
+                                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                            for (keys, desc) in [
+                                                ("Esc/^X", "exit"),
+                                                ("^S", "save"),
+                                                ("PgUp/Dn", "scroll"),
+                                                ("Home/End", "line"),
+                                                ("^Home/End", "file"),
+                                            ].iter().rev() {
+                                                ui.add(egui::Label::new(
+                                                    egui::RichText::new(*desc)
+                                                        .color(editor_comment)
+                                                        .size(10.0),
+                                                ));
+                                                ui.add(egui::Label::new(
+                                                    egui::RichText::new(*keys)
+                                                        .color(editor_accent)
+                                                        .size(10.0)
+                                                        .strong(),
+                                                ));
+                                                ui.add_space(8.0);
+                                            }
+                                        });
                                     });
                                 });
                         });
@@ -3170,8 +3228,9 @@ impl eframe::App for ZaxiomApp {
                             response.request_focus();
                         }
 
-                        // Handle keyboard input
-                        if response.has_focus() {
+                        // Handle keyboard input (only when no overlays are active)
+                        let overlay_active = editor_is_open || self.command_palette.is_open || pane.fuzzy_finder.active;
+                        if response.has_focus() && !overlay_active {
                             let has_suggestions = !pane.suggestions.is_empty();
 
                             // Tab: apply suggestion (consume to prevent focus change)

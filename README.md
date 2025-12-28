@@ -451,9 +451,13 @@ vim file.txt
 edit file.txt
 
 # Editor controls:
-# Ctrl+S - Save file
-# Ctrl+X - Exit editor
+# Ctrl+S     - Save file
+# Ctrl+X/Esc - Exit editor
 # Arrow keys - Navigate
+# PgUp/PgDn  - Scroll page
+# Home/End   - Start/end of line
+# Ctrl+Home  - Start of file
+# Ctrl+End   - End of file
 ```
 
 ### AI Chat (Ollama Integration)
@@ -708,7 +712,7 @@ zaxiom/
 
 ```powershell
 # Clone and install
-git clone https://github.com/jacky/zaxiom
+git clone https://github.com/aayushadhikari7/zaxiom
 cd zaxiom
 
 # Run the installer (builds + creates shortcuts)

@@ -16,10 +16,11 @@ Write-Host ""
 # Build
 Write-Host "  [1/2] Building..." -ForegroundColor Yellow
 Push-Location $ScriptDir
-$process = Start-Process -FilePath "cargo" -ArgumentList "build","--release" -Wait -PassThru -NoNewWindow
+& cargo build --release
+$exitCode = $LASTEXITCODE
 Pop-Location
 
-if ($process.ExitCode -ne 0) {
+if ($exitCode -ne 0) {
     Write-Host "  Build failed!" -ForegroundColor Red
     exit 1
 }

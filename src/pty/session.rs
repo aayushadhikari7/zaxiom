@@ -40,6 +40,7 @@ pub struct PtySession {
 
 impl PtySession {
     /// Create a new PTY session with PowerShell
+    #[allow(dead_code)]
     pub fn new(rows: u16, cols: u16, cwd: &Path) -> Result<Self> {
         Self::new_with_command("powershell.exe", &[], rows, cols, cwd)
     }
@@ -201,11 +202,13 @@ impl PtySession {
     }
 
     /// Write a string to the PTY
+    #[allow(dead_code)]
     pub fn write_str(&mut self, s: &str) -> Result<()> {
         self.write(s.as_bytes())
     }
 
     /// Send a command to the PTY (appends \r\n)
+    #[allow(dead_code)]
     pub fn send_command(&mut self, cmd: &str) -> Result<()> {
         self.write_str(&format!("{}\r\n", cmd))
     }
@@ -235,6 +238,7 @@ impl PtySession {
     }
 
     /// Check if the child process is still running
+    #[allow(dead_code)]
     pub fn is_running(&mut self) -> bool {
         self.child.try_wait().ok().flatten().is_none()
     }

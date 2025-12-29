@@ -1,31 +1,42 @@
+<div align="center">
+
 # Zaxiom
 
-A native terminal for Windows with full PTY support, built in Rust.
+**A modern terminal for Windows, built in Rust**
+
+[![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-b7410e?style=flat-square&logo=rust)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+[![Windows](https://img.shields.io/badge/Platform-Windows-0078D6?style=flat-square&logo=windows)](https://github.com/aayushadhikari7/zaxiom)
 
 ```
-    ███████╗ █████╗ ██╗  ██╗██╗ ██████╗ ███╗   ███╗
-    ╚══███╔╝██╔══██╗╚██╗██╔╝██║██╔═══██╗████╗ ████║
-      ███╔╝ ███████║ ╚███╔╝ ██║██║   ██║██╔████╔██║
-     ███╔╝  ██╔══██║ ██╔██╗ ██║██║   ██║██║╚██╔╝██║
-    ███████╗██║  ██║██╔╝ ██╗██║╚██████╔╝██║ ╚═╝ ██║
-    ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
+ ███████╗ █████╗ ██╗  ██╗██╗ ██████╗ ███╗   ███╗
+ ╚══███╔╝██╔══██╗╚██╗██╔╝██║██╔═══██╗████╗ ████║
+   ███╔╝ ███████║ ╚███╔╝ ██║██║   ██║██╔████╔██║
+  ███╔╝  ██╔══██║ ██╔██╗ ██║██║   ██║██║╚██╔╝██║
+ ███████╗██║  ██║██╔╝ ██╗██║╚██████╔╝██║ ╚═╝ ██║
+ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
 ```
 
-## Overview
+*Linux vibes on Windows* ✨
 
-Zaxiom is a GPU-accelerated terminal that runs natively on Windows. It combines a built-in shell with full PTY support via ConPTY, allowing you to run interactive CLI tools (vim, ssh, node REPLs, etc.) alongside fast native commands.
+![Zaxiom Terminal](assets/zaxiom.png)
 
-**Key capabilities:**
-- Full VT100/ANSI terminal emulation with UTF-8 support
-- Hybrid execution: native Rust commands for speed, PTY for interactive tools
-- Multi-tab and split pane support
-- Intelligent autocomplete with git branch and flag awareness
-- 20 built-in color themes
-- Session persistence
+</div>
 
-## Installation
+---
 
-### Windows
+## 💡 Why Zaxiom?
+
+Most Windows terminals feel clunky or lack proper Unix-style tooling. Zaxiom brings the best of both worlds:
+
+- ⚡ **Blazingly fast** — 100+ commands implemented natively in Rust
+- 🖥️ **Full PTY support** — Run vim, ssh, node REPLs, and interactive CLI tools seamlessly
+- 🛠️ **Developer-friendly** — Git integration, intelligent autocomplete, syntax highlighting
+- 🎨 **Beautiful** — 20 built-in themes and a kawaii robot companion
+
+---
+
+## 🚀 Quick Start
 
 ```powershell
 git clone https://github.com/aayushadhikari7/zaxiom
@@ -33,63 +44,97 @@ cd zaxiom
 .\install.ps1
 ```
 
-The installer builds the release binary and creates Start Menu/Desktop shortcuts.
-
-### Build from source
+Or build manually:
 
 ```bash
 cargo build --release
 ```
 
-## Features
+---
 
-### Terminal
-- **PTY support** - ConPTY integration for interactive applications
-- **Tabs & splits** - Ctrl+T/W for tabs, Ctrl+Shift+D/E for splits
-- **Autocomplete** - Commands, paths, git branches, flags
-- **History** - Context-aware with fuzzy search (Ctrl+R)
-- **Search** - Ctrl+F to search output
-- **Themes** - `theme <name>` to switch (dracula, nord, gruvbox, tokyo-night, etc.)
+## ✨ Features
 
-### Built-in Commands
-Standard shell commands implemented in Rust:
-- Navigation: `ls`, `cd`, `pwd`, `tree`
-- Files: `cat`, `cp`, `mv`, `rm`, `mkdir`, `touch`, `chmod`
-- Text: `grep`, `find`, `head`, `tail`, `wc`, `sort`, `sed`, `awk`
-- System: `ps`, `kill`, `df`, `du`, `whoami`, `uname`
-- Network: `curl`, `wget`, `ping`
-- Compression: `tar`, `zip`, `gzip`
-- Hash: `md5sum`, `sha256sum`, `blake3sum`, `base64`
+### Terminal Emulation
+| | Feature | Description |
+|--|---------|-------------|
+| 🖥️ | **PTY Support** | Full ConPTY integration for interactive apps |
+| 📑 | **Tabs & Splits** | Multi-pane workflow with keyboard shortcuts |
+| 💬 | **Autocomplete** | Context-aware suggestions for commands, paths, git branches |
+| 🔍 | **Fuzzy Search** | Ctrl+R for history, Ctrl+Shift+F for files, Ctrl+G for branches |
+| ⌨️ | **Vi Mode** | Vim-style navigation in scrollback buffer |
 
-### External Tools
-Seamlessly run external development tools:
-- npm, yarn, pnpm, bun, node, deno
-- cargo, rustc, go, python, pip
-- docker, kubectl, terraform
-- git, gh, ssh
-- And more
+### 📦 Built-in Commands
 
-### Keyboard Shortcuts
+All your favorite Unix commands, implemented in Rust for speed:
 
+| | Category | Commands |
+|--|----------|----------|
+| 📂 | Navigation | `ls` `cd` `pwd` `tree` `clear` |
+| 📄 | Files | `cat` `cp` `mv` `rm` `mkdir` `touch` `chmod` `nano` |
+| 📝 | Text | `grep` `find` `head` `tail` `wc` `sort` `sed` `awk` `cut` `diff` |
+| 💻 | System | `ps` `kill` `df` `du` `whoami` `uname` `neofetch` |
+| 🌐 | Network | `curl` `wget` `ping` |
+| 🗜️ | Compression | `tar` `zip` `gzip` `gunzip` |
+| 🔐 | Hash | `md5sum` `sha256sum` `blake3sum` `base64` |
+
+### 🔧 External Tool Support
+
+Seamlessly run your development tools:
+
+| | Category | Tools |
+|--|----------|-------|
+| 🟨 | JavaScript | `npm` `yarn` `pnpm` `bun` `node` `deno` |
+| 🦀 | Rust | `cargo` `rustc` `rustup` |
+| 🐍 | Python | `python` `pip` `uv` `poetry` |
+| 🐳 | Containers | `docker` `kubectl` `terraform` |
+| 🔀 | Version Control | `git` `gh` `ssh` |
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+### Navigation
 | Shortcut | Action |
 |----------|--------|
-| Ctrl+T | New tab |
-| Ctrl+W | Close tab/pane |
-| Ctrl+Tab | Next tab |
-| Ctrl+Shift+D | Split horizontal |
-| Ctrl+Shift+E | Split vertical |
-| Alt+Arrows | Navigate panes |
-| Ctrl+R | Fuzzy search history |
-| Ctrl+F | Search output |
-| Tab | Autocomplete |
+| `Ctrl+T` | New tab |
+| `Ctrl+W` | Close tab/pane |
+| `Ctrl+Tab` | Next tab |
+| `Ctrl+1-9` | Jump to tab |
 
-### Special Modes
+### Splits
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Shift+D` | Split horizontal |
+| `Ctrl+Shift+E` | Split vertical |
+| `Alt+Arrows` | Navigate panes |
 
-- **Vi mode** (Ctrl+Shift+M) - Vim-style navigation in scrollback
-- **Hints mode** (Ctrl+Shift+H) - Extract URLs, paths, git hashes
-- **Fuzzy finder** (Ctrl+R/Ctrl+Shift+F/Ctrl+G) - Search history, files, branches
+### Productivity
+| Shortcut | Action |
+|----------|--------|
+| `Tab` | Autocomplete |
+| `Ctrl+R` | Fuzzy search history |
+| `Ctrl+F` | Search output |
+| `Ctrl+Shift+M` | Vi mode |
+| `Ctrl+Shift+H` | Hints mode (extract URLs, paths) |
 
-## Architecture
+---
+
+## 🎨 Themes
+
+Switch themes instantly with `theme <name>`:
+
+| | | |
+|--|--|--|
+| 🌸 Catppuccin Mocha *(default)* | ❄️ Nord | 🧛 Dracula |
+| 🌃 Tokyo Night | 🟤 Gruvbox | ⚫ One Dark |
+| ☀️ Solarized | 🎨 Monokai Pro | 🌹 Rose Pine |
+| 🌊 Kanagawa | 🌲 Everforest | 🦉 Night Owl |
+
+Enable kawaii mode for extra flair: `theme --kawaii` ✨
+
+---
+
+## 🏗️ Architecture
 
 ```
 src/
@@ -101,20 +146,24 @@ src/
 └── config/          # Themes and settings
 ```
 
-## Dependencies
+---
 
-| Crate | Purpose |
-|-------|---------|
-| eframe/egui | GPU-accelerated UI |
-| portable-pty | PTY support (ConPTY) |
-| syntect | Syntax highlighting |
-| git2 | Git operations |
-| reqwest | HTTP client |
+## 🤝 Contributing
 
-## License
+Contributions are welcome! Feel free to:
 
-MIT
+- 🐛 Report bugs or request features via [Issues](https://github.com/aayushadhikari7/zaxiom/issues)
+- 🔧 Submit pull requests
+- 💬 Share feedback
 
 ---
 
-Built with Rust + egui
+## 🔮 Roadmap
+
+Stay tuned for more updates and features! This project is actively developed and there's more to come.
+
+---
+
+## 📄 License
+
+[MIT](LICENSE) — Built with 🦀 Rust + egui

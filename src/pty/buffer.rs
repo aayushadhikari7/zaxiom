@@ -6,6 +6,7 @@ use std::collections::VecDeque;
 
 /// A line in the PTY buffer
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct PtyLine {
     /// The text content (may contain ANSI codes)
     pub text: String,
@@ -14,6 +15,7 @@ pub struct PtyLine {
 }
 
 /// Buffer for PTY output with streaming support
+#[allow(dead_code)]
 pub struct PtyBuffer {
     /// Lines of output
     lines: VecDeque<PtyLine>,
@@ -32,6 +34,7 @@ pub struct PtyBuffer {
     cols: usize,
 }
 
+#[allow(dead_code)]
 impl PtyBuffer {
     /// Create a new PTY buffer
     pub fn new(rows: usize, cols: usize) -> Self {

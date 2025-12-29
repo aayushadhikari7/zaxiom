@@ -388,6 +388,7 @@ impl Executor {
     }
 
     /// Check if the command registry has a specific command
+    #[allow(dead_code)]
     pub fn has_command(&self, cmd: &str) -> bool {
         self.registry.has_command(cmd)
     }

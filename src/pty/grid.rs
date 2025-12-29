@@ -38,6 +38,7 @@ impl Default for Cell {
 }
 
 impl Cell {
+    #[allow(dead_code)]
     pub fn with_char(ch: char) -> Self {
         Self { ch, ..Default::default() }
     }
@@ -736,6 +737,7 @@ impl TerminalGrid {
     }
 
     /// Get only the visible screen (no scrollback)
+    #[allow(dead_code)]
     pub fn get_visible_lines(&self) -> Vec<String> {
         self.cells.iter().map(|row| self.row_to_string(row)).collect()
     }
@@ -824,11 +826,13 @@ impl TerminalGrid {
     }
 
     /// Get dimensions (rows, cols)
+    #[allow(dead_code)]
     pub fn dimensions(&self) -> (usize, usize) {
         (self.rows, self.cols)
     }
 
     /// Check if in alternate screen mode
+    #[allow(dead_code)]
     pub fn is_alternate_screen(&self) -> bool {
         self.alternate_screen
     }

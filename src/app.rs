@@ -45,7 +45,7 @@ const STARTUP_BANNER: &str = r#"
     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
 
         ╭──────────────────────────────────────────╮
-        │  ♡  Welcome to Zaxiom v0.3.0~            │
+        │  ♡  Welcome to Zaxiom v0.3.1~            │
         │      Linux vibes on Windows! (◕‿◕)♡     │
         │                                          │
         │  Your kawaii robot companion is here! →  │
@@ -1557,6 +1557,7 @@ impl eframe::App for ZaxiomApp {
                     self.next_tab();
                 }
             }
+
             // Ctrl+Shift+D: Split horizontal
             if i.modifiers.ctrl && i.modifiers.shift && i.key_pressed(egui::Key::D) {
                 split_horizontal = true;
@@ -1869,11 +1870,11 @@ impl eframe::App for ZaxiomApp {
             }
         }
 
-        // Handle split pane actions
-        if split_horizontal {
+        // Handle split pane actions (max 4 panes)
+        if split_horizontal && self.tabs[self.active_tab].pane_count() < 4 {
             self.tabs[self.active_tab].split(SplitDirection::Horizontal);
         }
-        if split_vertical {
+        if split_vertical && self.tabs[self.active_tab].pane_count() < 4 {
             self.tabs[self.active_tab].split(SplitDirection::Vertical);
         }
         if close_pane {
@@ -2610,7 +2611,8 @@ impl eframe::App for ZaxiomApp {
         // Get window size for responsive layout
         let screen_rect = ctx.screen_rect();
         let window_width = screen_rect.width();
-        let show_mascot = window_width > 900.0; // Hide mascot on narrow windows
+        let has_splits = self.tabs[self.active_tab].pane_count() > 1;
+        let show_mascot = window_width > 900.0 && !has_splits; // Hide mascot on narrow windows or when splits active
 
         // Command Palette overlay (centered, modal)
         if self.command_palette.is_open {
@@ -3459,7 +3461,7 @@ impl eframe::App for ZaxiomApp {
             close_suggestions = true;
         }
 
-        // Get focused pane ID for central panel
+        // Get focused pane ID and calculate split layout
         let focused_pane_id = self.tabs[self.active_tab].splits.focused_pane_id();
 
         egui::CentralPanel::default()
@@ -3468,7 +3470,186 @@ impl eframe::App for ZaxiomApp {
                 let foreground = self.theme.foreground;
                 let path_color = self.theme.path_color;
 
-                // Terminal output area (scrollable)
+                // Calculate split layout
+                let panel_rect = ui.available_rect_before_wrap();
+                let input_height = 30.0;
+                let content_rect = egui::Rect::from_min_max(
+                    panel_rect.min,
+                    egui::pos2(panel_rect.max.x, panel_rect.max.y - input_height),
+                );
+                let pane_layouts = self.tabs[self.active_tab].splits.calculate_layout(content_rect);
+                let pane_count = pane_layouts.len();
+
+                // Render split panes if more than 1 pane exists
+                if pane_count > 1 {
+                    let border_color = self.theme.comment_color;
+                    let error_color = self.theme.error_color;
+                    let success_color = self.theme.success_color;
+                    let command_color = self.theme.command_color;
+                    let mut split_command_to_execute: Option<(usize, String)> = None;
+                    let mut pane_to_focus: Option<usize> = None;
+
+                    for (pane_id, rect) in pane_layouts {
+                        let is_focused = pane_id == focused_pane_id;
+
+                        // Draw border around each pane
+                        let stroke = if is_focused {
+                            egui::Stroke::new(2.0, self.theme.accent)
+                        } else {
+                            egui::Stroke::new(1.0, border_color)
+                        };
+                        ui.painter().rect_stroke(
+                            rect,
+                            egui::CornerRadius::ZERO,
+                            stroke,
+                            egui::StrokeKind::Inside,
+                        );
+
+                        // Use push_id to create unique ID scope for each pane
+                        let inner_rect = rect.shrink(4.0);
+                        let input_height = 25.0;
+                        let scroll_rect = egui::Rect::from_min_max(
+                            inner_rect.min,
+                            egui::pos2(inner_rect.max.x, inner_rect.max.y - input_height),
+                        );
+                        let input_rect = egui::Rect::from_min_max(
+                            egui::pos2(inner_rect.min.x, inner_rect.max.y - input_height),
+                            inner_rect.max,
+                        );
+
+                        ui.push_id(pane_id, |ui| {
+                            // Get pane data for reading
+                            let buffer_lines: Vec<_> = self.tabs[self.active_tab]
+                                .panes
+                                .get(&pane_id)
+                                .map(|p| p.buffer.output_lines().collect())
+                                .unwrap_or_default();
+                            let prompt = self.tabs[self.active_tab]
+                                .panes
+                                .get(&pane_id)
+                                .map(|p| p.state.format_prompt())
+                                .unwrap_or_default();
+
+                            // Render scroll area with buffer content
+                            ui.push_id("scroll", |ui| {
+                                let scroll_response = ui.allocate_ui_at_rect(scroll_rect, |ui| {
+                                    egui::ScrollArea::vertical()
+                                        .max_height(scroll_rect.height())
+                                        .stick_to_bottom(true)
+                                        .auto_shrink([false; 2])
+                                        .show(ui, |ui| {
+                                            ui.set_max_width(scroll_rect.width() - 10.0);
+                                            ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+
+                                            for line in buffer_lines {
+                                                let color = match line.line_type {
+                                                    LineType::Normal => foreground,
+                                                    LineType::Error => error_color,
+                                                    LineType::Command => command_color,
+                                                    LineType::Success => success_color,
+                                                };
+                                                ui.label(egui::RichText::new(&line.text).color(color).monospace());
+                                            }
+                                        });
+                                });
+
+                                // Click on scroll area to focus this pane
+                                if scroll_response.response.clicked() && !is_focused {
+                                    pane_to_focus = Some(pane_id);
+                                }
+                            });
+
+                            // Render input area at fixed position
+                            ui.push_id("input", |ui| {
+                                ui.allocate_ui_at_rect(input_rect, |ui| {
+                                    ui.horizontal(|ui| {
+                                        let prompt_color = if is_focused { path_color } else { border_color };
+                                        ui.label(egui::RichText::new(&prompt).color(prompt_color).monospace());
+
+                                        if let Some(pane) = self.tabs[self.active_tab].panes.get_mut(&pane_id) {
+                                            let text_color = if is_focused { foreground } else { border_color };
+
+                                            let response = ui.add(
+                                                egui::TextEdit::singleline(&mut pane.input)
+                                                    .font(egui::TextStyle::Monospace)
+                                                    .text_color(text_color)
+                                                    .desired_width(input_rect.width() - 150.0)
+                                                    .frame(false)
+                                            );
+
+                                            // Click/focus on input switches pane focus
+                                            if (response.clicked() || response.gained_focus()) && !is_focused {
+                                                pane_to_focus = Some(pane_id);
+                                            }
+
+                                            // Auto-focus the focused pane's input
+                                            if is_focused && !response.has_focus() {
+                                                response.request_focus();
+                                            }
+
+                                            // Handle Enter key directly
+                                            if response.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                                                let cmd = std::mem::take(&mut pane.input);
+                                                if !cmd.is_empty() {
+                                                    split_command_to_execute = Some((pane_id, cmd));
+                                                }
+                                            }
+                                        }
+                                    });
+                                });
+                            });
+                        });
+                    }
+
+                    // Switch focus if a pane was clicked
+                    if let Some(new_focus) = pane_to_focus {
+                        self.tabs[self.active_tab].splits.focus_pane(new_focus);
+                    }
+
+                    // Execute command if entered in split mode
+                    if let Some((exec_pane_id, cmd)) = split_command_to_execute {
+                        self.tabs[self.active_tab].splits.focus_pane(exec_pane_id);
+
+                        // Handle special commands
+                        match cmd.as_str() {
+                            "clear" => {
+                                if let Some(pane) = self.tabs[self.active_tab].panes.get_mut(&exec_pane_id) {
+                                    pane.buffer.clear();
+                                    for line in ASCII_LOGO.lines() {
+                                        pane.buffer.push_line(line);
+                                    }
+                                }
+                            }
+                            _ => {
+                                // Execute as regular command
+                                if let Some(pane) = self.tabs[self.active_tab].panes.get_mut(&exec_pane_id) {
+                                    let cwd = pane.state.cwd().clone();
+                                    pane.history.add(&cmd, cwd, None);
+                                    pane.history.reset_position();
+                                    pane.buffer.start_block(&cmd);
+                                    let prompt = pane.state.format_prompt();
+                                    pane.buffer.push_line(&format!("{}{}", prompt, cmd));
+                                    let history = pane.history.recent_commands(10);
+                                    match self.executor.execute_with_history(&cmd, &mut pane.state, Some(&history)) {
+                                        Ok(output) => {
+                                            if !output.is_empty() {
+                                                for line in output.lines() {
+                                                    pane.buffer.push_line(line);
+                                                }
+                                            }
+                                        }
+                                        Err(e) => {
+                                            pane.buffer.push_error(&e.to_string());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return; // Skip single-pane rendering
+                }
+
+                // Terminal output area (scrollable) - single pane mode
                 let available_height = ui.available_height() - 30.0;
                 let available_width = ui.available_width();
 

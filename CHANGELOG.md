@@ -2,6 +2,20 @@
 
 All notable changes to Zaxiom will be documented in this file.
 
+## [0.3.1] - 2025-12-30
+
+### Added
+- Functional split pane system with working input in all panes
+- Click-to-focus support for switching between panes
+- Text wrapping in split pane buffers
+- AI commands in command palette (ai status, ai providers, ollama commands)
+- Split/Vi Mode/Hints Mode/History Search actions in command palette
+
+### Fixed
+- Split pane input handling - all panes now accept keyboard input
+- Enter key execution in split panes
+- Layout overlap issues in split mode
+
 ## [0.3.0] - 2025-12-30
 
 ### Added
@@ -50,6 +64,7 @@ All notable changes to Zaxiom will be documented in this file.
 - Hints mode for extracting URLs and paths
 - Split panes and tabs
 
+[0.3.1]: https://github.com/aayushadhikari7/zaxiom/releases/tag/v0.3.1
 [0.3.0]: https://github.com/aayushadhikari7/zaxiom/releases/tag/v0.3.0
 [0.2.0]: https://github.com/aayushadhikari7/zaxiom/releases/tag/v0.2.0
 [0.1.0]: https://github.com/aayushadhikari7/zaxiom/releases/tag/v0.1.0

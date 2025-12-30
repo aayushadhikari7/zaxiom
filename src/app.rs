@@ -364,6 +364,11 @@ impl TabSession {
     /// Close the focused pane
     pub fn close_focused_pane(&mut self) -> bool {
         let pane_id = self.splits.focused_pane_id();
+        self.close_pane(pane_id)
+    }
+
+    /// Close a specific pane by ID
+    pub fn close_pane(&mut self, pane_id: usize) -> bool {
         if self.splits.close_pane(pane_id) {
             self.panes.remove(&pane_id);
             true
@@ -3488,8 +3493,9 @@ impl eframe::App for ZaxiomApp {
                     let command_color = self.theme.command_color;
                     let mut split_command_to_execute: Option<(usize, String)> = None;
                     let mut pane_to_focus: Option<usize> = None;
+                    let mut pane_to_close: Option<usize> = None;
 
-                    for (pane_id, rect) in pane_layouts {
+                    for (pane_id, rect) in pane_layouts.iter().copied() {
                         let is_focused = pane_id == focused_pane_id;
 
                         // Draw border around each pane
@@ -3507,9 +3513,14 @@ impl eframe::App for ZaxiomApp {
 
                         // Use push_id to create unique ID scope for each pane
                         let inner_rect = rect.shrink(4.0);
+                        let header_height = 20.0;
                         let input_height = 25.0;
-                        let scroll_rect = egui::Rect::from_min_max(
+                        let header_rect = egui::Rect::from_min_max(
                             inner_rect.min,
+                            egui::pos2(inner_rect.max.x, inner_rect.min.y + header_height),
+                        );
+                        let scroll_rect = egui::Rect::from_min_max(
+                            egui::pos2(inner_rect.min.x, inner_rect.min.y + header_height),
                             egui::pos2(inner_rect.max.x, inner_rect.max.y - input_height),
                         );
                         let input_rect = egui::Rect::from_min_max(
@@ -3518,6 +3529,47 @@ impl eframe::App for ZaxiomApp {
                         );
 
                         ui.push_id(pane_id, |ui| {
+                            // Render header with close button
+                            ui.push_id("header", |ui| {
+                                let mut header_ui = ui.new_child(egui::UiBuilder::new().max_rect(header_rect));
+                                header_ui.horizontal(|ui| {
+                                    // Pane label
+                                    let label_color = if is_focused { foreground } else { border_color };
+                                    ui.label(egui::RichText::new(format!("Pane {}", pane_id + 1)).color(label_color).small());
+
+                                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                        // Close button (only show if more than 1 pane)
+                                        if pane_count > 1 {
+                                            let btn_size = 14.0;
+                                            let (rect, response) = ui.allocate_exact_size(
+                                                egui::vec2(btn_size, btn_size),
+                                                egui::Sense::click()
+                                            );
+
+                                            if response.clicked() {
+                                                pane_to_close = Some(pane_id);
+                                            }
+
+                                            // Draw X with lines
+                                            let color = if response.hovered() {
+                                                egui::Color32::from_rgb(255, 100, 100)
+                                            } else {
+                                                border_color
+                                            };
+                                            let margin = 3.0;
+                                            let stroke = egui::Stroke::new(1.5, color);
+                                            ui.painter().line_segment(
+                                                [rect.min + egui::vec2(margin, margin), rect.max - egui::vec2(margin, margin)],
+                                                stroke,
+                                            );
+                                            ui.painter().line_segment(
+                                                [egui::pos2(rect.max.x - margin, rect.min.y + margin), egui::pos2(rect.min.x + margin, rect.max.y - margin)],
+                                                stroke,
+                                            );
+                                        }
+                                    });
+                                });
+                            });
                             // Get pane data for reading
                             let buffer_lines: Vec<_> = self.tabs[self.active_tab]
                                 .panes
@@ -3532,70 +3584,70 @@ impl eframe::App for ZaxiomApp {
 
                             // Render scroll area with buffer content
                             ui.push_id("scroll", |ui| {
-                                let scroll_response = ui.allocate_ui_at_rect(scroll_rect, |ui| {
-                                    egui::ScrollArea::vertical()
-                                        .max_height(scroll_rect.height())
-                                        .stick_to_bottom(true)
-                                        .auto_shrink([false; 2])
-                                        .show(ui, |ui| {
-                                            ui.set_max_width(scroll_rect.width() - 10.0);
-                                            ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+                                let mut scroll_ui = ui.new_child(egui::UiBuilder::new().max_rect(scroll_rect).sense(egui::Sense::click()));
+                                let scroll_response = scroll_ui.response();
 
-                                            for line in buffer_lines {
-                                                let color = match line.line_type {
-                                                    LineType::Normal => foreground,
-                                                    LineType::Error => error_color,
-                                                    LineType::Command => command_color,
-                                                    LineType::Success => success_color,
-                                                };
-                                                ui.label(egui::RichText::new(&line.text).color(color).monospace());
-                                            }
-                                        });
-                                });
+                                egui::ScrollArea::vertical()
+                                    .max_height(scroll_rect.height())
+                                    .stick_to_bottom(true)
+                                    .auto_shrink([false; 2])
+                                    .show(&mut scroll_ui, |ui| {
+                                        ui.set_max_width(scroll_rect.width() - 10.0);
+                                        ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+
+                                        for line in buffer_lines {
+                                            let color = match line.line_type {
+                                                LineType::Normal => foreground,
+                                                LineType::Error => error_color,
+                                                LineType::Command => command_color,
+                                                LineType::Success => success_color,
+                                            };
+                                            ui.label(egui::RichText::new(&line.text).color(color).monospace());
+                                        }
+                                    });
 
                                 // Click on scroll area to focus this pane
-                                if scroll_response.response.clicked() && !is_focused {
+                                if scroll_response.clicked() && !is_focused {
                                     pane_to_focus = Some(pane_id);
                                 }
                             });
 
                             // Render input area at fixed position
                             ui.push_id("input", |ui| {
-                                ui.allocate_ui_at_rect(input_rect, |ui| {
-                                    ui.horizontal(|ui| {
-                                        let prompt_color = if is_focused { path_color } else { border_color };
-                                        ui.label(egui::RichText::new(&prompt).color(prompt_color).monospace());
+                                let mut input_ui = ui.new_child(egui::UiBuilder::new().max_rect(input_rect));
+                                input_ui.horizontal(|ui| {
+                                    let prompt_color = if is_focused { path_color } else { border_color };
+                                    ui.label(egui::RichText::new(&prompt).color(prompt_color).monospace());
 
-                                        if let Some(pane) = self.tabs[self.active_tab].panes.get_mut(&pane_id) {
-                                            let text_color = if is_focused { foreground } else { border_color };
+                                    if let Some(pane) = self.tabs[self.active_tab].panes.get_mut(&pane_id) {
+                                        let text_color = if is_focused { foreground } else { border_color };
 
-                                            let response = ui.add(
-                                                egui::TextEdit::singleline(&mut pane.input)
-                                                    .font(egui::TextStyle::Monospace)
-                                                    .text_color(text_color)
-                                                    .desired_width(input_rect.width() - 150.0)
-                                                    .frame(false)
-                                            );
+                                        let response = ui.add(
+                                            egui::TextEdit::singleline(&mut pane.input)
+                                                .font(egui::TextStyle::Monospace)
+                                                .text_color(text_color)
+                                                .desired_width(input_rect.width() - 150.0)
+                                                .frame(false)
+                                        );
 
-                                            // Click/focus on input switches pane focus
-                                            if (response.clicked() || response.gained_focus()) && !is_focused {
-                                                pane_to_focus = Some(pane_id);
-                                            }
+                                        // Click/focus on input switches pane focus
+                                        if (response.clicked() || response.gained_focus()) && !is_focused {
+                                            pane_to_focus = Some(pane_id);
+                                        }
 
-                                            // Auto-focus the focused pane's input
-                                            if is_focused && !response.has_focus() {
-                                                response.request_focus();
-                                            }
+                                        // Auto-focus the focused pane's input
+                                        if is_focused && !response.has_focus() {
+                                            response.request_focus();
+                                        }
 
-                                            // Handle Enter key directly
-                                            if response.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
-                                                let cmd = std::mem::take(&mut pane.input);
-                                                if !cmd.is_empty() {
-                                                    split_command_to_execute = Some((pane_id, cmd));
-                                                }
+                                        // Handle Enter key directly
+                                        if response.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                                            let cmd = std::mem::take(&mut pane.input);
+                                            if !cmd.is_empty() {
+                                                split_command_to_execute = Some((pane_id, cmd));
                                             }
                                         }
-                                    });
+                                    }
                                 });
                             });
                         });
@@ -3604,6 +3656,11 @@ impl eframe::App for ZaxiomApp {
                     // Switch focus if a pane was clicked
                     if let Some(new_focus) = pane_to_focus {
                         self.tabs[self.active_tab].splits.focus_pane(new_focus);
+                    }
+
+                    // Close pane if close button was clicked
+                    if let Some(close_id) = pane_to_close {
+                        self.tabs[self.active_tab].close_pane(close_id);
                     }
 
                     // Execute command if entered in split mode

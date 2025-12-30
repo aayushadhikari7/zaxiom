@@ -2352,6 +2352,51 @@ impl eframe::App for ZaxiomApp {
                         }
                     }
                 }
+                "Split Horizontal" => {
+                    self.tabs[self.active_tab].split(SplitDirection::Horizontal);
+                }
+                "Split Vertical" => {
+                    self.tabs[self.active_tab].split(SplitDirection::Vertical);
+                }
+                "Vi Mode" => {
+                    if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                        pane.vi_mode.active = !pane.vi_mode.active;
+                    }
+                }
+                "Hints Mode" => {
+                    if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                        if pane.hints_mode.active {
+                            pane.hints_mode.deactivate();
+                        } else {
+                            // Extract hints from visible buffer content
+                            let extractor = HintsExtractor::new();
+                            let mut all_hints = Vec::new();
+                            for (line_num, line) in pane.buffer.output_lines().enumerate() {
+                                let hints = extractor.extract(&line.text, line_num);
+                                all_hints.extend(hints);
+                            }
+                            pane.hints_mode.activate(all_hints);
+                        }
+                    }
+                }
+                "History Search" => {
+                    if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
+                        if pane.fuzzy_finder.active {
+                            pane.fuzzy_finder.deactivate();
+                        } else {
+                            let cwd = pane.state.cwd().clone();
+                            pane.fuzzy_finder.activate(FuzzyMode::History, &cwd);
+                            // Populate with history items
+                            let history_items: Vec<(String, Option<String>)> = pane
+                                .history
+                                .recent_commands(100)
+                                .into_iter()
+                                .map(|cmd| (cmd, None))
+                                .collect();
+                            pane.fuzzy_finder.set_history_items(history_items);
+                        }
+                    }
+                }
                 _ => {
                     // Execute as terminal command
                     if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {

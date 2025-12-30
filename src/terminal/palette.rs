@@ -96,6 +96,87 @@ impl CommandPalette {
             score: 0,
         });
 
+        // AI-related actions
+        entries.push(PaletteEntry {
+            name: "ai status".to_string(),
+            description: "Show AI provider status and configuration".to_string(),
+            category: "AI".to_string(),
+            shortcut: None,
+            score: 0,
+        });
+        entries.push(PaletteEntry {
+            name: "ai providers".to_string(),
+            description: "List all available AI providers".to_string(),
+            category: "AI".to_string(),
+            shortcut: None,
+            score: 0,
+        });
+        entries.push(PaletteEntry {
+            name: "ollama list".to_string(),
+            description: "List installed Ollama models".to_string(),
+            category: "AI".to_string(),
+            shortcut: None,
+            score: 0,
+        });
+        entries.push(PaletteEntry {
+            name: "ollama status".to_string(),
+            description: "Check if Ollama server is running".to_string(),
+            category: "AI".to_string(),
+            shortcut: None,
+            score: 0,
+        });
+        entries.push(PaletteEntry {
+            name: "ollama models".to_string(),
+            description: "Show recommended Ollama models to download".to_string(),
+            category: "AI".to_string(),
+            shortcut: None,
+            score: 0,
+        });
+        entries.push(PaletteEntry {
+            name: "ollama serve".to_string(),
+            description: "Start the Ollama server".to_string(),
+            category: "AI".to_string(),
+            shortcut: None,
+            score: 0,
+        });
+
+        // Split pane actions
+        entries.push(PaletteEntry {
+            name: "Split Horizontal".to_string(),
+            description: "Split current pane horizontally".to_string(),
+            category: "Actions".to_string(),
+            shortcut: Some("Ctrl+Shift+D".to_string()),
+            score: 0,
+        });
+        entries.push(PaletteEntry {
+            name: "Split Vertical".to_string(),
+            description: "Split current pane vertically".to_string(),
+            category: "Actions".to_string(),
+            shortcut: Some("Ctrl+Shift+E".to_string()),
+            score: 0,
+        });
+        entries.push(PaletteEntry {
+            name: "Vi Mode".to_string(),
+            description: "Toggle vim-style navigation mode".to_string(),
+            category: "Actions".to_string(),
+            shortcut: Some("Ctrl+Shift+M".to_string()),
+            score: 0,
+        });
+        entries.push(PaletteEntry {
+            name: "Hints Mode".to_string(),
+            description: "Extract URLs and paths from output".to_string(),
+            category: "Actions".to_string(),
+            shortcut: Some("Ctrl+Shift+H".to_string()),
+            score: 0,
+        });
+        entries.push(PaletteEntry {
+            name: "History Search".to_string(),
+            description: "Fuzzy search command history".to_string(),
+            category: "Actions".to_string(),
+            shortcut: Some("Ctrl+R".to_string()),
+            score: 0,
+        });
+
         entries.sort_by(|a, b| a.name.cmp(&b.name));
         entries
     }
@@ -120,7 +201,7 @@ impl CommandPalette {
             | "column" | "strings" | "split" | "join" | "comm" => "Text",
             "exit" | "which" | "du" | "df" | "ps" | "kill" | "whoami" | "hostname" | "uname"
             | "uptime" | "free" | "date" | "cal" | "id" | "neofetch" | "printenv" | "lscpu"
-            | "history" | "test" | "man" => "System",
+            | "history" | "test" | "man" | "theme" => "System",
             "curl" | "wget" | "ping" | "netstat" | "traceroute" | "nslookup" | "host"
             | "ifconfig" => "Network",
             "md5sum" | "sha1sum" | "sha224sum" | "sha256sum" | "sha384sum" | "sha512sum"
@@ -128,7 +209,8 @@ impl CommandPalette {
             "tar" | "zip" | "unzip" | "gzip" | "gunzip" => "Compress",
             "alias" | "env" | "export" | "sleep" | "seq" | "yes" | "true" | "false" | "expr"
             | "bc" | "tee" | "timeout" | "type" | "command" | "pushd" | "popd" | "dirs" => "Shell",
-            "fortune" | "cowsay" | "coffee" | "matrix" => "Fun",
+            "fortune" | "cowsay" | "coffee" | "matrix" | "pet" => "Fun",
+            "ai" | "ollama" => "AI",
             _ => "Other",
         }
         .to_string()

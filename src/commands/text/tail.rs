@@ -118,13 +118,11 @@ RELATED COMMANDS:
         // Keep last N lines in a ring buffer
         let mut ring: VecDeque<String> = VecDeque::with_capacity(lines);
 
-        for line in reader.lines() {
-            if let Ok(l) = line {
-                if ring.len() >= lines {
-                    ring.pop_front();
-                }
-                ring.push_back(l);
+        for l in reader.lines().map_while(Result::ok) {
+            if ring.len() >= lines {
+                ring.pop_front();
             }
+            ring.push_back(l);
         }
 
         let output: Vec<String> = ring.into_iter().collect();

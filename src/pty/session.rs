@@ -95,7 +95,7 @@ impl PtySession {
                         cmd.arg("-NoLogo");
                         cmd.arg("-NoProfile");
                         cmd.arg("-Command");
-                        cmd.arg(&format!("& {{ {} }}", full_cmd));
+                        cmd.arg(format!("& {{ {} }}", full_cmd));
                         cmd.cwd(cwd);
                         cmd
                     }

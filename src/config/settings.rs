@@ -38,6 +38,7 @@ pub struct Config {
 
 /// AI provider configuration
 #[derive(Debug, Deserialize, Serialize)]
+#[derive(Default)]
 pub struct AiConfig {
     /// Default provider: "groq", "anthropic", "openai", "gemini", "ollama"
     pub default_provider: Option<String>,
@@ -46,14 +47,6 @@ pub struct AiConfig {
     pub default_model: Option<String>,
 }
 
-impl Default for AiConfig {
-    fn default() -> Self {
-        Self {
-            default_provider: None, // Will fall back to Groq
-            default_model: None,
-        }
-    }
-}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FontConfig {
@@ -127,7 +120,7 @@ impl Config {
         Self::ensure_config_dir()?;
         let config_path = Self::config_path();
         let contents = toml::to_string_pretty(self)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+            .map_err(std::io::Error::other)?;
         std::fs::write(config_path, contents)
     }
 

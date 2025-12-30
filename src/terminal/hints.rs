@@ -278,6 +278,7 @@ impl HintsExtractor {
 }
 
 /// Hints mode state for overlay display
+#[derive(Default)]
 pub struct HintsMode {
     /// Whether hints mode is active
     pub active: bool,
@@ -291,17 +292,6 @@ pub struct HintsMode {
     pub type_filter: Option<HintType>,
 }
 
-impl Default for HintsMode {
-    fn default() -> Self {
-        Self {
-            active: false,
-            hints: Vec::new(),
-            filter: String::new(),
-            selected: None,
-            type_filter: None,
-        }
-    }
-}
 
 impl HintsMode {
     /// Create new hints mode
@@ -377,7 +367,7 @@ impl HintsMode {
                 let type_ok = self
                     .type_filter
                     .as_ref()
-                    .map_or(true, |t| &h.hint_type == t);
+                    .is_none_or(|t| &h.hint_type == t);
                 let label_ok = self.filter.is_empty() || h.label.starts_with(&self.filter);
                 type_ok && label_ok
             })

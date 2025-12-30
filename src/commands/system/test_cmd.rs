@@ -41,7 +41,7 @@ fn evaluate_expression(args: &[String], state: &TerminalState) -> Result<bool> {
 
     // Handle negation
     if args[0] == "!" {
-        return Ok(!evaluate_expression(&args[1..].to_vec(), state)?);
+        return Ok(!evaluate_expression(&args[1..], state)?);
     }
 
     // Unary operators
@@ -150,7 +150,7 @@ fn is_writable(path: &Path) -> bool {
     } else {
         // Check if parent is writable
         path.parent()
-            .map(|p| is_writable(p))
+            .map(is_writable)
             .unwrap_or(false)
     }
 }

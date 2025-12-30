@@ -160,7 +160,7 @@ impl TerminalGrid {
     fn process_byte(&mut self, byte: u8) {
         // Handle UTF-8 continuation bytes
         if self.is_collecting_utf8() {
-            if byte >= 0x80 && byte < 0xC0 {
+            if (0x80..0xC0).contains(&byte) {
                 // Continuation byte
                 self.utf8_buffer.push(byte);
                 let expected_len = Self::utf8_char_len(self.utf8_buffer[0]);
@@ -260,7 +260,7 @@ impl TerminalGrid {
                 self.escape_buffer.push(byte);
 
                 // Check if this is the final byte of the sequence
-                if byte >= 0x40 && byte <= 0x7e {
+                if (0x40..=0x7e).contains(&byte) {
                     self.handle_csi();
                     self.parser_state = ParserState::Normal;
                 } else {
@@ -298,7 +298,7 @@ impl TerminalGrid {
 
         // Parse parameters (semicolon-separated numbers)
         let params: Vec<usize> = params_str
-            .split(|c| c == ';' || c == ':')
+            .split([';', ':'])
             .filter_map(|s| s.trim_start_matches('?').parse().ok())
             .collect();
 

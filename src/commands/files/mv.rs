@@ -72,11 +72,10 @@ RELATED COMMANDS:
         let sources: Vec<_> = paths.iter().map(|p| state.resolve_path(p)).collect();
 
         // Multiple sources -> dest must be a directory
-        if sources.len() > 1 {
-            if !dest.is_dir() {
+        if sources.len() > 1
+            && !dest.is_dir() {
                 return Err(anyhow::anyhow!("Target must be a directory when moving multiple files"));
             }
-        }
 
         for source in sources {
             if !source.exists() {

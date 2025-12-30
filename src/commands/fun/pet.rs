@@ -99,9 +99,10 @@ Try: fortune, cowsay, neofetch, coffee ♪(´ε` )
 
         // Build cute output
         let mut output = String::new();
-        output.push_str("\n");
+        output.push('\n');
         output.push_str("  ╭─────────────────────────────╮\n");
-        output.push_str(&format!("  │ {}│\n", format!("{:<27}", response.chars().take(27).collect::<String>())));
+        let response_text: String = response.chars().take(27).collect();
+        output.push_str(&format!("  │ {:<27}│\n", response_text));
         output.push_str("  ╰─────────────────────────────╯\n");
         output.push_str("         \\   \n");
         output.push_str("          \\  \n");

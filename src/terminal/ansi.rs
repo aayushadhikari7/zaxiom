@@ -32,6 +32,7 @@ static ANSI_ALL_REGEX: Lazy<Regex> = Lazy::new(|| {
 
 /// A text segment with optional ANSI styling
 #[derive(Clone, Debug)]
+#[derive(Default)]
 pub struct StyledSegment {
     /// The text content
     pub text: String,
@@ -47,18 +48,6 @@ pub struct StyledSegment {
     pub underline: bool,
 }
 
-impl Default for StyledSegment {
-    fn default() -> Self {
-        Self {
-            text: String::new(),
-            fg_color: None,
-            bg_color: None,
-            bold: false,
-            italic: false,
-            underline: false,
-        }
-    }
-}
 
 /// Current styling state while parsing
 #[derive(Clone, Debug, Default)]

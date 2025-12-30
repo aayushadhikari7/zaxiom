@@ -222,10 +222,10 @@ fn parse_awk_program(program: &str) -> Result<(Option<String>, Option<String>)> 
     }
 
     // Pattern and action: /regex/ {action}
-    if program.starts_with('/') {
-        if let Some(end_pattern) = program[1..].find('/') {
-            let pattern = &program[1..end_pattern+1];
-            let rest = program[end_pattern+2..].trim();
+    if let Some(after_slash) = program.strip_prefix('/') {
+        if let Some(end_pattern) = after_slash.find('/') {
+            let pattern = &after_slash[..end_pattern];
+            let rest = after_slash[end_pattern+1..].trim();
 
             if rest.starts_with('{') && rest.ends_with('}') {
                 let action = &rest[1..rest.len()-1];
@@ -243,8 +243,8 @@ fn execute_awk_action(action: &str, line: &str, fields: &[&str], nr: usize, nf: 
     let action = action.trim();
 
     // Handle print statements
-    if action.starts_with("print") {
-        let args = action[5..].trim();
+    if let Some(args) = action.strip_prefix("print") {
+        let args = args.trim();
 
         if args.is_empty() {
             return Ok(line.to_string());
@@ -277,8 +277,7 @@ fn evaluate_awk_expression(expr: &str, line: &str, fields: &[&str], nr: usize, n
     }
 
     // Field reference $N
-    if expr.starts_with('$') {
-        let field_num = &expr[1..];
+    if let Some(field_num) = expr.strip_prefix('$') {
         if field_num == "0" {
             return Ok(line.to_string());
         }

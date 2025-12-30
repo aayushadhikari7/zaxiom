@@ -461,7 +461,7 @@ impl SmartHistory {
         self.entries
             .iter()
             .rev()
-            .filter(|e| e.exit_code.map_or(false, |c| c != 0))
+            .filter(|e| e.exit_code.is_some_and(|c| c != 0))
             .take(limit)
             .collect()
     }
@@ -518,7 +518,7 @@ impl SmartHistory {
         let failed = self
             .entries
             .iter()
-            .filter(|e| e.exit_code.map_or(false, |c| c != 0))
+            .filter(|e| e.exit_code.is_some_and(|c| c != 0))
             .count();
         let unique = self.frequency.len();
 

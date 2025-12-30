@@ -169,7 +169,7 @@ impl OutputBuffer {
 
     /// Get the last block's duration formatted as a string
     pub fn last_block_duration(&self) -> Option<String> {
-        self.blocks.last().and_then(|b| b.duration).map(|d| format_duration(d))
+        self.blocks.last().and_then(|b| b.duration).map(format_duration)
     }
 
     /// Get all command blocks

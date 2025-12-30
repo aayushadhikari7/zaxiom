@@ -87,7 +87,7 @@ fn extract_strings(data: &[u8], min_length: usize) -> Vec<String> {
     let mut current = String::new();
 
     for &byte in data {
-        if byte >= 0x20 && byte < 0x7f {
+        if (0x20..0x7f).contains(&byte) {
             current.push(byte as char);
         } else {
             if current.len() >= min_length {

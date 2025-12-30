@@ -161,12 +161,10 @@ fn format_entry(path: &Path, long_format: bool) -> String {
         let type_char = if is_dir { "d" } else { "-" };
 
         format!("{} {:>8} {} {} {}", type_char, size, modified, icon, name)
+    } else if is_dir {
+        format!("{} {}/", icon, name)
     } else {
-        if is_dir {
-            format!("{} {}/", icon, name)
-        } else {
-            format!("{} {}", icon, name)
-        }
+        format!("{} {}", icon, name)
     }
 }
 

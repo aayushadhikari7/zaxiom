@@ -147,7 +147,7 @@ RELATED COMMANDS:
             let should_highlight = !no_syntax && (force_syntax || {
                 path.extension()
                     .and_then(|e| e.to_str())
-                    .map(|ext| syntax::is_supported(ext))
+                    .map(syntax::is_supported)
                     .unwrap_or(false)
             });
 

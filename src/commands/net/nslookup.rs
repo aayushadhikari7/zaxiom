@@ -30,7 +30,7 @@ impl Command for NslookupCommand {
         let hostname = &args[0];
         let mut output = Vec::new();
 
-        output.push(format!("Server:  (system resolver)"));
+        output.push("Server:  (system resolver)".to_string());
         output.push(String::new());
         output.push(format!("Name:    {}", hostname));
 

@@ -9,6 +9,7 @@ use std::path::Path;
 
 /// Detected project type
 #[derive(Clone, Debug, PartialEq)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum ProjectType {
     /// Rust project (Cargo.toml)
     Rust,

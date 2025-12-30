@@ -34,8 +34,8 @@ fn read_git_branch(git_dir: &Path) -> Option<String> {
     let head = head_content.trim();
 
     // Check if it's a ref
-    if head.starts_with("ref: refs/heads/") {
-        let branch = &head[16..]; // Skip "ref: refs/heads/"
+    if let Some(branch) = head.strip_prefix("ref: refs/heads/") {
+        // Skip "ref: refs/heads/"
         return Some(branch.to_string());
     }
 

@@ -34,7 +34,7 @@ impl Command for YesCommand {
         };
 
         // Limit output to prevent hanging
-        let lines: Vec<&str> = std::iter::repeat(text.as_str()).take(100).collect();
+        let lines: Vec<&str> = std::iter::repeat_n(text.as_str(), 100).collect();
         Ok(lines.join("\n"))
     }
 }

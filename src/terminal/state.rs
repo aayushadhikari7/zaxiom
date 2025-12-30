@@ -159,8 +159,8 @@ impl TerminalState {
         }
 
         // Handle ~ prefix
-        if path.starts_with("~/") {
-            return self.home.join(&path[2..]);
+        if let Some(stripped) = path.strip_prefix("~/") {
+            return self.home.join(stripped);
         }
 
         // Handle Git Bash style /c/path -> C:\path

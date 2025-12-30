@@ -38,7 +38,7 @@ impl Command for CalCommand {
             _ => {
                 let m: u32 = args[0].parse().map_err(|_| anyhow::anyhow!("cal: invalid month"))?;
                 let y: i32 = args[1].parse().map_err(|_| anyhow::anyhow!("cal: invalid year"))?;
-                if m < 1 || m > 12 {
+                if !(1..=12).contains(&m) {
                     return Err(anyhow::anyhow!("cal: month must be 1-12"));
                 }
                 (y, m)
@@ -77,12 +77,13 @@ fn render_calendar(year: i32, month: u32, today: NaiveDate) -> String {
         let is_today = year == today.year() && month == today.month() && day == today.day();
 
         if is_today {
-            line.push_str(&format!("{:>2} ", day));
+            // Highlight today with ANSI inverse
+            line.push_str(&format!("\x1b[7m{:>2}\x1b[0m ", day));
         } else {
             line.push_str(&format!("{:>2} ", day));
         }
 
-        if (start_weekday + day) % 7 == 0 {
+        if (start_weekday + day).is_multiple_of(7) {
             output.push(line.trim_end().to_string());
             line = String::new();
         }

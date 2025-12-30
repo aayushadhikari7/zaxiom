@@ -90,11 +90,10 @@ impl Command for TypeCommand {
                 } else {
                     output.push(format!("{} is {}", name, path));
                 }
-            } else if output.is_empty() || output.last().map(|s| !s.contains(name)).unwrap_or(true) {
-                if !type_only {
+            } else if (output.is_empty() || output.last().map(|s| !s.contains(name)).unwrap_or(true))
+                && !type_only {
                     output.push(format!("{}: not found", name));
                 }
-            }
         }
 
         Ok(output.join("\n"))

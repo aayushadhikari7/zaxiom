@@ -95,7 +95,7 @@ impl Mascot {
         }
 
         // Random blinking
-        if !self.is_blinking && self.frame % 120 == 0 && self.rand_bool(0.4) {
+        if !self.is_blinking && self.frame.is_multiple_of(120) && self.rand_bool(0.4) {
             self.is_blinking = true;
             self.blink_until = Instant::now() + Duration::from_millis(100);
         }

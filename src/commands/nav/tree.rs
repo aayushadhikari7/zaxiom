@@ -146,6 +146,7 @@ RELATED COMMANDS:
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn print_tree(
     path: &std::path::Path,
     prefix: &str,

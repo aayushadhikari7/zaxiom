@@ -118,7 +118,7 @@ RELATED COMMANDS:
 
         // Determine output filename
         let filename = output_file.unwrap_or_else(|| {
-            url.split('/').last()
+            url.split('/').next_back()
                 .filter(|s| !s.is_empty())
                 .unwrap_or("index.html")
                 .to_string()

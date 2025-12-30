@@ -222,3 +222,5 @@ Stay tuned for more updates and features! This project is actively developed and
 ## 📄 License
 
 [MIT](LICENSE) — Built with 🦀 Rust + egui
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.

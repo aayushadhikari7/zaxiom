@@ -263,7 +263,7 @@ impl Autocomplete {
                     let long_flag = if long.starts_with('-') { long.to_string() } else { format!("--{}", long) };
                     if long_flag.starts_with(prefix) || (prefix == "-" && !long.starts_with('-')) {
                         suggestions.push(Suggestion {
-                            text: if long.starts_with('-') { long.to_string() } else { long.to_string() },
+                            text: long.to_string(),
                             kind: SuggestionKind::Flag,
                             description: Some(flag.description.to_string()),
                         });
@@ -351,12 +351,10 @@ impl Autocomplete {
                             path.push('/');
                         }
                         path
+                    } else if is_dir {
+                        format!("{}/", name)
                     } else {
-                        if is_dir {
-                            format!("{}/", name)
-                        } else {
-                            name.clone()
-                        }
+                        name.clone()
                     };
 
                     suggestions.push(Suggestion {

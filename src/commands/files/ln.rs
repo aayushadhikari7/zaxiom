@@ -41,8 +41,8 @@ impl Command for LnCommand {
             return Err(anyhow::anyhow!("ln: missing operands\nUsage: ln [-s] <target> <link_name>"));
         }
 
-        let target = state.resolve_path(&paths[0]);
-        let link_name = state.resolve_path(&paths[1]);
+        let target = state.resolve_path(paths[0]);
+        let link_name = state.resolve_path(paths[1]);
 
         if symbolic {
             #[cfg(windows)]

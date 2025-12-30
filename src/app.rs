@@ -891,7 +891,7 @@ impl ZaxiomApp {
                 if let Some(block) = pane.buffer.blocks().last() {
                     if let Some(dur) = block.duration {
                         if dur.as_millis() >= 100 {
-                            let status_icon = if success { "" } else { "" };
+                            let status_icon = if success { "✓" } else { "✗" };
                             pane.buffer.push_line(&format!(
                                 " {} completed in {}",
                                 status_icon, duration_str
@@ -1598,9 +1598,7 @@ impl eframe::App for ZaxiomApp {
                         if i.key_pressed(egui::Key::Num4) { vi_key_char = Some('$'); }
                         if i.key_pressed(egui::Key::Num6) { vi_key_char = Some('^'); }
                         if i.key_pressed(egui::Key::Slash) { vi_key_char = Some('?'); }
-                    } else {
-                        if i.key_pressed(egui::Key::Slash) { vi_key_char = Some('/'); }
-                    }
+                    } else if i.key_pressed(egui::Key::Slash) { vi_key_char = Some('/'); }
                 }
             }
             // Ctrl+1-9: Switch to specific tab
@@ -2330,7 +2328,7 @@ impl eframe::App for ZaxiomApp {
                         .stroke(egui::Stroke::new(2.0, palette_accent))
                         .corner_radius(egui::CornerRadius::same(8))
                         .inner_margin(egui::Margin::same(12))
-                        .shadow(egui::epaint::Shadow { spread: 8, blur: 16, color: egui::Color32::from_black_alpha(120), offset: [0, 4].into() })
+                        .shadow(egui::epaint::Shadow { spread: 8, blur: 16, color: egui::Color32::from_black_alpha(120), offset: [0, 4] })
                         .show(ui, |ui| {
                             ui.set_min_width(400.0);
                             ui.set_max_width(500.0);
@@ -2413,7 +2411,7 @@ impl eframe::App for ZaxiomApp {
                             .stroke(egui::Stroke::new(2.0, fuzzy_accent))
                             .corner_radius(egui::CornerRadius::same(8))
                             .inner_margin(egui::Margin::same(12))
-                            .shadow(egui::epaint::Shadow { spread: 8, blur: 16, color: egui::Color32::from_black_alpha(120), offset: [0, -4].into() })
+                            .shadow(egui::epaint::Shadow { spread: 8, blur: 16, color: egui::Color32::from_black_alpha(120), offset: [0, -4] })
                             .show(ui, |ui| {
                                 ui.set_min_width(500.0);
                                 ui.set_max_width(600.0);
@@ -2498,7 +2496,7 @@ impl eframe::App for ZaxiomApp {
 
                                     // Status (match count)
                                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                        ui.add(egui::Label::new(egui::RichText::new(&pane.fuzzy_finder.status_text())
+                                        ui.add(egui::Label::new(egui::RichText::new(pane.fuzzy_finder.status_text())
                                             .color(fuzzy_comment).size(11.0).monospace()));
                                     });
                                 });
@@ -2960,16 +2958,14 @@ impl eframe::App for ZaxiomApp {
             .map(|p| p.show_suggestions)
             .unwrap_or(false);
 
-        if has_suggestions {
-            if ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Tab)) {
+        if has_suggestions
+            && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Tab)) {
                 apply_suggestion = true;
             }
-        }
-        if showing_suggestions {
-            if ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Escape)) {
+        if showing_suggestions
+            && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Escape)) {
                 close_suggestions = true;
             }
-        }
 
         // Get focused pane ID for central panel
         let focused_pane_id = self.tabs[self.active_tab].splits.focused_pane_id();
@@ -3353,7 +3349,7 @@ impl eframe::App for ZaxiomApp {
                                     spread: 8,
                                     blur: 16,
                                     color: egui::Color32::from_black_alpha(100),
-                                    offset: [0, 4].into(),
+                                    offset: [0, 4],
                                 })
                                 .show(ui, |ui| {
                                     ui.set_min_width(400.0);
@@ -3590,7 +3586,7 @@ impl eframe::App for ZaxiomApp {
                                 .stroke(egui::Stroke::new(1.0, vi_accent))
                                 .corner_radius(egui::CornerRadius::same(6))
                                 .inner_margin(egui::Margin::same(12))
-                                .shadow(egui::epaint::Shadow { spread: 4, blur: 8, color: egui::Color32::from_black_alpha(80), offset: [0, 2].into() })
+                                .shadow(egui::epaint::Shadow { spread: 4, blur: 8, color: egui::Color32::from_black_alpha(80), offset: [0, 2] })
                                 .show(ui, |ui| {
                                     ui.set_min_width(200.0);
                                     ui.horizontal(|ui| {
@@ -3732,11 +3728,10 @@ impl eframe::App for ZaxiomApp {
                             let has_suggestions = !pane.suggestions.is_empty();
 
                             // Tab: apply suggestion (consume to prevent focus change)
-                            if ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Tab)) {
-                                if has_suggestions {
+                            if ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Tab))
+                                && has_suggestions {
                                     apply_suggestion = true;
                                 }
-                            }
 
                             // Up/Down: navigate suggestions or history
                             if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) {
@@ -3755,11 +3750,10 @@ impl eframe::App for ZaxiomApp {
                             }
 
                             // Escape: close suggestions
-                            if ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Escape)) {
-                                if pane.show_suggestions {
+                            if ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Escape))
+                                && pane.show_suggestions {
                                     close_suggestions = true;
                                 }
-                            }
                         }
 
                             // Keep focus on input
@@ -3936,7 +3930,7 @@ impl eframe::App for ZaxiomApp {
 
         // Increment frame counter and autosave periodically (every ~5 seconds at 60fps = 300 frames)
         self.frame_count += 1;
-        if self.frame_count % 300 == 0 {
+        if self.frame_count.is_multiple_of(300) {
             self.autosave();
         }
 

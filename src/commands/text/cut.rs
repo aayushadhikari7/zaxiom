@@ -173,10 +173,8 @@ fn parse_range(spec: &str) -> Result<Vec<usize>> {
                 let end: usize = range_parts[1].parse().unwrap_or(1000);
                 indices.extend(start..=end);
             }
-        } else {
-            if let Ok(n) = part.parse::<usize>() {
-                indices.push(n);
-            }
+        } else if let Ok(n) = part.parse::<usize>() {
+            indices.push(n);
         }
     }
 

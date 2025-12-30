@@ -60,7 +60,7 @@ fn evaluate_bc(expr: &str) -> Result<String> {
 
     // Remove any scale setting
     let expr = if expr.starts_with("scale") {
-        expr.split(';').last().unwrap_or(expr).trim()
+        expr.split(';').next_back().unwrap_or(expr).trim()
     } else {
         expr
     };

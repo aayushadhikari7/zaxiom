@@ -78,20 +78,20 @@ impl Command for TimeoutCommand {
 fn parse_duration(s: &str) -> Result<Duration> {
     let s = s.trim();
 
-    if s.ends_with('s') {
-        let n: f64 = s[..s.len()-1].parse()
+    if let Some(n) = s.strip_suffix('s') {
+        let n: f64 = n.parse()
             .map_err(|_| anyhow::anyhow!("timeout: invalid duration"))?;
         return Ok(Duration::from_secs_f64(n));
     }
 
-    if s.ends_with('m') {
-        let n: f64 = s[..s.len()-1].parse()
+    if let Some(n) = s.strip_suffix('m') {
+        let n: f64 = n.parse()
             .map_err(|_| anyhow::anyhow!("timeout: invalid duration"))?;
         return Ok(Duration::from_secs_f64(n * 60.0));
     }
 
-    if s.ends_with('h') {
-        let n: f64 = s[..s.len()-1].parse()
+    if let Some(n) = s.strip_suffix('h') {
+        let n: f64 = n.parse()
             .map_err(|_| anyhow::anyhow!("timeout: invalid duration"))?;
         return Ok(Duration::from_secs_f64(n * 3600.0));
     }

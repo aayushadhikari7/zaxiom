@@ -4,6 +4,8 @@
 
 **A modern terminal for Windows, built in Rust**
 
+[![GitHub release](https://img.shields.io/github/v/release/aayushadhikari7/zaxiom?style=flat-square&color=green)](https://github.com/aayushadhikari7/zaxiom/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/aayushadhikari7/zaxiom/total?style=flat-square)](https://github.com/aayushadhikari7/zaxiom/releases)
 [![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-b7410e?style=flat-square&logo=rust)](https://www.rust-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 [![Windows](https://img.shields.io/badge/Platform-Windows-0078D6?style=flat-square&logo=windows)](https://github.com/aayushadhikari7/zaxiom)

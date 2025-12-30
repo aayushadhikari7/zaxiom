@@ -15,10 +15,11 @@ $ErrorActionPreference = "Stop"
 $AppName = "Zaxiom"
 $ExeName = "zaxiom.exe"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$BuildExe = Join-Path $ScriptDir "target\release\$ExeName"
+$RepoRoot = Split-Path -Parent $ScriptDir
+$BuildExe = Join-Path $RepoRoot "target\release\$ExeName"
 $InstallDir = Join-Path $env:LOCALAPPDATA $AppName
 $InstalledExe = Join-Path $InstallDir $ExeName
-$IconSource = Join-Path $ScriptDir "assets\icon.ico"
+$IconSource = Join-Path $RepoRoot "assets\icon.ico"
 $InstalledIcon = Join-Path $InstallDir "icon.ico"
 
 function Write-Success { param($Message) Write-Host $Message -ForegroundColor Green }
@@ -72,7 +73,7 @@ function Build-Project {
     Write-Info "Building $AppName release..."
     Write-Host "  This may take a minute on first build..." -ForegroundColor Gray
 
-    Push-Location $ScriptDir
+    Push-Location $RepoRoot
     try {
         & cargo build --release
         if ($LASTEXITCODE -ne 0) {
@@ -264,7 +265,7 @@ function Start-Installation {
         Write-Host "    - Desktop shortcut" -ForegroundColor Gray
     }
     Write-Host ""
-    Write-Host "  To uninstall: .\install.ps1 -Uninstall" -ForegroundColor Gray
+    Write-Host "  To uninstall: .\run\install.ps1 -Uninstall" -ForegroundColor Gray
     Write-Host ""
 
     if (-not $Silent) {

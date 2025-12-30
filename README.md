@@ -38,17 +38,34 @@ Most Windows terminals feel clunky or lack proper Unix-style tooling. Zaxiom bri
 
 ## 🚀 Quick Start
 
+### Using Make (cross-platform)
+
+```bash
+git clone https://github.com/aayushadhikari7/zaxiom
+cd zaxiom
+make release      # Build optimized binary
+make install      # Windows: install to system with shortcuts
+```
+
+### Using PowerShell (Windows)
+
 ```powershell
 git clone https://github.com/aayushadhikari7/zaxiom
 cd zaxiom
-.\install.ps1
+.\run\install.ps1
 ```
 
-Or build manually:
+### Available Make Commands
 
-```bash
-cargo build --release
-```
+| Command | Description |
+|---------|-------------|
+| `make build` | Debug build |
+| `make release` | Optimized release build |
+| `make run` | Build and run |
+| `make install` | Install to system (Windows) |
+| `make update` | Rebuild and update installed version |
+| `make ci` | Run all checks (fmt, lint, test) |
+| `make help` | Show all commands |
 
 ---
 
@@ -137,13 +154,18 @@ Enable kawaii mode for extra flair: `theme --kawaii` ✨
 ## 🏗️ Architecture
 
 ```
-src/
-├── app.rs           # Main application and UI
-├── pty/             # PTY session, terminal grid, ANSI parsing
-├── terminal/        # Buffer, history, autocomplete, splits
-├── shell/           # Parser and executor
-├── commands/        # Built-in command implementations
-└── config/          # Themes and settings
+zaxiom/
+├── src/
+│   ├── app.rs           # Main application and UI
+│   ├── pty/             # PTY session, terminal grid, ANSI parsing
+│   ├── terminal/        # Buffer, history, autocomplete, splits
+│   ├── shell/           # Parser and executor
+│   ├── commands/        # Built-in command implementations
+│   └── config/          # Themes and settings
+├── run/
+│   ├── install.ps1      # Windows installer script
+│   └── update.ps1       # Quick update script
+└── Makefile             # Cross-platform build commands
 ```
 
 ---

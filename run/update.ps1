@@ -5,7 +5,8 @@ $ErrorActionPreference = "Stop"
 
 $AppName = "Zaxiom"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$BuildExe = Join-Path $ScriptDir "target\release\zaxiom.exe"
+$RepoRoot = Split-Path -Parent $ScriptDir
+$BuildExe = Join-Path $RepoRoot "target\release\zaxiom.exe"
 $InstallDir = Join-Path $env:LOCALAPPDATA $AppName
 $InstalledExe = Join-Path $InstallDir "zaxiom.exe"
 
@@ -15,7 +16,7 @@ Write-Host ""
 
 # Build
 Write-Host "  [1/2] Building..." -ForegroundColor Yellow
-Push-Location $ScriptDir
+Push-Location $RepoRoot
 & cargo build --release
 $exitCode = $LASTEXITCODE
 Pop-Location

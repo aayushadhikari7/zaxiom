@@ -1,6 +1,6 @@
 //! mktemp command - create temporary file or directory
 
-use std::fs::{File, create_dir};
+use std::fs::{create_dir, File};
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -53,7 +53,11 @@ impl Command for MktempCommand {
         // Generate unique name
         let prefix = template.unwrap_or(if make_dir { "tmp.dir" } else { "tmp.file" });
         let unique_suffix = generate_random_suffix();
-        let name = format!("{}.{}", prefix.replace("XXXXXX", &unique_suffix), unique_suffix);
+        let name = format!(
+            "{}.{}",
+            prefix.replace("XXXXXX", &unique_suffix),
+            unique_suffix
+        );
 
         let path = base.join(&name);
 

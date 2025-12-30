@@ -48,7 +48,10 @@ impl Command for IfconfigCommand {
                     .replace("Wireless LAN adapter ", "wlan")
                     .replace(":", "")
                     .replace(" ", "_");
-                result.push(format!("\n{}: flags=<UP,BROADCAST,RUNNING>", current_interface));
+                result.push(format!(
+                    "\n{}: flags=<UP,BROADCAST,RUNNING>",
+                    current_interface
+                ));
             } else if line.starts_with("IPv4 Address") {
                 if let Some(ip) = line.split(':').nth(1) {
                     result.push(format!("        inet {}  netmask 255.255.255.0", ip.trim()));

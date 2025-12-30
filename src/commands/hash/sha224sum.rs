@@ -1,8 +1,8 @@
 //! sha224sum command - compute SHA224 message digest
 
-use std::fs;
 use anyhow::Result;
-use sha2::{Sha224, Digest};
+use sha2::{Digest, Sha224};
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -36,7 +36,8 @@ impl Command for Sha224sumCommand {
         for arg in args {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: sha224sum <file> [file2...]\n\
-                    Compute SHA224 message digest for files.".to_string());
+                    Compute SHA224 message digest for files."
+                    .to_string());
             }
 
             if arg.starts_with('-') {
@@ -44,8 +45,8 @@ impl Command for Sha224sumCommand {
             }
 
             let path = state.resolve_path(arg);
-            let content = fs::read(&path)
-                .map_err(|e| anyhow::anyhow!("sha224sum: {}: {}", arg, e))?;
+            let content =
+                fs::read(&path).map_err(|e| anyhow::anyhow!("sha224sum: {}: {}", arg, e))?;
 
             let mut hasher = Sha224::new();
             hasher.update(&content);
@@ -57,7 +58,12 @@ impl Command for Sha224sumCommand {
         Ok(output.join("\n"))
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         if let Some(input) = stdin {
             let mut hasher = Sha224::new();
             hasher.update(input.as_bytes());

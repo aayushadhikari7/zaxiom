@@ -60,14 +60,16 @@ RELATED COMMANDS:
   whoami     Current username
   uname      System information
   neofetch   System info with style
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
         for arg in args {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: hostname\n\
-                    Show the system's host name.".to_string());
+                    Show the system's host name."
+                    .to_string());
             }
         }
 

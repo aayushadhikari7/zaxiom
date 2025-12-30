@@ -3,10 +3,10 @@
 //! Runs LLMs locally via Ollama server.
 //! No API key needed - uses localhost:11434.
 
+use super::provider::AiProvider;
 use anyhow::{anyhow, Result};
 use std::io::{BufRead, BufReader};
 use std::process::Command;
-use super::provider::AiProvider;
 
 const OLLAMA_API: &str = "http://localhost:11434";
 const DEFAULT_MODEL: &str = "llama3.2";
@@ -80,7 +80,8 @@ impl OllamaProvider {
             .send()
             .map_err(|e| anyhow!("Failed to connect to Ollama: {}", e))?;
 
-        let json: serde_json::Value = resp.json()
+        let json: serde_json::Value = resp
+            .json()
             .map_err(|e| anyhow!("Failed to parse response: {}", e))?;
 
         let models: Vec<String> = json["models"]
@@ -98,7 +99,14 @@ impl OllamaProvider {
         let models = Self::list_models()?;
 
         // Prefer these models in order
-        let preferred = ["llama3.2", "llama3.1", "llama3", "mistral", "codellama", "llama2"];
+        let preferred = [
+            "llama3.2",
+            "llama3.1",
+            "llama3",
+            "mistral",
+            "codellama",
+            "llama2",
+        ];
 
         for pref in preferred {
             if let Some(model) = models.iter().find(|m| m.starts_with(pref)) {
@@ -106,9 +114,10 @@ impl OllamaProvider {
             }
         }
 
-        models.into_iter().next().ok_or_else(|| {
-            anyhow!("No models installed. Run: ollama pull llama3.2")
-        })
+        models
+            .into_iter()
+            .next()
+            .ok_or_else(|| anyhow!("No models installed. Run: ollama pull llama3.2"))
     }
 
     /// Pull a model
@@ -161,8 +170,8 @@ impl OllamaProvider {
                 continue;
             }
 
-            let json: serde_json::Value = serde_json::from_str(&line)
-                .map_err(|e| anyhow!("Failed to parse JSON: {}", e))?;
+            let json: serde_json::Value =
+                serde_json::from_str(&line).map_err(|e| anyhow!("Failed to parse JSON: {}", e))?;
 
             if let Some(text) = json["response"].as_str() {
                 on_chunk(text);
@@ -241,7 +250,8 @@ impl AiProvider for OllamaProvider {
             .send()
             .map_err(|e| anyhow!("Failed to send request: {}", e))?;
 
-        let json: serde_json::Value = resp.json()
+        let json: serde_json::Value = resp
+            .json()
             .map_err(|e| anyhow!("Failed to parse response: {}", e))?;
 
         json["response"]

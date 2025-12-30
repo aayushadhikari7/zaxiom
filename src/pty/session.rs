@@ -46,7 +46,13 @@ impl PtySession {
     }
 
     /// Create a new PTY session with a specific command and arguments
-    pub fn new_with_command(program: &str, args: &[String], rows: u16, cols: u16, cwd: &Path) -> Result<Self> {
+    pub fn new_with_command(
+        program: &str,
+        args: &[String],
+        rows: u16,
+        cols: u16,
+        cwd: &Path,
+    ) -> Result<Self> {
         let size = PtySize {
             rows,
             cols,
@@ -58,9 +64,7 @@ impl PtySession {
         let pty_system = native_pty_system();
 
         // Open a new PTY with the specified size
-        let pair = pty_system
-            .openpty(size)
-            .context("Failed to open PTY")?;
+        let pair = pty_system.openpty(size).context("Failed to open PTY")?;
 
         // Build the command to spawn
         // Try to resolve the full path to the executable for better TTY handling
@@ -256,10 +260,7 @@ impl PtySession {
         use std::process::Command;
 
         // Try to find the command using 'where'
-        let output = Command::new("where")
-            .arg(program)
-            .output()
-            .ok()?;
+        let output = Command::new("where").arg(program).output().ok()?;
 
         if !output.status.success() {
             return None;
@@ -287,11 +288,12 @@ impl PtySession {
                         // Try to extract the path between quotes after %dp0%
                         if let Some(dp0_idx) = line.find("%dp0%") {
                             let after_dp0 = &line[dp0_idx + 5..]; // Skip "%dp0%"
-                            // Skip leading backslash if present
+                                                                  // Skip leading backslash if present
                             let after_dp0 = after_dp0.strip_prefix('\\').unwrap_or(after_dp0);
 
                             // Find the end of the path (quote, space before %*, or end of line)
-                            let end = after_dp0.find('"')
+                            let end = after_dp0
+                                .find('"')
                                 .or_else(|| after_dp0.find(" %"))
                                 .unwrap_or(after_dp0.len());
                             let script_rel = &after_dp0[..end];

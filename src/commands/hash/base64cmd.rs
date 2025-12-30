@@ -1,8 +1,8 @@
 //! base64 command - encode or decode base64
 
-use std::fs;
 use anyhow::Result;
-use base64::{Engine as _, engine::general_purpose};
+use base64::{engine::general_purpose, Engine as _};
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -70,7 +70,8 @@ NOTE:
 RELATED COMMANDS:
   xxd        Hex encoding
   uuencode   Unix-to-Unix encoding
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -83,7 +84,8 @@ RELATED COMMANDS:
                 "-h" | "--help" => {
                     return Ok("Usage: base64 [OPTIONS] <file>\n\
                         Options:\n  \
-                        -d    Decode base64 input".to_string());
+                        -d    Decode base64 input"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => file = Some(arg),
                 _ => {}
@@ -103,8 +105,8 @@ RELATED COMMANDS:
 
             Ok(String::from_utf8_lossy(&decoded).to_string())
         } else {
-            let content = fs::read(&path)
-                .map_err(|e| anyhow::anyhow!("base64: {}: {}", file, e))?;
+            let content =
+                fs::read(&path).map_err(|e| anyhow::anyhow!("base64: {}: {}", file, e))?;
 
             Ok(general_purpose::STANDARD.encode(&content))
         }

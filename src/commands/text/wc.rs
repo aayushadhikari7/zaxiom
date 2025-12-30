@@ -1,7 +1,7 @@
 //! wc command - word, line, character count
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -60,14 +60,20 @@ RELATED COMMANDS:
   head     First N lines
   tail     Last N lines
   cat      Display file
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut show_lines = false;
         let mut show_words = false;
         let mut show_chars = false;
@@ -86,7 +92,8 @@ RELATED COMMANDS:
                         -l    Print line count\n  \
                         -w    Print word count\n  \
                         -c    Print byte count\n  \
-                        -m    Print character count".to_string());
+                        -m    Print character count"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => files.push(arg),
                 _ => {}
@@ -109,10 +116,18 @@ RELATED COMMANDS:
                 let chars = input.chars().count();
 
                 let mut parts = Vec::new();
-                if show_lines { parts.push(format!("{:8}", lines)); }
-                if show_words { parts.push(format!("{:8}", words)); }
-                if show_bytes { parts.push(format!("{:8}", bytes)); }
-                if show_chars { parts.push(format!("{:8}", chars)); }
+                if show_lines {
+                    parts.push(format!("{:8}", lines));
+                }
+                if show_words {
+                    parts.push(format!("{:8}", words));
+                }
+                if show_bytes {
+                    parts.push(format!("{:8}", bytes));
+                }
+                if show_chars {
+                    parts.push(format!("{:8}", chars));
+                }
 
                 return Ok(parts.join(" "));
             } else {
@@ -128,8 +143,8 @@ RELATED COMMANDS:
 
         for file in &files {
             let path = state.resolve_path(file);
-            let content = fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("wc: {}: {}", file, e))?;
+            let content =
+                fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("wc: {}: {}", file, e))?;
 
             let lines = content.lines().count();
             let words = content.split_whitespace().count();
@@ -142,10 +157,18 @@ RELATED COMMANDS:
             total_chars += chars;
 
             let mut parts = Vec::new();
-            if show_lines { parts.push(format!("{:8}", lines)); }
-            if show_words { parts.push(format!("{:8}", words)); }
-            if show_bytes { parts.push(format!("{:8}", bytes)); }
-            if show_chars { parts.push(format!("{:8}", chars)); }
+            if show_lines {
+                parts.push(format!("{:8}", lines));
+            }
+            if show_words {
+                parts.push(format!("{:8}", words));
+            }
+            if show_bytes {
+                parts.push(format!("{:8}", bytes));
+            }
+            if show_chars {
+                parts.push(format!("{:8}", chars));
+            }
             parts.push((*file).to_string());
 
             output.push(parts.join(" "));
@@ -154,10 +177,18 @@ RELATED COMMANDS:
         // Show totals if multiple files
         if files.len() > 1 {
             let mut parts = Vec::new();
-            if show_lines { parts.push(format!("{:8}", total_lines)); }
-            if show_words { parts.push(format!("{:8}", total_words)); }
-            if show_bytes { parts.push(format!("{:8}", total_bytes)); }
-            if show_chars { parts.push(format!("{:8}", total_chars)); }
+            if show_lines {
+                parts.push(format!("{:8}", total_lines));
+            }
+            if show_words {
+                parts.push(format!("{:8}", total_words));
+            }
+            if show_bytes {
+                parts.push(format!("{:8}", total_bytes));
+            }
+            if show_chars {
+                parts.push(format!("{:8}", total_chars));
+            }
             parts.push("total".to_string());
             output.push(parts.join(" "));
         }

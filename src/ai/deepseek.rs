@@ -2,8 +2,8 @@
 //!
 //! Access to DeepSeek models - excellent for coding tasks.
 
-use anyhow::{anyhow, Result};
 use super::provider::AiProvider;
+use anyhow::{anyhow, Result};
 
 const DEEPSEEK_API_URL: &str = "https://api.deepseek.com/v1/chat/completions";
 const ENV_KEY: &str = "DEEPSEEK_API_KEY";
@@ -49,14 +49,12 @@ impl AiProvider for DeepSeekProvider {
     }
 
     fn models(&self) -> Vec<&'static str> {
-        vec![
-            "deepseek-chat",
-            "deepseek-reasoner",
-        ]
+        vec!["deepseek-chat", "deepseek-reasoner"]
     }
 
     fn chat(&self, prompt: &str, model: Option<&str>) -> Result<String> {
-        let api_key = self.get_or_prompt_api_key()
+        let api_key = self
+            .get_or_prompt_api_key()
             .ok_or_else(|| anyhow!("{}", self.get_setup_instructions()))?;
 
         let model = model.unwrap_or(DEFAULT_MODEL);
@@ -83,7 +81,8 @@ impl AiProvider for DeepSeekProvider {
             return Err(anyhow!("DeepSeek API error ({}): {}", status, body));
         }
 
-        let json: serde_json::Value = response.json()
+        let json: serde_json::Value = response
+            .json()
             .map_err(|e| anyhow!("Failed to parse DeepSeek response: {}", e))?;
 
         json["choices"][0]["message"]["content"]

@@ -1,8 +1,8 @@
 //! sleep command - delay for a specified time
 
+use anyhow::Result;
 use std::thread;
 use std::time::Duration;
-use anyhow::Result;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -34,7 +34,8 @@ impl Command for SleepCommand {
                     s    seconds (default)\n  \
                     m    minutes\n  \
                     h    hours\n  \
-                    d    days".to_string());
+                    d    days"
+                    .to_string());
             }
         }
 
@@ -42,18 +43,19 @@ impl Command for SleepCommand {
 
         for arg in args {
             let (num_str, suffix) = if arg.ends_with('s') {
-                (&arg[..arg.len()-1], 1.0)
+                (&arg[..arg.len() - 1], 1.0)
             } else if arg.ends_with('m') {
-                (&arg[..arg.len()-1], 60.0)
+                (&arg[..arg.len() - 1], 60.0)
             } else if arg.ends_with('h') {
-                (&arg[..arg.len()-1], 3600.0)
+                (&arg[..arg.len() - 1], 3600.0)
             } else if arg.ends_with('d') {
-                (&arg[..arg.len()-1], 86400.0)
+                (&arg[..arg.len() - 1], 86400.0)
             } else {
                 (arg.as_str(), 1.0)
             };
 
-            let num: f64 = num_str.parse()
+            let num: f64 = num_str
+                .parse()
                 .map_err(|_| anyhow::anyhow!("sleep: invalid time interval '{}'", arg))?;
 
             total_secs += num * suffix;

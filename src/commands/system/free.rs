@@ -35,7 +35,8 @@ impl Command for FreeCommand {
                         Options:\n  \
                         -h    Human-readable output\n  \
                         -m    Show output in megabytes\n  \
-                        -g    Show output in gigabytes".to_string());
+                        -g    Show output in gigabytes"
+                        .to_string());
                 }
                 _ => {}
             }
@@ -43,12 +44,15 @@ impl Command for FreeCommand {
 
         // Get memory info via PowerShell
         let output = std::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command",
+            .args([
+                "-NoProfile",
+                "-Command",
                 "$os = Get-CimInstance Win32_OperatingSystem; \
                  $total = $os.TotalVisibleMemorySize * 1024; \
                  $free = $os.FreePhysicalMemory * 1024; \
                  $used = $total - $free; \
-                 \"$total,$used,$free\""])
+                 \"$total,$used,$free\"",
+            ])
             .output()?;
 
         if output.status.success() {
@@ -83,10 +87,15 @@ impl Command for FreeCommand {
                 };
 
                 let header = format!("{:>14} {:>14} {:>14}", "total", "used", "free");
-                let mem_line = format!("Mem: {:>10}{} {:>10}{} {:>10}{}",
-                    format_size(total), unit,
-                    format_size(used), unit,
-                    format_size(free), unit);
+                let mem_line = format!(
+                    "Mem: {:>10}{} {:>10}{} {:>10}{}",
+                    format_size(total),
+                    unit,
+                    format_size(used),
+                    unit,
+                    format_size(free),
+                    unit
+                );
 
                 Ok(format!("{}\n{}", header, mem_line))
             } else {

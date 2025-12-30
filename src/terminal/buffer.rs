@@ -5,14 +5,13 @@
 
 #![allow(dead_code)]
 
-use std::collections::VecDeque;
-use regex::Regex;
 use once_cell::sync::Lazy;
+use regex::Regex;
+use std::collections::VecDeque;
 
 /// Regex for detecting URLs in output
-static URL_REGEX: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r#"https?://[^\s<>"{}|\\^\[\]`]+"#).unwrap()
-});
+static URL_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r#"https?://[^\s<>"{}|\\^\[\]`]+"#).unwrap());
 
 /// Output buffer for terminal display
 pub struct OutputBuffer {
@@ -98,7 +97,8 @@ impl OutputBuffer {
 
     /// Detect URLs in a text string
     fn detect_urls(text: &str) -> Vec<UrlSpan> {
-        URL_REGEX.find_iter(text)
+        URL_REGEX
+            .find_iter(text)
             .map(|m| UrlSpan {
                 start: m.start(),
                 end: m.end(),
@@ -169,7 +169,10 @@ impl OutputBuffer {
 
     /// Get the last block's duration formatted as a string
     pub fn last_block_duration(&self) -> Option<String> {
-        self.blocks.last().and_then(|b| b.duration).map(format_duration)
+        self.blocks
+            .last()
+            .and_then(|b| b.duration)
+            .map(format_duration)
     }
 
     /// Get all command blocks
@@ -224,7 +227,8 @@ impl OutputBuffer {
     /// Search within buffer and return matching line indices
     pub fn search(&self, query: &str) -> Vec<usize> {
         let query_lower = query.to_lowercase();
-        self.lines.iter()
+        self.lines
+            .iter()
             .enumerate()
             .filter(|(_, line)| line.text.to_lowercase().contains(&query_lower))
             .map(|(idx, _)| idx)

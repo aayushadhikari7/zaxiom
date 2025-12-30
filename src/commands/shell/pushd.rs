@@ -59,7 +59,12 @@ impl Command for PushdCommand {
         // Show directory stack
         let stack = DIR_STACK.lock().unwrap();
         let mut dirs: Vec<String> = vec![target.display().to_string()];
-        dirs.extend(stack.iter().rev().map(|p: &PathBuf| p.display().to_string()));
+        dirs.extend(
+            stack
+                .iter()
+                .rev()
+                .map(|p: &PathBuf| p.display().to_string()),
+        );
 
         Ok(dirs.join(" "))
     }

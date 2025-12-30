@@ -89,7 +89,8 @@ impl ThemeCommand {
         for theme in ThemeName::all() {
             if !theme.is_light() {
                 let marker = if *theme == current { " ◀" } else { "" };
-                output.push_str(&format!("  {:20} {}{}\n",
+                output.push_str(&format!(
+                    "  {:20} {}{}\n",
                     self.theme_to_arg(*theme),
                     theme.display_name(),
                     marker
@@ -102,7 +103,8 @@ impl ThemeCommand {
         for theme in ThemeName::all() {
             if theme.is_light() {
                 let marker = if *theme == current { " ◀" } else { "" };
-                output.push_str(&format!("  {:20} {}{}\n",
+                output.push_str(&format!(
+                    "  {:20} {}{}\n",
                     self.theme_to_arg(*theme),
                     theme.display_name(),
                     marker
@@ -136,7 +138,8 @@ impl ThemeCommand {
             ThemeName::RosePineMoon => "rose-pine-moon",
             ThemeName::EverforestDark => "everforest",
             ThemeName::NightOwl => "night-owl",
-        }.to_string()
+        }
+        .to_string()
     }
 
     fn parse_theme_name(&self, name: &str) -> Option<ThemeName> {

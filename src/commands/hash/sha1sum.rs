@@ -1,8 +1,8 @@
 //! sha1sum command - compute SHA1 message digest
 
-use std::fs;
 use anyhow::Result;
-use sha1::{Sha1, Digest};
+use sha1::{Digest, Sha1};
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -64,7 +64,8 @@ RELATED COMMANDS:
   md5sum      MD5 (also insecure)
   sha256sum   SHA-256 (recommended)
   blake3sum   BLAKE3 (fastest)
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -77,7 +78,8 @@ RELATED COMMANDS:
         for arg in args {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: sha1sum <file> [file2...]\n\
-                    Compute SHA1 message digest for files.".to_string());
+                    Compute SHA1 message digest for files."
+                    .to_string());
             }
 
             if arg.starts_with('-') {
@@ -85,8 +87,8 @@ RELATED COMMANDS:
             }
 
             let path = state.resolve_path(arg);
-            let content = fs::read(&path)
-                .map_err(|e| anyhow::anyhow!("sha1sum: {}: {}", arg, e))?;
+            let content =
+                fs::read(&path).map_err(|e| anyhow::anyhow!("sha1sum: {}: {}", arg, e))?;
 
             let mut hasher = Sha1::new();
             hasher.update(&content);

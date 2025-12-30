@@ -4,8 +4,8 @@
 
 use eframe::egui;
 
+use super::buffer::{LineType, OutputLine};
 use crate::config::theme::Theme;
-use super::buffer::{OutputLine, LineType};
 
 /// Render an output line with appropriate styling
 #[allow(dead_code)]
@@ -17,11 +17,7 @@ pub fn render_line(ui: &mut egui::Ui, line: &OutputLine, theme: &Theme) {
         LineType::Success => theme.success_color,
     };
 
-    ui.add(
-        egui::Label::new(
-            egui::RichText::new(&line.text)
-                .monospace()
-                .color(color)
-        )
-    );
+    ui.add(egui::Label::new(
+        egui::RichText::new(&line.text).monospace().color(color),
+    ));
 }

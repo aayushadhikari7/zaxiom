@@ -40,7 +40,10 @@ impl Default for Cell {
 impl Cell {
     #[allow(dead_code)]
     pub fn with_char(ch: char) -> Self {
-        Self { ch, ..Default::default() }
+        Self {
+            ch,
+            ..Default::default()
+        }
     }
 }
 
@@ -48,11 +51,11 @@ impl Cell {
 #[derive(Debug, Clone, PartialEq)]
 enum ParserState {
     Normal,
-    Escape,       // Just saw ESC
-    Csi,          // ESC [
-    CsiParam,     // Collecting CSI parameters
-    Osc,          // ESC ]
-    OscParam,     // Collecting OSC content
+    Escape,   // Just saw ESC
+    Csi,      // ESC [
+    CsiParam, // Collecting CSI parameters
+    Osc,      // ESC ]
+    OscParam, // Collecting OSC content
 }
 
 /// Terminal grid with VT100/ANSI emulation
@@ -294,7 +297,8 @@ impl TerminalGrid {
         }
 
         let final_byte = *self.escape_buffer.last().unwrap();
-        let params_str = String::from_utf8_lossy(&self.escape_buffer[..self.escape_buffer.len() - 1]);
+        let params_str =
+            String::from_utf8_lossy(&self.escape_buffer[..self.escape_buffer.len() - 1]);
 
         // Parse parameters (semicolon-separated numbers)
         let params: Vec<usize> = params_str
@@ -465,7 +469,10 @@ impl TerminalGrid {
                 2 => self.current_dim = true,
                 3 => self.current_italic = true,
                 4 => self.current_underline = true,
-                22 => { self.current_bold = false; self.current_dim = false; }
+                22 => {
+                    self.current_bold = false;
+                    self.current_dim = false;
+                }
                 23 => self.current_italic = false,
                 24 => self.current_underline = false,
                 30..=37 => self.current_fg = Some((params[i] - 30) as u32),
@@ -627,7 +634,8 @@ impl TerminalGrid {
         for _ in 0..n {
             if self.cursor_row < self.rows {
                 self.cells.pop();
-                self.cells.insert(self.cursor_row, vec![Cell::default(); self.cols]);
+                self.cells
+                    .insert(self.cursor_row, vec![Cell::default(); self.cols]);
             }
         }
     }
@@ -740,7 +748,10 @@ impl TerminalGrid {
     /// Get only the visible screen (no scrollback)
     #[allow(dead_code)]
     pub fn get_visible_lines(&self) -> Vec<String> {
-        self.cells.iter().map(|row| self.row_to_string(row)).collect()
+        self.cells
+            .iter()
+            .map(|row| self.row_to_string(row))
+            .collect()
     }
 
     /// Convert a row of cells to a string with ANSI colors
@@ -755,18 +766,29 @@ impl TerminalGrid {
 
         for cell in row {
             // Check if we need to change attributes
-            let need_reset = (cell.fg != last_fg) || (cell.bg != last_bg) ||
-                            (cell.bold != last_bold) || (cell.dim != last_dim) ||
-                            (cell.italic != last_italic) || (cell.underline != last_underline);
+            let need_reset = (cell.fg != last_fg)
+                || (cell.bg != last_bg)
+                || (cell.bold != last_bold)
+                || (cell.dim != last_dim)
+                || (cell.italic != last_italic)
+                || (cell.underline != last_underline);
 
             if need_reset {
                 // Build SGR sequence
                 let mut sgr_parts = vec!["0".to_string()]; // Reset first
 
-                if cell.bold { sgr_parts.push("1".to_string()); }
-                if cell.dim { sgr_parts.push("2".to_string()); }
-                if cell.italic { sgr_parts.push("3".to_string()); }
-                if cell.underline { sgr_parts.push("4".to_string()); }
+                if cell.bold {
+                    sgr_parts.push("1".to_string());
+                }
+                if cell.dim {
+                    sgr_parts.push("2".to_string());
+                }
+                if cell.italic {
+                    sgr_parts.push("3".to_string());
+                }
+                if cell.underline {
+                    sgr_parts.push("4".to_string());
+                }
 
                 if let Some(fg) = cell.fg {
                     if fg >= 0x1000000 {
@@ -813,7 +835,13 @@ impl TerminalGrid {
         }
 
         // Reset at end of line
-        if last_fg.is_some() || last_bg.is_some() || last_bold || last_dim || last_italic || last_underline {
+        if last_fg.is_some()
+            || last_bg.is_some()
+            || last_bold
+            || last_dim
+            || last_italic
+            || last_underline
+        {
             result.push_str("\x1b[0m");
         }
 

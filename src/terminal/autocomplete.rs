@@ -61,14 +61,13 @@ impl Autocomplete {
         let mut ac = Self {
             flags: HashMap::new(),
             builtins: vec![
-                "cd", "ls", "pwd", "echo", "cat", "head", "tail", "grep", "find",
-                "cp", "mv", "rm", "mkdir", "rmdir", "touch", "chmod", "clear",
-                "history", "alias", "unalias", "export", "env", "which", "help",
-                "exit", "neofetch", "fortune", "cowsay", "matrix", "coffee",
-                "wc", "sort", "uniq", "cut", "tr", "sed", "awk", "xargs",
-                "tar", "gzip", "gunzip", "zip", "unzip", "curl", "wget",
-                "ps", "kill", "top", "df", "du", "free", "uptime", "whoami",
-                "date", "cal", "diff", "nano", "less", "more", "tree",
+                "cd", "ls", "pwd", "echo", "cat", "head", "tail", "grep", "find", "cp", "mv", "rm",
+                "mkdir", "rmdir", "touch", "chmod", "clear", "history", "alias", "unalias",
+                "export", "env", "which", "help", "exit", "neofetch", "fortune", "cowsay",
+                "matrix", "coffee", "wc", "sort", "uniq", "cut", "tr", "sed", "awk", "xargs",
+                "tar", "gzip", "gunzip", "zip", "unzip", "curl", "wget", "ps", "kill", "top", "df",
+                "du", "free", "uptime", "whoami", "date", "cal", "diff", "nano", "less", "more",
+                "tree",
             ],
         };
         ac.init_flags();
@@ -78,84 +77,338 @@ impl Autocomplete {
     /// Initialize flag definitions for common commands
     fn init_flags(&mut self) {
         // ls flags
-        self.flags.insert("ls", vec![
-            FlagDef { short: Some("-l"), long: Some("--long"), description: "Long listing format", takes_value: false },
-            FlagDef { short: Some("-a"), long: Some("--all"), description: "Show hidden files", takes_value: false },
-            FlagDef { short: Some("-h"), long: Some("--human-readable"), description: "Human readable sizes", takes_value: false },
-            FlagDef { short: Some("-R"), long: Some("--recursive"), description: "List recursively", takes_value: false },
-            FlagDef { short: Some("-S"), long: None, description: "Sort by size", takes_value: false },
-            FlagDef { short: Some("-t"), long: None, description: "Sort by time", takes_value: false },
-            FlagDef { short: Some("-r"), long: Some("--reverse"), description: "Reverse sort order", takes_value: false },
-        ]);
+        self.flags.insert(
+            "ls",
+            vec![
+                FlagDef {
+                    short: Some("-l"),
+                    long: Some("--long"),
+                    description: "Long listing format",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-a"),
+                    long: Some("--all"),
+                    description: "Show hidden files",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-h"),
+                    long: Some("--human-readable"),
+                    description: "Human readable sizes",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-R"),
+                    long: Some("--recursive"),
+                    description: "List recursively",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-S"),
+                    long: None,
+                    description: "Sort by size",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-t"),
+                    long: None,
+                    description: "Sort by time",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-r"),
+                    long: Some("--reverse"),
+                    description: "Reverse sort order",
+                    takes_value: false,
+                },
+            ],
+        );
 
         // grep flags
-        self.flags.insert("grep", vec![
-            FlagDef { short: Some("-i"), long: Some("--ignore-case"), description: "Case insensitive", takes_value: false },
-            FlagDef { short: Some("-r"), long: Some("--recursive"), description: "Search recursively", takes_value: false },
-            FlagDef { short: Some("-n"), long: Some("--line-number"), description: "Show line numbers", takes_value: false },
-            FlagDef { short: Some("-v"), long: Some("--invert-match"), description: "Invert match", takes_value: false },
-            FlagDef { short: Some("-c"), long: Some("--count"), description: "Count matches", takes_value: false },
-            FlagDef { short: Some("-l"), long: Some("--files-with-matches"), description: "Show only filenames", takes_value: false },
-            FlagDef { short: Some("-A"), long: Some("--after-context"), description: "Lines after match", takes_value: true },
-            FlagDef { short: Some("-B"), long: Some("--before-context"), description: "Lines before match", takes_value: true },
-        ]);
+        self.flags.insert(
+            "grep",
+            vec![
+                FlagDef {
+                    short: Some("-i"),
+                    long: Some("--ignore-case"),
+                    description: "Case insensitive",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-r"),
+                    long: Some("--recursive"),
+                    description: "Search recursively",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-n"),
+                    long: Some("--line-number"),
+                    description: "Show line numbers",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-v"),
+                    long: Some("--invert-match"),
+                    description: "Invert match",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-c"),
+                    long: Some("--count"),
+                    description: "Count matches",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-l"),
+                    long: Some("--files-with-matches"),
+                    description: "Show only filenames",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-A"),
+                    long: Some("--after-context"),
+                    description: "Lines after match",
+                    takes_value: true,
+                },
+                FlagDef {
+                    short: Some("-B"),
+                    long: Some("--before-context"),
+                    description: "Lines before match",
+                    takes_value: true,
+                },
+            ],
+        );
 
         // git flags
-        self.flags.insert("git", vec![
-            FlagDef { short: None, long: Some("status"), description: "Show working tree status", takes_value: false },
-            FlagDef { short: None, long: Some("add"), description: "Add files to staging", takes_value: false },
-            FlagDef { short: None, long: Some("commit"), description: "Commit changes", takes_value: false },
-            FlagDef { short: None, long: Some("push"), description: "Push to remote", takes_value: false },
-            FlagDef { short: None, long: Some("pull"), description: "Pull from remote", takes_value: false },
-            FlagDef { short: None, long: Some("checkout"), description: "Switch branches", takes_value: false },
-            FlagDef { short: None, long: Some("branch"), description: "List/create branches", takes_value: false },
-            FlagDef { short: None, long: Some("merge"), description: "Merge branches", takes_value: false },
-            FlagDef { short: None, long: Some("log"), description: "Show commit history", takes_value: false },
-            FlagDef { short: None, long: Some("diff"), description: "Show changes", takes_value: false },
-            FlagDef { short: None, long: Some("stash"), description: "Stash changes", takes_value: false },
-        ]);
+        self.flags.insert(
+            "git",
+            vec![
+                FlagDef {
+                    short: None,
+                    long: Some("status"),
+                    description: "Show working tree status",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("add"),
+                    description: "Add files to staging",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("commit"),
+                    description: "Commit changes",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("push"),
+                    description: "Push to remote",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("pull"),
+                    description: "Pull from remote",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("checkout"),
+                    description: "Switch branches",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("branch"),
+                    description: "List/create branches",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("merge"),
+                    description: "Merge branches",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("log"),
+                    description: "Show commit history",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("diff"),
+                    description: "Show changes",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("stash"),
+                    description: "Stash changes",
+                    takes_value: false,
+                },
+            ],
+        );
 
         // find flags
-        self.flags.insert("find", vec![
-            FlagDef { short: None, long: Some("-name"), description: "Search by name pattern", takes_value: true },
-            FlagDef { short: None, long: Some("-type"), description: "Filter by type (f/d)", takes_value: true },
-            FlagDef { short: None, long: Some("-size"), description: "Filter by size", takes_value: true },
-            FlagDef { short: None, long: Some("-mtime"), description: "Filter by modification time", takes_value: true },
-        ]);
+        self.flags.insert(
+            "find",
+            vec![
+                FlagDef {
+                    short: None,
+                    long: Some("-name"),
+                    description: "Search by name pattern",
+                    takes_value: true,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("-type"),
+                    description: "Filter by type (f/d)",
+                    takes_value: true,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("-size"),
+                    description: "Filter by size",
+                    takes_value: true,
+                },
+                FlagDef {
+                    short: None,
+                    long: Some("-mtime"),
+                    description: "Filter by modification time",
+                    takes_value: true,
+                },
+            ],
+        );
 
         // cp/mv flags
         for cmd in &["cp", "mv"] {
-            self.flags.insert(*cmd, vec![
-                FlagDef { short: Some("-r"), long: Some("--recursive"), description: "Copy/move recursively", takes_value: false },
-                FlagDef { short: Some("-f"), long: Some("--force"), description: "Force overwrite", takes_value: false },
-                FlagDef { short: Some("-i"), long: Some("--interactive"), description: "Prompt before overwrite", takes_value: false },
-                FlagDef { short: Some("-v"), long: Some("--verbose"), description: "Verbose output", takes_value: false },
-            ]);
+            self.flags.insert(
+                *cmd,
+                vec![
+                    FlagDef {
+                        short: Some("-r"),
+                        long: Some("--recursive"),
+                        description: "Copy/move recursively",
+                        takes_value: false,
+                    },
+                    FlagDef {
+                        short: Some("-f"),
+                        long: Some("--force"),
+                        description: "Force overwrite",
+                        takes_value: false,
+                    },
+                    FlagDef {
+                        short: Some("-i"),
+                        long: Some("--interactive"),
+                        description: "Prompt before overwrite",
+                        takes_value: false,
+                    },
+                    FlagDef {
+                        short: Some("-v"),
+                        long: Some("--verbose"),
+                        description: "Verbose output",
+                        takes_value: false,
+                    },
+                ],
+            );
         }
 
         // rm flags
-        self.flags.insert("rm", vec![
-            FlagDef { short: Some("-r"), long: Some("--recursive"), description: "Remove recursively", takes_value: false },
-            FlagDef { short: Some("-f"), long: Some("--force"), description: "Force removal", takes_value: false },
-            FlagDef { short: Some("-i"), long: Some("--interactive"), description: "Prompt before removal", takes_value: false },
-            FlagDef { short: Some("-v"), long: Some("--verbose"), description: "Verbose output", takes_value: false },
-        ]);
+        self.flags.insert(
+            "rm",
+            vec![
+                FlagDef {
+                    short: Some("-r"),
+                    long: Some("--recursive"),
+                    description: "Remove recursively",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-f"),
+                    long: Some("--force"),
+                    description: "Force removal",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-i"),
+                    long: Some("--interactive"),
+                    description: "Prompt before removal",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-v"),
+                    long: Some("--verbose"),
+                    description: "Verbose output",
+                    takes_value: false,
+                },
+            ],
+        );
 
         // cat flags
-        self.flags.insert("cat", vec![
-            FlagDef { short: Some("-n"), long: Some("--number"), description: "Number all lines", takes_value: false },
-            FlagDef { short: Some("-b"), long: Some("--number-nonblank"), description: "Number non-blank lines", takes_value: false },
-        ]);
+        self.flags.insert(
+            "cat",
+            vec![
+                FlagDef {
+                    short: Some("-n"),
+                    long: Some("--number"),
+                    description: "Number all lines",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-b"),
+                    long: Some("--number-nonblank"),
+                    description: "Number non-blank lines",
+                    takes_value: false,
+                },
+            ],
+        );
 
         // tar flags
-        self.flags.insert("tar", vec![
-            FlagDef { short: Some("-c"), long: Some("--create"), description: "Create archive", takes_value: false },
-            FlagDef { short: Some("-x"), long: Some("--extract"), description: "Extract archive", takes_value: false },
-            FlagDef { short: Some("-t"), long: Some("--list"), description: "List archive contents", takes_value: false },
-            FlagDef { short: Some("-v"), long: Some("--verbose"), description: "Verbose output", takes_value: false },
-            FlagDef { short: Some("-z"), long: Some("--gzip"), description: "Use gzip compression", takes_value: false },
-            FlagDef { short: Some("-f"), long: Some("--file"), description: "Archive file name", takes_value: true },
-        ]);
+        self.flags.insert(
+            "tar",
+            vec![
+                FlagDef {
+                    short: Some("-c"),
+                    long: Some("--create"),
+                    description: "Create archive",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-x"),
+                    long: Some("--extract"),
+                    description: "Extract archive",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-t"),
+                    long: Some("--list"),
+                    description: "List archive contents",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-v"),
+                    long: Some("--verbose"),
+                    description: "Verbose output",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-z"),
+                    long: Some("--gzip"),
+                    description: "Use gzip compression",
+                    takes_value: false,
+                },
+                FlagDef {
+                    short: Some("-f"),
+                    long: Some("--file"),
+                    description: "Archive file name",
+                    takes_value: true,
+                },
+            ],
+        );
     }
 
     /// Get suggestions for the current input
@@ -188,7 +441,11 @@ impl Autocomplete {
         }
 
         // Check for git branch completion
-        if cmd == "git" && (parts.contains(&"checkout") || parts.contains(&"merge") || parts.contains(&"branch")) {
+        if cmd == "git"
+            && (parts.contains(&"checkout")
+                || parts.contains(&"merge")
+                || parts.contains(&"branch"))
+        {
             return self.suggest_git_branches(current_word, cwd);
         }
 
@@ -229,7 +486,9 @@ impl Autocomplete {
         }
 
         // Common external commands
-        let externals = ["git", "python", "node", "npm", "cargo", "rustc", "code", "vim"];
+        let externals = [
+            "git", "python", "node", "npm", "cargo", "rustc", "code", "vim",
+        ];
         for ext in externals {
             if ext.starts_with(&prefix_lower) && !self.builtins.contains(&ext) {
                 suggestions.push(Suggestion {
@@ -260,7 +519,11 @@ impl Autocomplete {
                     }
                 }
                 if let Some(long) = flag.long {
-                    let long_flag = if long.starts_with('-') { long.to_string() } else { format!("--{}", long) };
+                    let long_flag = if long.starts_with('-') {
+                        long.to_string()
+                    } else {
+                        format!("--{}", long)
+                    };
                     if long_flag.starts_with(prefix) || (prefix == "-" && !long.starts_with('-')) {
                         suggestions.push(Suggestion {
                             text: long.to_string(),
@@ -320,7 +583,8 @@ impl Autocomplete {
                 (cwd.join(prefix), String::new())
             } else {
                 let parent = path.parent().unwrap_or(Path::new("."));
-                let file_part = path.file_name()
+                let file_part = path
+                    .file_name()
                     .map(|s| s.to_string_lossy().to_string())
                     .unwrap_or_default();
                 (cwd.join(parent), file_part)
@@ -359,20 +623,26 @@ impl Autocomplete {
 
                     suggestions.push(Suggestion {
                         text: completion,
-                        kind: if is_dir { SuggestionKind::Directory } else { SuggestionKind::File },
-                        description: if is_dir { Some("directory".to_string()) } else { None },
+                        kind: if is_dir {
+                            SuggestionKind::Directory
+                        } else {
+                            SuggestionKind::File
+                        },
+                        description: if is_dir {
+                            Some("directory".to_string())
+                        } else {
+                            None
+                        },
                     });
                 }
             }
         }
 
         // Sort: directories first, then alphabetically
-        suggestions.sort_by(|a, b| {
-            match (a.kind, b.kind) {
-                (SuggestionKind::Directory, SuggestionKind::File) => std::cmp::Ordering::Less,
-                (SuggestionKind::File, SuggestionKind::Directory) => std::cmp::Ordering::Greater,
-                _ => a.text.to_lowercase().cmp(&b.text.to_lowercase()),
-            }
+        suggestions.sort_by(|a, b| match (a.kind, b.kind) {
+            (SuggestionKind::Directory, SuggestionKind::File) => std::cmp::Ordering::Less,
+            (SuggestionKind::File, SuggestionKind::Directory) => std::cmp::Ordering::Greater,
+            _ => a.text.to_lowercase().cmp(&b.text.to_lowercase()),
         });
 
         suggestions.truncate(15);
@@ -380,12 +650,20 @@ impl Autocomplete {
     }
 
     /// Apply a suggestion to the input
-    pub fn apply_suggestion(&self, input: &str, cursor_pos: usize, suggestion: &Suggestion) -> (String, usize) {
+    pub fn apply_suggestion(
+        &self,
+        input: &str,
+        cursor_pos: usize,
+        suggestion: &Suggestion,
+    ) -> (String, usize) {
         let before_cursor = &input[..cursor_pos.min(input.len())];
         let after_cursor = &input[cursor_pos.min(input.len())..];
 
         // Find the word being completed
-        let word_start = before_cursor.rfind(|c: char| c.is_whitespace()).map(|i| i + 1).unwrap_or(0);
+        let word_start = before_cursor
+            .rfind(|c: char| c.is_whitespace())
+            .map(|i| i + 1)
+            .unwrap_or(0);
 
         let new_input = format!(
             "{}{}{}",

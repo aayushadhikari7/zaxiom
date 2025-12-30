@@ -43,7 +43,8 @@ impl Command for SeqCommand {
                         Examples:\n  \
                         seq 5           → 1 2 3 4 5\n  \
                         seq 2 5         → 2 3 4 5\n  \
-                        seq 1 2 10      → 1 3 5 7 9".to_string());
+                        seq 1 2 10      → 1 3 5 7 9"
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => {
                     if let Ok(n) = args[i].parse::<f64>() {
@@ -88,12 +89,14 @@ impl Command for SeqCommand {
         // Format numbers
         let output: Vec<String> = if equal_width {
             // Find max width
-            let max_width = sequence.iter()
+            let max_width = sequence
+                .iter()
                 .map(|n| format_number(*n).len())
                 .max()
                 .unwrap_or(1);
 
-            sequence.iter()
+            sequence
+                .iter()
                 .map(|n| {
                     let s = format_number(*n);
                     format!("{:0>width$}", s, width = max_width)

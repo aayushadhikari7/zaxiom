@@ -35,7 +35,8 @@ impl Command for ExprCommand {
                 Examples:\n  \
                 expr 1 + 2\n  \
                 expr 10 \\* 5\n  \
-                expr 10 / 3".to_string());
+                expr 10 / 3"
+                .to_string());
         }
 
         // Join args and evaluate
@@ -85,14 +86,62 @@ fn evaluate_expression(expr: &str) -> Result<String> {
                     }
                     l % r
                 }
-                "<" => if l < r { 1 } else { 0 },
-                "<=" => if l <= r { 1 } else { 0 },
-                "=" => if l == r { 1 } else { 0 },
-                "!=" => if l != r { 1 } else { 0 },
-                ">=" => if l >= r { 1 } else { 0 },
-                ">" => if l > r { 1 } else { 0 },
-                "|" => if l != 0 { l } else { r },
-                "&" => if l != 0 && r != 0 { l } else { 0 },
+                "<" => {
+                    if l < r {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                "<=" => {
+                    if l <= r {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                "=" => {
+                    if l == r {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                "!=" => {
+                    if l != r {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                ">=" => {
+                    if l >= r {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                ">" => {
+                    if l > r {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                "|" => {
+                    if l != 0 {
+                        l
+                    } else {
+                        r
+                    }
+                }
+                "&" => {
+                    if l != 0 && r != 0 {
+                        l
+                    } else {
+                        0
+                    }
+                }
                 _ => return Err(anyhow::anyhow!("expr: unknown operator: {}", op)),
             };
             return Ok(result.to_string());

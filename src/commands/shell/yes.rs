@@ -24,7 +24,8 @@ impl Command for YesCommand {
         if !args.is_empty() && (args[0] == "-h" || args[0] == "--help") {
             return Ok("Usage: yes [STRING]\n\
                 Repeatedly output STRING, or 'y' by default.\n\
-                Note: Limited to 100 lines in this terminal.".to_string());
+                Note: Limited to 100 lines in this terminal."
+                .to_string());
         }
 
         let text = if args.is_empty() {

@@ -29,7 +29,12 @@ impl Command for XargsCommand {
         Ok("xargs: requires stdin input (use with pipe)".to_string())
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, _state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        _state: &mut TerminalState,
+    ) -> Result<String> {
         let input = stdin.unwrap_or("");
         if input.is_empty() {
             return Ok(String::new());

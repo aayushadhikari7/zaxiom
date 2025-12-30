@@ -1,8 +1,8 @@
 //! awk command - pattern scanning and processing language
 
-use std::fs;
 use anyhow::Result;
 use regex::Regex;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -88,14 +88,20 @@ RELATED COMMANDS:
   cut      Extract columns (simpler)
   sed      Stream editing
   grep     Pattern matching
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut field_separator = " ".to_string();
         let mut program: Option<&String> = None;
         let mut file: Option<&String> = None;
@@ -124,7 +130,8 @@ RELATED COMMANDS:
                         $0    Entire line\n  \
                         $1-$n Individual fields\n  \
                         NR    Line number\n  \
-                        NF    Number of fields".to_string());
+                        NF    Number of fields"
+                        .to_string());
                 }
                 _ if args[i].starts_with("-F") => {
                     field_separator = args[i][2..].to_string();
@@ -146,8 +153,7 @@ RELATED COMMANDS:
         // Get content
         let content = if let Some(f) = file {
             let path = state.resolve_path(f);
-            fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("awk: {}: {}", f, e))?
+            fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("awk: {}: {}", f, e))?
         } else if let Some(input) = stdin {
             input.to_string()
         } else {
@@ -211,13 +217,13 @@ fn parse_awk_program(program: &str) -> Result<(Option<String>, Option<String>)> 
 
     // Pattern only: /regex/
     if program.starts_with('/') && program.ends_with('/') && !program.contains('{') {
-        let pattern = &program[1..program.len()-1];
+        let pattern = &program[1..program.len() - 1];
         return Ok((Some(pattern.to_string()), None));
     }
 
     // Action only: {action}
     if program.starts_with('{') && program.ends_with('}') {
-        let action = &program[1..program.len()-1];
+        let action = &program[1..program.len() - 1];
         return Ok((None, Some(action.to_string())));
     }
 
@@ -225,10 +231,10 @@ fn parse_awk_program(program: &str) -> Result<(Option<String>, Option<String>)> 
     if let Some(after_slash) = program.strip_prefix('/') {
         if let Some(end_pattern) = after_slash.find('/') {
             let pattern = &after_slash[..end_pattern];
-            let rest = after_slash[end_pattern+1..].trim();
+            let rest = after_slash[end_pattern + 1..].trim();
 
             if rest.starts_with('{') && rest.ends_with('}') {
-                let action = &rest[1..rest.len()-1];
+                let action = &rest[1..rest.len() - 1];
                 return Ok((Some(pattern.to_string()), Some(action.to_string())));
             }
         }
@@ -239,7 +245,13 @@ fn parse_awk_program(program: &str) -> Result<(Option<String>, Option<String>)> 
 }
 
 /// Execute an awk action and return the result
-fn execute_awk_action(action: &str, line: &str, fields: &[&str], nr: usize, nf: usize) -> Result<String> {
+fn execute_awk_action(
+    action: &str,
+    line: &str,
+    fields: &[&str],
+    nr: usize,
+    nf: usize,
+) -> Result<String> {
     let action = action.trim();
 
     // Handle print statements
@@ -267,13 +279,20 @@ fn execute_awk_action(action: &str, line: &str, fields: &[&str], nr: usize, nf: 
 }
 
 /// Evaluate an awk expression
-fn evaluate_awk_expression(expr: &str, line: &str, fields: &[&str], nr: usize, nf: usize) -> Result<String> {
+fn evaluate_awk_expression(
+    expr: &str,
+    line: &str,
+    fields: &[&str],
+    nr: usize,
+    nf: usize,
+) -> Result<String> {
     let expr = expr.trim();
 
     // String literal
-    if (expr.starts_with('"') && expr.ends_with('"')) ||
-       (expr.starts_with('\'') && expr.ends_with('\'')) {
-        return Ok(expr[1..expr.len()-1].to_string());
+    if (expr.starts_with('"') && expr.ends_with('"'))
+        || (expr.starts_with('\'') && expr.ends_with('\''))
+    {
+        return Ok(expr[1..expr.len() - 1].to_string());
     }
 
     // Field reference $N

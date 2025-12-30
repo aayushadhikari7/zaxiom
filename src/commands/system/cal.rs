@@ -1,7 +1,7 @@
 //! cal command - display a calendar
 
-use chrono::{Datelike, Local, NaiveDate};
 use anyhow::Result;
+use chrono::{Datelike, Local, NaiveDate};
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -30,14 +30,21 @@ impl Command for CalCommand {
                 if args[0] == "-h" || args[0] == "--help" {
                     return Ok("Usage: cal [[month] year]\n\
                         Display a calendar for the given month/year.\n\
-                        Without arguments, shows current month.".to_string());
+                        Without arguments, shows current month."
+                        .to_string());
                 }
-                let y: i32 = args[0].parse().map_err(|_| anyhow::anyhow!("cal: invalid year"))?;
+                let y: i32 = args[0]
+                    .parse()
+                    .map_err(|_| anyhow::anyhow!("cal: invalid year"))?;
                 (y, today.month())
             }
             _ => {
-                let m: u32 = args[0].parse().map_err(|_| anyhow::anyhow!("cal: invalid month"))?;
-                let y: i32 = args[1].parse().map_err(|_| anyhow::anyhow!("cal: invalid year"))?;
+                let m: u32 = args[0]
+                    .parse()
+                    .map_err(|_| anyhow::anyhow!("cal: invalid month"))?;
+                let y: i32 = args[1]
+                    .parse()
+                    .map_err(|_| anyhow::anyhow!("cal: invalid year"))?;
                 if !(1..=12).contains(&m) {
                     return Err(anyhow::anyhow!("cal: month must be 1-12"));
                 }
@@ -51,8 +58,18 @@ impl Command for CalCommand {
 
 fn render_calendar(year: i32, month: u32, today: NaiveDate) -> String {
     let month_names = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ];
 
     let first_day = NaiveDate::from_ymd_opt(year, month, 1).unwrap();

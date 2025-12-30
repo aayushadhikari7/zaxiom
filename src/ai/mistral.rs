@@ -2,8 +2,8 @@
 //!
 //! Access to Mistral models via their API.
 
-use anyhow::{anyhow, Result};
 use super::provider::AiProvider;
+use anyhow::{anyhow, Result};
 
 const MISTRAL_API_URL: &str = "https://api.mistral.ai/v1/chat/completions";
 const ENV_KEY: &str = "MISTRAL_API_KEY";
@@ -59,7 +59,8 @@ impl AiProvider for MistralProvider {
     }
 
     fn chat(&self, prompt: &str, model: Option<&str>) -> Result<String> {
-        let api_key = self.get_or_prompt_api_key()
+        let api_key = self
+            .get_or_prompt_api_key()
             .ok_or_else(|| anyhow!("{}", self.get_setup_instructions()))?;
 
         let model = model.unwrap_or(DEFAULT_MODEL);
@@ -86,7 +87,8 @@ impl AiProvider for MistralProvider {
             return Err(anyhow!("Mistral API error ({}): {}", status, body));
         }
 
-        let json: serde_json::Value = response.json()
+        let json: serde_json::Value = response
+            .json()
             .map_err(|e| anyhow!("Failed to parse Mistral response: {}", e))?;
 
         json["choices"][0]["message"]["content"]

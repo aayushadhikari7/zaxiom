@@ -1,7 +1,7 @@
 //! realpath command - print resolved absolute path
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -28,7 +28,8 @@ impl Command for RealpathCommand {
 
         if args[0] == "-h" || args[0] == "--help" {
             return Ok("Usage: realpath PATH...\n\
-                Print the resolved absolute pathname.".to_string());
+                Print the resolved absolute pathname."
+                .to_string());
         }
 
         let mut output = Vec::new();

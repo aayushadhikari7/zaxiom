@@ -1,8 +1,8 @@
 //! wget command - non-interactive network downloader
 
+use anyhow::Result;
 use std::fs::File;
 use std::io::Write;
-use anyhow::Result;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -72,7 +72,8 @@ ERROR HANDLING:
 RELATED COMMANDS:
   curl     Transfer data (more options)
   scp      Secure copy over SSH
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -94,7 +95,8 @@ RELATED COMMANDS:
                     return Ok("Usage: wget [OPTIONS] <url>\n\
                         Options:\n  \
                         -O <file>    Save to specified file\n  \
-                        -q           Quiet mode".to_string());
+                        -q           Quiet mode"
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => url = Some(&args[i]),
                 _ => {}
@@ -105,20 +107,22 @@ RELATED COMMANDS:
         let url = url.ok_or_else(|| anyhow::anyhow!("wget: missing URL"))?;
 
         // Use reqwest blocking client
-        let response = reqwest::blocking::get(url.as_str())
-            .map_err(|e| anyhow::anyhow!("wget: {}", e))?;
+        let response =
+            reqwest::blocking::get(url.as_str()).map_err(|e| anyhow::anyhow!("wget: {}", e))?;
 
         let status = response.status();
         if !status.is_success() {
             return Err(anyhow::anyhow!("wget: HTTP {}", status));
         }
 
-        let bytes = response.bytes()
+        let bytes = response
+            .bytes()
             .map_err(|e| anyhow::anyhow!("wget: {}", e))?;
 
         // Determine output filename
         let filename = output_file.unwrap_or_else(|| {
-            url.split('/').next_back()
+            url.split('/')
+                .next_back()
                 .filter(|s| !s.is_empty())
                 .unwrap_or("index.html")
                 .to_string()

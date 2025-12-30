@@ -69,7 +69,8 @@ RELATED COMMANDS:
   df       Disk free space
   ls -lh   List files with sizes
   find     Find files by size
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -94,7 +95,8 @@ RELATED COMMANDS:
                         Options:\n  \
                         -h    Human-readable sizes\n  \
                         -s    Display only total for each argument\n  \
-                        -d N  Print total for directory only if N or fewer levels deep".to_string());
+                        -d N  Print total for directory only if N or fewer levels deep"
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => paths.push(args[i].clone()),
                 _ => {}
@@ -113,7 +115,11 @@ RELATED COMMANDS:
 
             if summarize {
                 let size = calculate_dir_size(&path)?;
-                output.push(format!("{}\t{}", format_size(size, human_readable), path.display()));
+                output.push(format!(
+                    "{}\t{}",
+                    format_size(size, human_readable),
+                    path.display()
+                ));
             } else {
                 for entry in WalkDir::new(&path)
                     .min_depth(0)
@@ -123,7 +129,11 @@ RELATED COMMANDS:
                 {
                     if entry.file_type().is_dir() {
                         let size = calculate_dir_size(entry.path())?;
-                        output.push(format!("{}\t{}", format_size(size, human_readable), entry.path().display()));
+                        output.push(format!(
+                            "{}\t{}",
+                            format_size(size, human_readable),
+                            entry.path().display()
+                        ));
                     }
                 }
             }
@@ -140,10 +150,7 @@ fn calculate_dir_size(path: &std::path::Path) -> Result<u64> {
         return Ok(std::fs::metadata(path)?.len());
     }
 
-    for entry in WalkDir::new(path)
-        .into_iter()
-        .filter_map(|e| e.ok())
-    {
+    for entry in WalkDir::new(path).into_iter().filter_map(|e| e.ok()) {
         if entry.file_type().is_file() {
             total += entry.metadata().map(|m| m.len()).unwrap_or(0);
         }

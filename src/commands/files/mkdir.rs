@@ -63,7 +63,8 @@ RELATED COMMANDS:
   rm -r    Remove directories with contents
   ls       List directories
   tree     Show directory tree
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {

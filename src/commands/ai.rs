@@ -5,9 +5,9 @@
 
 use anyhow::Result;
 
-use crate::ai::{OllamaProvider, list_providers, get_help};
-use crate::terminal::state::TerminalState;
 use super::traits::Command as CommandTrait;
+use crate::ai::{get_help, list_providers, OllamaProvider};
+use crate::terminal::state::TerminalState;
 
 /// AI command - manage providers and settings
 pub struct AiCommand;
@@ -52,7 +52,11 @@ fn get_status() -> String {
 
     for p in providers {
         let status = if p.available { "✓" } else { "✗" };
-        let available = if p.available { "ready" } else { "not configured" };
+        let available = if p.available {
+            "ready"
+        } else {
+            "not configured"
+        };
         output.push_str(&format!(
             "  {} {} ({})\n    Model: {}\n    Status: {}\n\n",
             status, p.display_name, p.name, p.default_model, available
@@ -78,7 +82,11 @@ fn get_providers_list() -> String {
     output.push_str("═══════════════════════════════════════\n\n");
 
     for p in providers {
-        let status = if p.available { "✓ Ready" } else { "✗ Need setup" };
+        let status = if p.available {
+            "✓ Ready"
+        } else {
+            "✗ Need setup"
+        };
         output.push_str(&format!(
             "  {:<20} {}\n    Flag: --{}\n    Model: {}\n\n",
             p.display_name, status, p.name, p.default_model
@@ -117,22 +125,20 @@ impl CommandTrait for OllamaCommand {
         }
 
         match args[0].as_str() {
-            "list" | "ls" => {
-                match OllamaProvider::list_models() {
-                    Ok(models) => {
-                        if models.is_empty() {
-                            Ok("No models installed.\n\nRun: ollama pull llama3.2".to_string())
-                        } else {
-                            let mut output = String::from("📦 Installed models:\n\n");
-                            for model in models {
-                                output.push_str(&format!("  • {}\n", model));
-                            }
-                            Ok(output)
+            "list" | "ls" => match OllamaProvider::list_models() {
+                Ok(models) => {
+                    if models.is_empty() {
+                        Ok("No models installed.\n\nRun: ollama pull llama3.2".to_string())
+                    } else {
+                        let mut output = String::from("📦 Installed models:\n\n");
+                        for model in models {
+                            output.push_str(&format!("  • {}\n", model));
                         }
+                        Ok(output)
                     }
-                    Err(e) => Ok(format!("❌ {}", e)),
                 }
-            }
+                Err(e) => Ok(format!("❌ {}", e)),
+            },
 
             "pull" => {
                 if args.len() < 2 {
@@ -159,7 +165,9 @@ impl CommandTrait for OllamaCommand {
             "status" => {
                 if OllamaProvider::is_server_running() {
                     match OllamaProvider::get_best_model() {
-                        Ok(model) => Ok(format!("✅ Ollama is running\n📦 Default model: {}", model)),
+                        Ok(model) => {
+                            Ok(format!("✅ Ollama is running\n📦 Default model: {}", model))
+                        }
                         Err(_) => Ok("✅ Ollama is running\n⚠️  No models installed".to_string()),
                     }
                 } else {
@@ -218,7 +226,8 @@ fn get_ollama_help() -> String {
 │    3. Chat: # --ollama hello                                │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
-"#.to_string()
+"#
+    .to_string()
 }
 
 fn get_recommended_models() -> String {
@@ -240,6 +249,6 @@ fn get_recommended_models() -> String {
     • phi3:mini       - Tiny but useful
 
 Download with: ollama pull <model>
-"#.to_string()
+"#
+    .to_string()
 }
-

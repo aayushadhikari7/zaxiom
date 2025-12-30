@@ -1,7 +1,7 @@
 //! cd command - change directory
 
-use std::path::PathBuf;
 use anyhow::Result;
+use std::path::PathBuf;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;

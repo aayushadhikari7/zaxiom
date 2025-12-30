@@ -88,8 +88,7 @@ impl Mascot {
         self.frame = self.frame.wrapping_add(1);
 
         // Check for sleepy mode
-        if self.last_activity.elapsed() > Duration::from_secs(30)
-            && self.mood != MascotMood::Sleepy
+        if self.last_activity.elapsed() > Duration::from_secs(30) && self.mood != MascotMood::Sleepy
         {
             self.set_mood(MascotMood::Sleepy);
         }
@@ -159,7 +158,8 @@ impl Mascot {
         }
 
         // Check for special keywords first
-        if cmd_lower.contains("love") || cmd_lower.contains("cute") || cmd_lower.contains("kawaii") {
+        if cmd_lower.contains("love") || cmd_lower.contains("cute") || cmd_lower.contains("kawaii")
+        {
             self.set_mood(MascotMood::Love);
             return;
         }
@@ -167,11 +167,15 @@ impl Mascot {
             self.set_mood(MascotMood::Happy);
             return;
         }
-        if cmd_lower.contains("party") || cmd_lower.contains("dance") || cmd_lower.contains("music") {
+        if cmd_lower.contains("party") || cmd_lower.contains("dance") || cmd_lower.contains("music")
+        {
             self.set_mood(MascotMood::Dancing);
             return;
         }
-        if cmd_lower.contains("yay") || cmd_lower.contains("success") || cmd_lower.contains("woohoo") {
+        if cmd_lower.contains("yay")
+            || cmd_lower.contains("success")
+            || cmd_lower.contains("woohoo")
+        {
             self.set_mood(MascotMood::Celebrating);
             return;
         }
@@ -306,7 +310,11 @@ impl Mascot {
         // Glow effect
         painter.circle_filled(antenna_top, 7.0, glow_color.gamma_multiply(0.3));
         painter.circle_filled(antenna_top, 5.0, glow_color);
-        painter.circle_filled(Pos2::new(antenna_top.x - 1.5, antenna_top.y - 1.5), 2.0, self.colors.highlight);
+        painter.circle_filled(
+            Pos2::new(antenna_top.x - 1.5, antenna_top.y - 1.5),
+            2.0,
+            self.colors.highlight,
+        );
     }
 
     fn draw_ears(&self, painter: &egui::Painter, head_center: Pos2) {
@@ -327,7 +335,12 @@ impl Mascot {
 
         // Main head shape
         painter.rect_filled(head_rect, CornerRadius::same(12), self.colors.body_white);
-        painter.rect_stroke(head_rect, CornerRadius::same(12), Stroke::new(1.0, Color32::from_rgb(220, 220, 225)), StrokeKind::Outside);
+        painter.rect_stroke(
+            head_rect,
+            CornerRadius::same(12),
+            Stroke::new(1.0, Color32::from_rgb(220, 220, 225)),
+            StrokeKind::Outside,
+        );
 
         // Small pink accent on top
         let accent_rect = Rect::from_center_size(
@@ -351,7 +364,12 @@ impl Mascot {
         painter.rect_filled(glow_rect, CornerRadius::same(4), self.colors.visor_glow);
 
         // Screen border
-        painter.rect_stroke(visor_rect, CornerRadius::same(6), Stroke::new(2.0, self.colors.body_pink), StrokeKind::Outside);
+        painter.rect_stroke(
+            visor_rect,
+            CornerRadius::same(6),
+            Stroke::new(2.0, self.colors.body_pink),
+            StrokeKind::Outside,
+        );
     }
 
     fn draw_eyes(&self, painter: &egui::Painter, head_center: Pos2) {
@@ -362,11 +380,17 @@ impl Mascot {
         if self.is_blinking || self.mood == MascotMood::Sleepy {
             // Closed eyes (horizontal lines)
             painter.line_segment(
-                [Pos2::new(left_eye.x - 4.0, left_eye.y), Pos2::new(left_eye.x + 4.0, left_eye.y)],
+                [
+                    Pos2::new(left_eye.x - 4.0, left_eye.y),
+                    Pos2::new(left_eye.x + 4.0, left_eye.y),
+                ],
                 Stroke::new(2.0, self.colors.eye_cyan),
             );
             painter.line_segment(
-                [Pos2::new(right_eye.x - 4.0, right_eye.y), Pos2::new(right_eye.x + 4.0, right_eye.y)],
+                [
+                    Pos2::new(right_eye.x - 4.0, right_eye.y),
+                    Pos2::new(right_eye.x + 4.0, right_eye.y),
+                ],
                 Stroke::new(2.0, self.colors.eye_cyan),
             );
         } else if self.mood == MascotMood::Love {
@@ -381,8 +405,16 @@ impl Mascot {
             painter.circle_filled(right_eye, 6.0, self.colors.eye_pink);
             painter.circle_filled(right_eye, 3.0, Color32::BLACK);
             // Tiny highlight
-            painter.circle_filled(Pos2::new(left_eye.x - 2.0, left_eye.y - 2.0), 1.5, self.colors.highlight);
-            painter.circle_filled(Pos2::new(right_eye.x - 2.0, right_eye.y - 2.0), 1.5, self.colors.highlight);
+            painter.circle_filled(
+                Pos2::new(left_eye.x - 2.0, left_eye.y - 2.0),
+                1.5,
+                self.colors.highlight,
+            );
+            painter.circle_filled(
+                Pos2::new(right_eye.x - 2.0, right_eye.y - 2.0),
+                1.5,
+                self.colors.highlight,
+            );
         } else if self.mood == MascotMood::Proud || self.mood == MascotMood::Celebrating {
             // Sparkly star eyes ★‿★
             let star_color = Color32::from_rgb(255, 220, 100);
@@ -401,19 +433,31 @@ impl Mascot {
             let happy_color = Color32::from_rgb(255, 180, 200);
             // Draw ^ shapes
             painter.line_segment(
-                [Pos2::new(left_eye.x - 3.0, left_eye.y + 2.0), Pos2::new(left_eye.x, left_eye.y - 2.0)],
+                [
+                    Pos2::new(left_eye.x - 3.0, left_eye.y + 2.0),
+                    Pos2::new(left_eye.x, left_eye.y - 2.0),
+                ],
                 Stroke::new(2.0, happy_color),
             );
             painter.line_segment(
-                [Pos2::new(left_eye.x, left_eye.y - 2.0), Pos2::new(left_eye.x + 3.0, left_eye.y + 2.0)],
+                [
+                    Pos2::new(left_eye.x, left_eye.y - 2.0),
+                    Pos2::new(left_eye.x + 3.0, left_eye.y + 2.0),
+                ],
                 Stroke::new(2.0, happy_color),
             );
             painter.line_segment(
-                [Pos2::new(right_eye.x - 3.0, right_eye.y + 2.0), Pos2::new(right_eye.x, right_eye.y - 2.0)],
+                [
+                    Pos2::new(right_eye.x - 3.0, right_eye.y + 2.0),
+                    Pos2::new(right_eye.x, right_eye.y - 2.0),
+                ],
                 Stroke::new(2.0, happy_color),
             );
             painter.line_segment(
-                [Pos2::new(right_eye.x, right_eye.y - 2.0), Pos2::new(right_eye.x + 3.0, right_eye.y + 2.0)],
+                [
+                    Pos2::new(right_eye.x, right_eye.y - 2.0),
+                    Pos2::new(right_eye.x + 3.0, right_eye.y + 2.0),
+                ],
                 Stroke::new(2.0, happy_color),
             );
         } else if self.mood == MascotMood::Typing {
@@ -423,14 +467,23 @@ impl Mascot {
             painter.circle_filled(right_eye, 2.5, focus_color);
             // Small concentration line between eyes
             painter.line_segment(
-                [Pos2::new(left_eye.x + 4.0, eye_y + 3.0), Pos2::new(right_eye.x - 4.0, eye_y + 3.0)],
+                [
+                    Pos2::new(left_eye.x + 4.0, eye_y + 3.0),
+                    Pos2::new(right_eye.x - 4.0, eye_y + 3.0),
+                ],
                 Stroke::new(1.0, Color32::from_rgb(100, 100, 120)),
             );
         } else {
             // Normal eye colors based on mood
             let (left_color, right_color) = match self.mood {
-                MascotMood::Sad => (self.colors.eye_cyan.gamma_multiply(0.6), self.colors.eye_pink.gamma_multiply(0.6)),
-                MascotMood::Excited => (Color32::from_rgb(255, 200, 100), Color32::from_rgb(255, 150, 200)),
+                MascotMood::Sad => (
+                    self.colors.eye_cyan.gamma_multiply(0.6),
+                    self.colors.eye_pink.gamma_multiply(0.6),
+                ),
+                MascotMood::Excited => (
+                    Color32::from_rgb(255, 200, 100),
+                    Color32::from_rgb(255, 150, 200),
+                ),
                 _ => (self.colors.eye_cyan, self.colors.eye_pink),
             };
 
@@ -443,8 +496,16 @@ impl Mascot {
             painter.circle_filled(right_eye, 4.0, right_color);
 
             // Eye shine
-            painter.circle_filled(Pos2::new(left_eye.x - 1.5, left_eye.y - 1.5), 1.5, self.colors.highlight);
-            painter.circle_filled(Pos2::new(right_eye.x - 1.5, right_eye.y - 1.5), 1.5, self.colors.highlight);
+            painter.circle_filled(
+                Pos2::new(left_eye.x - 1.5, left_eye.y - 1.5),
+                1.5,
+                self.colors.highlight,
+            );
+            painter.circle_filled(
+                Pos2::new(right_eye.x - 1.5, right_eye.y - 1.5),
+                1.5,
+                self.colors.highlight,
+            );
 
             // Mood-specific eye details
             if self.mood == MascotMood::Sad {
@@ -479,13 +540,13 @@ impl Mascot {
     fn draw_star(&self, painter: &egui::Painter, center: Pos2, size: f32, color: Color32) {
         // 4-pointed star
         let points = vec![
-            Pos2::new(center.x, center.y - size),        // top
+            Pos2::new(center.x, center.y - size), // top
             Pos2::new(center.x + size * 0.3, center.y - size * 0.3),
-            Pos2::new(center.x + size, center.y),        // right
+            Pos2::new(center.x + size, center.y), // right
             Pos2::new(center.x + size * 0.3, center.y + size * 0.3),
-            Pos2::new(center.x, center.y + size),        // bottom
+            Pos2::new(center.x, center.y + size), // bottom
             Pos2::new(center.x - size * 0.3, center.y + size * 0.3),
-            Pos2::new(center.x - size, center.y),        // left
+            Pos2::new(center.x - size, center.y), // left
             Pos2::new(center.x - size * 0.3, center.y - size * 0.3),
         ];
         painter.add(egui::Shape::convex_polygon(points, color, Stroke::NONE));
@@ -507,7 +568,12 @@ impl Mascot {
         painter.rect_filled(belly_rect, CornerRadius::same(4), self.colors.body_pink);
 
         // Body outline
-        painter.rect_stroke(body_rect, CornerRadius::same(8), Stroke::new(1.0, Color32::from_rgb(220, 220, 225)), StrokeKind::Outside);
+        painter.rect_stroke(
+            body_rect,
+            CornerRadius::same(8),
+            Stroke::new(1.0, Color32::from_rgb(220, 220, 225)),
+            StrokeKind::Outside,
+        );
     }
 
     fn draw_arms(&self, painter: &egui::Painter, body_center: Pos2) {
@@ -540,7 +606,10 @@ impl Mascot {
             left_arm_start.x - arm_len * left_arm_angle.cos(),
             left_arm_start.y + arm_len * left_arm_angle.sin(),
         );
-        painter.line_segment([left_arm_start, left_arm_end], Stroke::new(4.0, self.colors.body_white));
+        painter.line_segment(
+            [left_arm_start, left_arm_end],
+            Stroke::new(4.0, self.colors.body_white),
+        );
         painter.circle_filled(left_arm_end, 4.0, self.colors.body_pink);
 
         // Right arm
@@ -549,7 +618,10 @@ impl Mascot {
             right_arm_start.x + arm_len * right_arm_angle.cos(),
             right_arm_start.y + arm_len * right_arm_angle.sin(),
         );
-        painter.line_segment([right_arm_start, right_arm_end], Stroke::new(4.0, self.colors.body_white));
+        painter.line_segment(
+            [right_arm_start, right_arm_end],
+            Stroke::new(4.0, self.colors.body_white),
+        );
         painter.circle_filled(right_arm_end, 4.0, self.colors.body_pink);
     }
 
@@ -566,13 +638,21 @@ impl Mascot {
         let right_foot = Pos2::new(body_center.x + 10.0, feet_y);
         painter.circle_filled(right_foot, 7.0, self.colors.body_pink);
         painter.circle_filled(right_foot, 4.0, self.colors.body_pink_dark);
-        painter.circle_stroke(right_foot, 7.0, Stroke::new(1.0, self.colors.body_pink_dark));
+        painter.circle_stroke(
+            right_foot,
+            7.0,
+            Stroke::new(1.0, self.colors.body_pink_dark),
+        );
     }
 
     fn draw_highlights(&self, painter: &egui::Painter, head_center: Pos2) {
         // Glossy highlight on head
         let highlight_pos = Pos2::new(head_center.x - 12.0, head_center.y - 10.0);
-        painter.circle_filled(highlight_pos, 4.0, Color32::from_rgba_unmultiplied(255, 255, 255, 100));
+        painter.circle_filled(
+            highlight_pos,
+            4.0,
+            Color32::from_rgba_unmultiplied(255, 255, 255, 100),
+        );
         painter.circle_filled(
             Pos2::new(highlight_pos.x + 2.0, highlight_pos.y + 3.0),
             2.0,
@@ -597,10 +677,7 @@ impl Mascot {
             let y_offset = ((self.frame as f32 * 0.1 + i as f32 * 0.5).sin() * 20.0) - 30.0;
             let fall = (self.frame % 60) as f32 * 0.8;
 
-            let pos = Pos2::new(
-                center.x + x_offset,
-                center.y + y_offset - 20.0 + fall,
-            );
+            let pos = Pos2::new(center.x + x_offset, center.y + y_offset - 20.0 + fall);
 
             let color = confetti_colors[i % confetti_colors.len()];
             let size = 2.0 + (seed.abs() * 2.0);
@@ -622,8 +699,16 @@ impl Mascot {
         let qm_pos = Pos2::new(qm_center.x, qm_center.y + bob);
 
         // Question mark background bubble
-        painter.circle_filled(qm_pos, 12.0, Color32::from_rgba_unmultiplied(255, 255, 255, 200));
-        painter.circle_stroke(qm_pos, 12.0, Stroke::new(1.5, Color32::from_rgb(200, 150, 200)));
+        painter.circle_filled(
+            qm_pos,
+            12.0,
+            Color32::from_rgba_unmultiplied(255, 255, 255, 200),
+        );
+        painter.circle_stroke(
+            qm_pos,
+            12.0,
+            Stroke::new(1.5, Color32::from_rgb(200, 150, 200)),
+        );
 
         // Draw "?" using simple shapes
         let q_color = Color32::from_rgb(150, 100, 180);
@@ -637,7 +722,10 @@ impl Mascot {
 
         // Stem
         painter.line_segment(
-            [Pos2::new(qm_pos.x + 4.0, qm_pos.y - 1.0), Pos2::new(qm_pos.x, qm_pos.y + 2.0)],
+            [
+                Pos2::new(qm_pos.x + 4.0, qm_pos.y - 1.0),
+                Pos2::new(qm_pos.x, qm_pos.y + 2.0),
+            ],
             Stroke::new(2.5, q_color),
         );
 

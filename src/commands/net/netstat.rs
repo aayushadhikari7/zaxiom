@@ -1,7 +1,7 @@
 //! netstat command - network statistics
 
-use std::process::Command as ProcessCommand;
 use anyhow::Result;
+use std::process::Command as ProcessCommand;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -45,7 +45,8 @@ impl Command for NetstatCommand {
                         -a           Show all connections and listening ports\n  \
                         -n           Show addresses and port numbers numerically\n  \
                         -o           Show process ID for each connection\n  \
-                        -p <proto>   Show connections for specified protocol (tcp/udp)".to_string());
+                        -p <proto>   Show connections for specified protocol (tcp/udp)"
+                        .to_string());
                 }
                 _ => {}
             }
@@ -68,7 +69,8 @@ impl Command for NetstatCommand {
             cmd.arg("-p").arg(proto);
         }
 
-        let output = cmd.output()
+        let output = cmd
+            .output()
             .map_err(|e| anyhow::anyhow!("netstat: {}", e))?;
 
         let stdout = String::from_utf8_lossy(&output.stdout);

@@ -1,8 +1,8 @@
 //! sed command - stream editor for text transformation
 
-use std::fs;
 use anyhow::Result;
 use regex::Regex;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -67,14 +67,20 @@ RELATED COMMANDS:
   awk      Pattern scanning
   tr       Character translation
   grep     Pattern search
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut in_place = false;
         let mut expression: Option<&String> = None;
         let mut file: Option<&String> = None;
@@ -83,7 +89,8 @@ RELATED COMMANDS:
             match arg.as_str() {
                 "-i" | "--in-place" => in_place = true,
                 "-h" | "--help" => {
-                    return Ok("Usage: sed [OPTIONS] 's/pattern/replacement/[flags]' [file]\n\
+                    return Ok(
+                        "Usage: sed [OPTIONS] 's/pattern/replacement/[flags]' [file]\n\
                         Options:\n  \
                         -i    Edit file in place\n\n\
                         Flags:\n  \
@@ -92,7 +99,9 @@ RELATED COMMANDS:
                         Examples:\n  \
                         sed 's/foo/bar/' file.txt\n  \
                         sed 's/foo/bar/g' file.txt\n  \
-                        sed 's/foo/bar/gi' file.txt".to_string());
+                        sed 's/foo/bar/gi' file.txt"
+                            .to_string(),
+                    );
                 }
                 _ if !arg.starts_with('-') => {
                     if expression.is_none() {
@@ -123,8 +132,7 @@ RELATED COMMANDS:
         // Get content
         let content = if let Some(f) = file {
             let path = state.resolve_path(f);
-            fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("sed: {}: {}", f, e))?
+            fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("sed: {}: {}", f, e))?
         } else if let Some(input) = stdin {
             input.to_string()
         } else {
@@ -148,8 +156,7 @@ RELATED COMMANDS:
         if in_place {
             if let Some(f) = file {
                 let path = state.resolve_path(f);
-                fs::write(&path, &result)
-                    .map_err(|e| anyhow::anyhow!("sed: {}: {}", f, e))?;
+                fs::write(&path, &result).map_err(|e| anyhow::anyhow!("sed: {}: {}", f, e))?;
                 return Ok(String::new());
             }
         }

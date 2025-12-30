@@ -1,7 +1,7 @@
 //! xxd command - make a hexdump
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -67,7 +67,8 @@ RELATED COMMANDS:
   od         Octal dump
   file       Identify file type
   strings    Extract text from binary
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -89,7 +90,8 @@ RELATED COMMANDS:
                     return Ok("Usage: xxd [OPTIONS] <file>\n\
                         Options:\n  \
                         -r         Reverse: convert hex dump to binary\n  \
-                        -c <cols>  Number of columns (default 16)".to_string());
+                        -c <cols>  Number of columns (default 16)"
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => file = Some(&args[i]),
                 _ => {}
@@ -102,8 +104,8 @@ RELATED COMMANDS:
 
         if reverse {
             // Reverse hex dump to binary
-            let content = fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("xxd: {}: {}", file, e))?;
+            let content =
+                fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("xxd: {}: {}", file, e))?;
 
             let mut bytes = Vec::new();
             for line in content.lines() {
@@ -111,16 +113,17 @@ RELATED COMMANDS:
                 if let Some(hex_part) = line.split(':').nth(1) {
                     let hex_str: String = hex_part
                         .chars()
-                        .take_while(|c| *c != ' ' || hex_part.chars().filter(|c| *c == ' ').count() < 2)
+                        .take_while(|c| {
+                            *c != ' ' || hex_part.chars().filter(|c| *c == ' ').count() < 2
+                        })
                         .filter(|c| c.is_ascii_hexdigit())
                         .collect();
 
                     for chunk in hex_str.as_bytes().chunks(2) {
                         if chunk.len() == 2 {
-                            if let Ok(byte) = u8::from_str_radix(
-                                std::str::from_utf8(chunk).unwrap_or("00"),
-                                16
-                            ) {
+                            if let Ok(byte) =
+                                u8::from_str_radix(std::str::from_utf8(chunk).unwrap_or("00"), 16)
+                            {
                                 bytes.push(byte);
                             }
                         }
@@ -131,8 +134,7 @@ RELATED COMMANDS:
             Ok(String::from_utf8_lossy(&bytes).to_string())
         } else {
             // Normal hex dump
-            let content = fs::read(&path)
-                .map_err(|e| anyhow::anyhow!("xxd: {}: {}", file, e))?;
+            let content = fs::read(&path).map_err(|e| anyhow::anyhow!("xxd: {}: {}", file, e))?;
 
             let mut output = Vec::new();
             let mut offset = 0;
@@ -141,7 +143,13 @@ RELATED COMMANDS:
                 let hex: Vec<String> = chunk.iter().map(|b| format!("{:02x}", b)).collect();
                 let ascii: String = chunk
                     .iter()
-                    .map(|&b| if b.is_ascii_graphic() || b == b' ' { b as char } else { '.' })
+                    .map(|&b| {
+                        if b.is_ascii_graphic() || b == b' ' {
+                            b as char
+                        } else {
+                            '.'
+                        }
+                    })
                     .collect();
 
                 // Pad hex to fill columns

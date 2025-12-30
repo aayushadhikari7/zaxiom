@@ -1,7 +1,7 @@
 //! cut command - remove sections from each line
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -85,7 +85,8 @@ RELATED COMMANDS:
   awk      More powerful field processing
   paste    Merge lines of files
   tr       Character translation
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -120,7 +121,8 @@ RELATED COMMANDS:
                         Options:\n  \
                         -d <char>    Use <char> as delimiter\n  \
                         -f <list>    Select only these fields\n  \
-                        -c <list>    Select only these characters".to_string());
+                        -c <list>    Select only these characters"
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => file = Some(&args[i]),
                 _ => {}
@@ -130,8 +132,8 @@ RELATED COMMANDS:
 
         let file = file.ok_or_else(|| anyhow::anyhow!("cut: missing file operand"))?;
         let path = state.resolve_path(file);
-        let content = fs::read_to_string(&path)
-            .map_err(|e| anyhow::anyhow!("cut: {}: {}", file, e))?;
+        let content =
+            fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("cut: {}: {}", file, e))?;
 
         let mut result: Vec<String> = Vec::new();
 

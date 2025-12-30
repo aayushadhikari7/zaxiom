@@ -24,7 +24,12 @@ impl Command for BcCommand {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, _state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        _state: &mut TerminalState,
+    ) -> Result<String> {
         if !args.is_empty() && (args[0] == "-h" || args[0] == "--help") {
             return Ok("Usage: bc [EXPRESSION]\n\
                 A basic calculator.\n\n\
@@ -35,7 +40,8 @@ impl Command for BcCommand {
                 ( )          Grouping\n\n\
                 Examples:\n  \
                 echo '2 + 2' | bc\n  \
-                bc '3.14 * 2'".to_string());
+                bc '3.14 * 2'"
+                .to_string());
         }
 
         let expr = if !args.is_empty() {
@@ -72,7 +78,10 @@ fn evaluate_bc(expr: &str) -> Result<String> {
             if result.fract() == 0.0 {
                 Ok(format!("{}", result as i64))
             } else {
-                Ok(format!("{:.6}", result).trim_end_matches('0').trim_end_matches('.').to_string())
+                Ok(format!("{:.6}", result)
+                    .trim_end_matches('0')
+                    .trim_end_matches('.')
+                    .to_string())
             }
         }
         Err(e) => Err(e),
@@ -195,6 +204,7 @@ fn eval_factor(expr: &str, pos: &mut usize) -> Result<f64> {
     }
 
     let num_str: String = expr.chars().skip(start).take(*pos - start).collect();
-    num_str.parse::<f64>()
+    num_str
+        .parse::<f64>()
         .map_err(|_| anyhow::anyhow!("bc: invalid number"))
 }

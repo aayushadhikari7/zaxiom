@@ -5,7 +5,7 @@ use std::fs;
 use anyhow::Result;
 
 use crate::commands::traits::Command;
-use crate::terminal::img::{is_image_file, image_to_ascii, format_image_info};
+use crate::terminal::img::{format_image_info, image_to_ascii, is_image_file};
 use crate::terminal::state::TerminalState;
 use crate::terminal::syntax;
 
@@ -61,14 +61,20 @@ RELATED COMMANDS:
   head     Show first lines
   tail     Show last lines
   less     Page through file (coming soon)
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut show_line_numbers = false;
         let mut force_syntax = false;
         let mut no_syntax = false;
@@ -84,7 +90,8 @@ RELATED COMMANDS:
                         Options:\n  \
                         -n, --number   Number all output lines\n  \
                         -s, --syntax   Force syntax highlighting\n  \
-                        -p, --plain    Disable syntax highlighting".to_string());
+                        -p, --plain    Disable syntax highlighting"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => files.push(arg),
                 _ => {}
@@ -140,16 +147,17 @@ RELATED COMMANDS:
                 continue;
             }
 
-            let contents = fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("cat: {}: {}", file, e))?;
+            let contents =
+                fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("cat: {}: {}", file, e))?;
 
             // Check for syntax highlighting
-            let should_highlight = !no_syntax && (force_syntax || {
-                path.extension()
-                    .and_then(|e| e.to_str())
-                    .map(syntax::is_supported)
-                    .unwrap_or(false)
-            });
+            let should_highlight = !no_syntax
+                && (force_syntax || {
+                    path.extension()
+                        .and_then(|e| e.to_str())
+                        .map(syntax::is_supported)
+                        .unwrap_or(false)
+                });
 
             if should_highlight {
                 // Get the file extension for syntax detection
@@ -179,11 +187,20 @@ RELATED COMMANDS:
                                 let text = segment.text.trim_end_matches('\n');
 
                                 if segment.bold {
-                                    output.push_str(&format!("\x1b[1;38;2;{};{};{}m{}\x1b[0m", r, g, b, text));
+                                    output.push_str(&format!(
+                                        "\x1b[1;38;2;{};{};{}m{}\x1b[0m",
+                                        r, g, b, text
+                                    ));
                                 } else if segment.italic {
-                                    output.push_str(&format!("\x1b[3;38;2;{};{};{}m{}\x1b[0m", r, g, b, text));
+                                    output.push_str(&format!(
+                                        "\x1b[3;38;2;{};{};{}m{}\x1b[0m",
+                                        r, g, b, text
+                                    ));
                                 } else {
-                                    output.push_str(&format!("\x1b[38;2;{};{};{}m{}\x1b[0m", r, g, b, text));
+                                    output.push_str(&format!(
+                                        "\x1b[38;2;{};{};{}m{}\x1b[0m",
+                                        r, g, b, text
+                                    ));
                                 }
                             }
 

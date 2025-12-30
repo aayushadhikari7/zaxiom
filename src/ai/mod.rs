@@ -14,42 +14,56 @@
 
 use anyhow::{anyhow, Result};
 
-pub mod provider;
-pub mod groq;
 pub mod anthropic;
-pub mod openai;
-pub mod gemini;
-pub mod mistral;
-pub mod deepseek;
-pub mod xai;
 pub mod cohere;
-pub mod perplexity;
+pub mod deepseek;
+pub mod gemini;
+pub mod groq;
+pub mod mistral;
 pub mod ollama;
+pub mod openai;
+pub mod perplexity;
+pub mod provider;
+pub mod xai;
 
-pub use provider::{AiProvider, ProviderChoice};
-pub use groq::GroqProvider;
 pub use anthropic::AnthropicProvider;
-pub use openai::OpenAIProvider;
-pub use gemini::GeminiProvider;
-pub use mistral::MistralProvider;
-pub use deepseek::DeepSeekProvider;
-pub use xai::XaiProvider;
 pub use cohere::CohereProvider;
-pub use perplexity::PerplexityProvider;
+pub use deepseek::DeepSeekProvider;
+pub use gemini::GeminiProvider;
+pub use groq::GroqProvider;
+pub use mistral::MistralProvider;
 pub use ollama::OllamaProvider;
+pub use openai::OpenAIProvider;
+pub use perplexity::PerplexityProvider;
+pub use provider::{AiProvider, ProviderChoice};
+pub use xai::XaiProvider;
 
 /// Null provider - used when no AI provider is configured
 /// Returns helpful setup instructions instead of actual AI responses
 struct NullProvider;
 
 impl AiProvider for NullProvider {
-    fn name(&self) -> &'static str { "none" }
-    fn display_name(&self) -> &'static str { "No Provider" }
-    fn is_available(&self) -> bool { false }
-    fn api_key_env(&self) -> &'static str { "" }
-    fn signup_url(&self) -> &'static str { "" }
-    fn default_model(&self) -> &'static str { "" }
-    fn models(&self) -> Vec<&'static str> { vec![] }
+    fn name(&self) -> &'static str {
+        "none"
+    }
+    fn display_name(&self) -> &'static str {
+        "No Provider"
+    }
+    fn is_available(&self) -> bool {
+        false
+    }
+    fn api_key_env(&self) -> &'static str {
+        ""
+    }
+    fn signup_url(&self) -> &'static str {
+        ""
+    }
+    fn default_model(&self) -> &'static str {
+        ""
+    }
+    fn models(&self) -> Vec<&'static str> {
+        vec![]
+    }
 
     fn chat(&self, _prompt: &str, _model: Option<&str>) -> Result<String> {
         Err(anyhow!(
@@ -196,7 +210,11 @@ pub fn parse_provider_flag(input: &str) -> (ProviderChoice, String) {
 
     // Check if first part is a flag
     if let Some(choice) = ProviderChoice::from_flag(parts[0]) {
-        let remaining = if parts.len() > 1 { parts[1].to_string() } else { String::new() };
+        let remaining = if parts.len() > 1 {
+            parts[1].to_string()
+        } else {
+            String::new()
+        };
         return (choice, remaining);
     }
 
@@ -222,7 +240,12 @@ pub fn handle_ai_chat(input: &str) -> String {
     let provider = get_provider_from_choice(&choice);
 
     match provider.chat(&prompt, None) {
-        Ok(response) => format!("{} {}:\n\n{}", get_provider_emoji(&choice), provider.display_name(), response),
+        Ok(response) => format!(
+            "{} {}:\n\n{}",
+            get_provider_emoji(&choice),
+            provider.display_name(),
+            response
+        ),
         Err(e) => format!("Error: {}", e),
     }
 }
@@ -245,7 +268,10 @@ pub fn set_default_provider(choice: &ProviderChoice) -> String {
             provider.display_name()
         )
     } else {
-        format!("Failed to save default provider. Using {} for this session only.", provider_name)
+        format!(
+            "Failed to save default provider. Using {} for this session only.",
+            provider_name
+        )
     }
 }
 
@@ -282,13 +308,21 @@ pub fn handle_ai_chat_with_context(
     let provider = get_provider_from_choice(&choice);
 
     match provider.chat(&full_prompt, None) {
-        Ok(response) => format!("{} {}:\n\n{}", get_provider_emoji(&choice), provider.display_name(), response),
+        Ok(response) => format!(
+            "{} {}:\n\n{}",
+            get_provider_emoji(&choice),
+            provider.display_name(),
+            response
+        ),
         Err(e) => format!("Error: {}", e),
     }
 }
 
 /// Build terminal context for AI
-fn build_terminal_context(state: &crate::terminal::state::TerminalState, history: Option<&[String]>) -> String {
+fn build_terminal_context(
+    state: &crate::terminal::state::TerminalState,
+    history: Option<&[String]>,
+) -> String {
     let mut context = String::new();
 
     context.push_str(&format!("Current directory: {}\n", state.cwd().display()));
@@ -350,7 +384,8 @@ pub fn get_help() -> String {
         }
     }
 
-    format!(r#"
+    format!(
+        r#"
 ┌───────────────────────────────────────────────────────────────┐
 │  🤖 AI Chat - Multi-Provider Support                         │
 ├───────────────────────────────────────────────────────────────┤
@@ -378,7 +413,21 @@ pub fn get_help() -> String {
 │  COMMANDS: ai status | ai providers                           │
 └───────────────────────────────────────────────────────────────┘
 "#,
-        if available.is_empty() { "│    (none configured)\n".to_string() } else { available.iter().map(|s| format!("│{}\n", s)).collect::<String>() },
-        if unavailable.is_empty() { "│    (all configured!)\n".to_string() } else { unavailable.iter().map(|s| format!("│{}\n", s)).collect::<String>() }
+        if available.is_empty() {
+            "│    (none configured)\n".to_string()
+        } else {
+            available
+                .iter()
+                .map(|s| format!("│{}\n", s))
+                .collect::<String>()
+        },
+        if unavailable.is_empty() {
+            "│    (all configured!)\n".to_string()
+        } else {
+            unavailable
+                .iter()
+                .map(|s| format!("│{}\n", s))
+                .collect::<String>()
+        }
     )
 }

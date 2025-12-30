@@ -1,11 +1,11 @@
 //! tar command - archive utility
 
-use std::fs::File;
 use anyhow::Result;
-use tar::{Archive, Builder};
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
+use std::fs::File;
+use tar::{Archive, Builder};
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -102,7 +102,8 @@ RELATED COMMANDS:
   zip      ZIP format archives
   gzip     Gzip single files
   gunzip   Decompress gzip
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -143,14 +144,16 @@ RELATED COMMANDS:
                     -t    List archive contents\n  \
                     -v    Verbose mode\n  \
                     -z    Use gzip compression\n  \
-                    -f    Archive file name".to_string());
+                    -f    Archive file name"
+                    .to_string());
             } else {
                 files.push(arg.clone());
             }
             i += 1;
         }
 
-        let archive_file = archive_file.ok_or_else(|| anyhow::anyhow!("tar: no archive specified"))?;
+        let archive_file =
+            archive_file.ok_or_else(|| anyhow::anyhow!("tar: no archive specified"))?;
         let archive_path = state.resolve_path(&archive_file);
 
         if create {

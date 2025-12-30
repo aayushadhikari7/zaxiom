@@ -33,6 +33,7 @@ impl Command for HistoryCommand {
         // access to the CommandHistory struct from the app
         Ok("💡 Tip: Use ↑/↓ arrows to navigate command history\n\
             📝 History is stored in memory during this session\n\
-            ⚡ history -c would clear history".to_string())
+            ⚡ history -c would clear history"
+            .to_string())
     }
 }

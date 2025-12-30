@@ -30,7 +30,8 @@ impl Command for LnCommand {
                 "-h" | "--help" => {
                     return Ok("Usage: ln [-s] <target> <link_name>\n\
                         Options:\n  \
-                        -s    Create symbolic link".to_string());
+                        -s    Create symbolic link"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => paths.push(arg),
                 _ => {}
@@ -38,7 +39,9 @@ impl Command for LnCommand {
         }
 
         if paths.len() < 2 {
-            return Err(anyhow::anyhow!("ln: missing operands\nUsage: ln [-s] <target> <link_name>"));
+            return Err(anyhow::anyhow!(
+                "ln: missing operands\nUsage: ln [-s] <target> <link_name>"
+            ));
         }
 
         let target = state.resolve_path(paths[0]);
@@ -57,10 +60,18 @@ impl Command for LnCommand {
             {
                 std::os::unix::fs::symlink(&target, &link_name)?;
             }
-            Ok(format!("Created symbolic link: {} -> {}", link_name.display(), target.display()))
+            Ok(format!(
+                "Created symbolic link: {} -> {}",
+                link_name.display(),
+                target.display()
+            ))
         } else {
             std::fs::hard_link(&target, &link_name)?;
-            Ok(format!("Created hard link: {} -> {}", link_name.display(), target.display()))
+            Ok(format!(
+                "Created hard link: {} -> {}",
+                link_name.display(),
+                target.display()
+            ))
         }
     }
 }

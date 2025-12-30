@@ -164,8 +164,14 @@ mod tests {
     #[test]
     fn test_arrow_keys() {
         let mods = egui::Modifiers::default();
-        assert_eq!(key_to_bytes(Key::ArrowUp, &mods), Some(vec![0x1b, b'[', b'A']));
-        assert_eq!(key_to_bytes(Key::ArrowDown, &mods), Some(vec![0x1b, b'[', b'B']));
+        assert_eq!(
+            key_to_bytes(Key::ArrowUp, &mods),
+            Some(vec![0x1b, b'[', b'A'])
+        );
+        assert_eq!(
+            key_to_bytes(Key::ArrowDown, &mods),
+            Some(vec![0x1b, b'[', b'B'])
+        );
     }
 
     #[test]

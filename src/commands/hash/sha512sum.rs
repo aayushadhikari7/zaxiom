@@ -1,8 +1,8 @@
 //! sha512sum command - compute SHA512 message digest
 
-use std::fs;
 use anyhow::Result;
-use sha2::{Sha512, Digest};
+use sha2::{Digest, Sha512};
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -69,7 +69,8 @@ RELATED COMMANDS:
   sha256sum   SHA-256 (shorter, widely used)
   sha384sum   SHA-384 (medium length)
   blake3sum   BLAKE3 (faster, equally secure)
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn supports_stdin(&self) -> bool {
@@ -86,7 +87,8 @@ RELATED COMMANDS:
         for arg in args {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: sha512sum <file> [file2...]\n\
-                    Compute SHA512 message digest for files.".to_string());
+                    Compute SHA512 message digest for files."
+                    .to_string());
             }
 
             if arg.starts_with('-') {
@@ -94,8 +96,8 @@ RELATED COMMANDS:
             }
 
             let path = state.resolve_path(arg);
-            let content = fs::read(&path)
-                .map_err(|e| anyhow::anyhow!("sha512sum: {}: {}", arg, e))?;
+            let content =
+                fs::read(&path).map_err(|e| anyhow::anyhow!("sha512sum: {}: {}", arg, e))?;
 
             let mut hasher = Sha512::new();
             hasher.update(&content);
@@ -107,7 +109,12 @@ RELATED COMMANDS:
         Ok(output.join("\n"))
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         if let Some(input) = stdin {
             let mut hasher = Sha512::new();
             hasher.update(input.as_bytes());

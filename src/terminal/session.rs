@@ -4,9 +4,9 @@
 
 #![allow(dead_code)]
 
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
 
 /// Saved session data
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -124,8 +124,7 @@ impl SessionManager {
             .filter_map(|e| {
                 let path = e.path();
                 if path.extension().map(|s| s == "json").unwrap_or(false) {
-                    path.file_stem()
-                        .map(|s| s.to_string_lossy().to_string())
+                    path.file_stem().map(|s| s.to_string_lossy().to_string())
                 } else {
                     None
                 }

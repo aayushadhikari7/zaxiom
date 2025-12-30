@@ -1,8 +1,8 @@
 //! file command - determine file type
 
+use anyhow::Result;
 use std::fs::{self, File};
 use std::io::Read;
-use anyhow::Result;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -29,7 +29,8 @@ impl Command for FileCommand {
 
         if args[0] == "-h" || args[0] == "--help" {
             return Ok("Usage: file <file...>\n\
-                Determine the type of each file.".to_string());
+                Determine the type of each file."
+                .to_string());
         }
 
         let mut output = Vec::new();

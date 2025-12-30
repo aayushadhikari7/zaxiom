@@ -1,7 +1,7 @@
 //! export command - set environment variables
 
-use std::env;
 use anyhow::Result;
+use std::env;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -79,7 +79,8 @@ RELATED COMMANDS:
   env      View all environment variables
   unset    Remove a variable
   echo     Print variable: echo $VAR
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -96,7 +97,8 @@ RELATED COMMANDS:
                 return Ok("Usage: export [name[=value] ...]\n\
                     Without arguments, prints all environment variables.\n\
                     With name=value, sets the variable.\n\
-                    With name only, marks variable for export.".to_string());
+                    With name only, marks variable for export."
+                    .to_string());
             }
 
             if let Some(eq_pos) = arg.find('=') {

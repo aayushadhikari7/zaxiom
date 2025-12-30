@@ -1,7 +1,7 @@
 //! diff command - compare files line by line
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -87,7 +87,8 @@ RELATED COMMANDS:
   cmp      Compare binary files
   comm     Compare sorted files
   patch    Apply diff patches
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -100,7 +101,8 @@ RELATED COMMANDS:
                 "-h" | "--help" => {
                     return Ok("Usage: diff [OPTIONS] <file1> <file2>\n\
                         Options:\n  \
-                        -u    Output unified diff format".to_string());
+                        -u    Output unified diff format"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => files.push(arg),
                 _ => {}
@@ -114,10 +116,10 @@ RELATED COMMANDS:
         let path1 = state.resolve_path(files[0]);
         let path2 = state.resolve_path(files[1]);
 
-        let content1 = fs::read_to_string(&path1)
-            .map_err(|e| anyhow::anyhow!("diff: {}: {}", files[0], e))?;
-        let content2 = fs::read_to_string(&path2)
-            .map_err(|e| anyhow::anyhow!("diff: {}: {}", files[1], e))?;
+        let content1 =
+            fs::read_to_string(&path1).map_err(|e| anyhow::anyhow!("diff: {}: {}", files[0], e))?;
+        let content2 =
+            fs::read_to_string(&path2).map_err(|e| anyhow::anyhow!("diff: {}: {}", files[1], e))?;
 
         let lines1: Vec<&str> = content1.lines().collect();
         let lines2: Vec<&str> = content2.lines().collect();

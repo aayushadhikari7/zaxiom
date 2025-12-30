@@ -65,7 +65,8 @@ RELATED COMMANDS:
   date       Current date and time
   hostname   System name
   uname      System information
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -77,7 +78,8 @@ RELATED COMMANDS:
                 "-h" | "--help" => {
                     return Ok("Usage: uptime [OPTIONS]\n\
                         Options:\n  \
-                        -p    Show uptime in pretty format".to_string());
+                        -p    Show uptime in pretty format"
+                        .to_string());
                 }
                 _ => {}
             }
@@ -116,10 +118,18 @@ RELATED COMMANDS:
                     parts.push(format!("{} day{}", days, if days == 1 { "" } else { "s" }));
                 }
                 if hours > 0 {
-                    parts.push(format!("{} hour{}", hours, if hours == 1 { "" } else { "s" }));
+                    parts.push(format!(
+                        "{} hour{}",
+                        hours,
+                        if hours == 1 { "" } else { "s" }
+                    ));
                 }
                 if minutes > 0 {
-                    parts.push(format!("{} minute{}", minutes, if minutes == 1 { "" } else { "s" }));
+                    parts.push(format!(
+                        "{} minute{}",
+                        minutes,
+                        if minutes == 1 { "" } else { "s" }
+                    ));
                 }
                 Ok(format!("up {}", parts.join(", ")))
             } else {

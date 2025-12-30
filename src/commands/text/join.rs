@@ -75,7 +75,9 @@ impl Command for JoinCommand {
                 line.split(separator).collect()
             };
             if let Some(key) = fields.get(field1.saturating_sub(1)) {
-                map1.entry(key.to_string()).or_default().push(line.to_string());
+                map1.entry(key.to_string())
+                    .or_default()
+                    .push(line.to_string());
             }
         }
 
@@ -97,8 +99,17 @@ impl Command for JoinCommand {
                             .filter(|(i, _)| *i != field2.saturating_sub(1))
                             .map(|(_, f)| *f)
                             .collect();
-                        let sep_str = if separator == ' ' { " " } else { &separator.to_string() };
-                        output.push(format!("{}{}{}", line1, sep_str, other_fields.join(sep_str)));
+                        let sep_str = if separator == ' ' {
+                            " "
+                        } else {
+                            &separator.to_string()
+                        };
+                        output.push(format!(
+                            "{}{}{}",
+                            line1,
+                            sep_str,
+                            other_fields.join(sep_str)
+                        ));
                     }
                 }
             }

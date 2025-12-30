@@ -1,26 +1,29 @@
 //! Main application struct and egui rendering loop
 
-use std::collections::HashMap;
 use arboard::Clipboard;
 use eframe::egui;
+use std::collections::HashMap;
 
 use crate::commands::files::EditorState;
-use crate::config::theme::{Theme, ThemeName};
 use crate::config::settings::Config;
+use crate::config::theme::{Theme, ThemeName};
 use crate::mascot::Mascot;
-use crate::pty::{InputMode, PtyBuffer, PtyOutput, PtySession, TerminalGrid, input::key_to_bytes, input::char_to_bytes};
+use crate::pty::{
+    input::char_to_bytes, input::key_to_bytes, InputMode, PtyBuffer, PtyOutput, PtySession,
+    TerminalGrid,
+};
 use crate::shell::executor::{ExecutionTarget, Executor};
 use crate::terminal::ansi;
 use crate::terminal::autocomplete::{Autocomplete, Suggestion, SuggestionKind};
 use crate::terminal::buffer::{LineType, OutputBuffer};
-use crate::terminal::hints::{HintsExtractor, HintsMode, HintType};
-use crate::terminal::smart_history::SmartHistory;
+use crate::terminal::fuzzy::{FuzzyAction, FuzzyFinder, FuzzyMode};
+use crate::terminal::hints::{HintType, HintsExtractor, HintsMode};
+use crate::terminal::palette::CommandPalette;
 use crate::terminal::session::{SavedSession, SavedTab, SessionManager};
+use crate::terminal::smart_history::SmartHistory;
 use crate::terminal::split::{SplitDirection, SplitManager};
 use crate::terminal::state::TerminalState;
-use crate::terminal::vi_mode::{ViMode, ViAction, ViState};
-use crate::terminal::palette::CommandPalette;
-use crate::terminal::fuzzy::{FuzzyFinder, FuzzyMode, FuzzyAction};
+use crate::terminal::vi_mode::{ViAction, ViMode, ViState};
 
 /// ASCII art logo only (shown after clear)
 const ASCII_LOGO: &str = r#"
@@ -166,7 +169,7 @@ impl PaneSession {
             vi_mode: ViMode::new(),
             hints_scroll_to_selected: false,
             fuzzy_finder: FuzzyFinder::new(),
-            pty_session: None,  // PTY spawned on-demand for external commands
+            pty_session: None, // PTY spawned on-demand for external commands
             pty_buffer: PtyBuffer::new(24, 80),
             pty_grid: TerminalGrid::new(24, 80),
             input_mode: InputMode::Normal,
@@ -248,7 +251,7 @@ impl PaneSession {
             }
 
             // Calculate character dimensions (approximate for monospace)
-            let char_width = font_size * 0.6;  // Approximate monospace ratio
+            let char_width = font_size * 0.6; // Approximate monospace ratio
             let char_height = font_size * line_height;
 
             let cols = (width / char_width).max(1.0) as u16;
@@ -322,7 +325,9 @@ impl TabSession {
     /// Create a new tab session with a single pane
     pub fn new(id: usize, show_banner: bool) -> Self {
         let first_pane = PaneSession::new(show_banner);
-        let title = first_pane.state.cwd()
+        let title = first_pane
+            .state
+            .cwd()
             .file_name()
             .map(|n| n.to_string_lossy().to_string())
             .unwrap_or_else(|| "~".to_string());
@@ -352,7 +357,7 @@ impl TabSession {
     /// Split the focused pane
     pub fn split(&mut self, direction: SplitDirection) {
         let new_pane_id = self.splits.split(direction);
-        let new_pane = PaneSession::new(true);  // Show banner in new panes
+        let new_pane = PaneSession::new(true); // Show banner in new panes
         self.panes.insert(new_pane_id, new_pane);
     }
 
@@ -370,7 +375,9 @@ impl TabSession {
     /// Update title based on focused pane's directory
     pub fn update_title(&mut self) {
         if let Some(pane) = self.focused_pane() {
-            self.title = pane.state.cwd()
+            self.title = pane
+                .state
+                .cwd()
                 .file_name()
                 .map(|n| n.to_string_lossy().to_string())
                 .unwrap_or_else(|| "~".to_string());
@@ -462,7 +469,9 @@ impl ZaxiomApp {
         let config = Config::load();
 
         // Load theme from config or use default
-        let theme_name = config.theme.name
+        let theme_name = config
+            .theme
+            .name
             .as_ref()
             .and_then(|name| ThemeName::from_string(name))
             .unwrap_or_default();
@@ -559,7 +568,8 @@ impl ZaxiomApp {
 
         // Clear the default "New pane" message and show restore message
         pane.buffer.clear();
-        pane.buffer.push_line(&format!(" Session restored: {}", saved.cwd.display()));
+        pane.buffer
+            .push_line(&format!(" Session restored: {}", saved.cwd.display()));
 
         let mut panes = HashMap::new();
         panes.insert(0, pane);
@@ -580,7 +590,9 @@ impl ZaxiomApp {
             // Get the focused pane's data (or first pane if none focused)
             if let Some(pane) = tab.focused_pane() {
                 // Get commands from SmartHistory entries
-                let history: Vec<String> = pane.history.all()
+                let history: Vec<String> = pane
+                    .history
+                    .all()
                     .take(100) // Limit to last 100 commands
                     .map(|entry| entry.command.clone())
                     .collect();
@@ -609,7 +621,7 @@ impl ZaxiomApp {
 
     /// Create a new tab
     fn new_tab(&mut self) {
-        let tab = TabSession::new(self.next_tab_id, true);  // Show banner in new tabs
+        let tab = TabSession::new(self.next_tab_id, true); // Show banner in new tabs
         self.next_tab_id += 1;
         self.tabs.push(tab);
         self.active_tab = self.tabs.len() - 1;
@@ -648,11 +660,14 @@ impl ZaxiomApp {
         if let Some(ref mut clipboard) = self.clipboard {
             if clipboard.set_text(text.to_string()).is_ok() {
                 self.clipboard_feedback = Some((
-                    format!("✨ Copied~ (◕‿◕) {}", if text.len() > 30 {
-                        format!("{}...", &text[..30])
-                    } else {
-                        text.to_string()
-                    }),
+                    format!(
+                        "✨ Copied~ (◕‿◕) {}",
+                        if text.len() > 30 {
+                            format!("{}...", &text[..30])
+                        } else {
+                            text.to_string()
+                        }
+                    ),
                     std::time::Instant::now(),
                 ));
             }
@@ -759,9 +774,8 @@ impl ZaxiomApp {
 
         let theme_to_apply = if let Some(pane) = tab.panes.get_mut(&pane_id) {
             // History expansion: !! = last command, !n = nth command
-            let history_commands: Vec<String> = pane.history.all()
-                .map(|e| e.command.clone())
-                .collect();
+            let history_commands: Vec<String> =
+                pane.history.all().map(|e| e.command.clone()).collect();
             let command = Self::expand_history(command, &history_commands);
             let command = command.as_str();
 
@@ -830,7 +844,11 @@ impl ZaxiomApp {
                 }
                 ExecutionTarget::Native | ExecutionTarget::Special => {
                     // Execute as native command (instant!)
-                    match self.executor.execute_with_history(command, &mut pane.state, Some(&history)) {
+                    match self.executor.execute_with_history(
+                        command,
+                        &mut pane.state,
+                        Some(&history),
+                    ) {
                         Ok(output) => {
                             // Check for special command markers
                             if output.starts_with("\x1b[CLEAR]") {
@@ -848,10 +866,14 @@ impl ZaxiomApp {
                                 match EditorState::new(path.clone()) {
                                     Ok(editor_state) => {
                                         self.editor = Some(editor_state);
-                                        pane.buffer.push_line(&format!("📝 Opening {} ...", path.display()));
+                                        pane.buffer.push_line(&format!(
+                                            "📝 Opening {} ...",
+                                            path.display()
+                                        ));
                                     }
                                     Err(e) => {
-                                        pane.buffer.push_error(&format!("Failed to open file: {}", e));
+                                        pane.buffer
+                                            .push_error(&format!("Failed to open file: {}", e));
                                     }
                                 }
                             } else if !output.is_empty() {
@@ -863,12 +885,14 @@ impl ZaxiomApp {
                         }
                         Err(e) => {
                             // Kawaii error messages!
-                            let sad_faces = ["(´;ω;`)", "(◞‸◟)", "(´・ω・`)", "(｡•́︿•̀｡)", "(っ◞‸◟c)"];
+                            let sad_faces =
+                                ["(´;ω;`)", "(◞‸◟)", "(´・ω・`)", "(｡•́︿•̀｡)", "(っ◞‸◟c)"];
                             let idx = std::time::SystemTime::now()
                                 .duration_since(std::time::UNIX_EPOCH)
                                 .map(|d| d.as_nanos() as usize % sad_faces.len())
                                 .unwrap_or(0);
-                            pane.buffer.push_error(&format!("{} Oopsie~ {}", sad_faces[idx], e));
+                            pane.buffer
+                                .push_error(&format!("{} Oopsie~ {}", sad_faces[idx], e));
                             false
                         }
                     }
@@ -1031,11 +1055,9 @@ impl ZaxiomApp {
             if !pane.suggestions.is_empty() {
                 let idx = pane.selected_suggestion.min(pane.suggestions.len() - 1);
                 let suggestion = pane.suggestions[idx].clone();
-                let (new_input, _) = self.autocomplete.apply_suggestion(
-                    &pane.input,
-                    pane.input.len(),
-                    &suggestion,
-                );
+                let (new_input, _) =
+                    self.autocomplete
+                        .apply_suggestion(&pane.input, pane.input.len(), &suggestion);
                 pane.input = new_input;
                 pane.show_suggestions = false;
                 pane.suppress_suggestions = true;
@@ -1088,11 +1110,12 @@ impl ZaxiomApp {
                             ));
 
                             // Tab title (clickable)
-                            let title_response = ui.add(egui::Label::new(
-                                egui::RichText::new(&tab.title)
-                                    .color(text_color)
-                                    .size(12.0),
-                            ).sense(egui::Sense::click()));
+                            let title_response = ui.add(
+                                egui::Label::new(
+                                    egui::RichText::new(&tab.title).color(text_color).size(12.0),
+                                )
+                                .sense(egui::Sense::click()),
+                            );
 
                             if title_response.clicked() {
                                 tab_to_switch = Some(i);
@@ -1100,11 +1123,14 @@ impl ZaxiomApp {
 
                             // Close button (only if more than 1 tab)
                             if self.tabs.len() > 1 {
-                                let close_response = ui.add(egui::Label::new(
-                                    egui::RichText::new("×")
-                                        .color(self.theme.comment_color)
-                                        .size(14.0),
-                                ).sense(egui::Sense::click()));
+                                let close_response = ui.add(
+                                    egui::Label::new(
+                                        egui::RichText::new("×")
+                                            .color(self.theme.comment_color)
+                                            .size(14.0),
+                                    )
+                                    .sense(egui::Sense::click()),
+                                );
 
                                 if close_response.clicked() {
                                     tab_to_close = Some(i);
@@ -1119,11 +1145,14 @@ impl ZaxiomApp {
             }
 
             // New tab button
-            let new_tab_response = ui.add(egui::Label::new(
-                egui::RichText::new(" + ")
-                    .color(self.theme.accent)
-                    .size(14.0),
-            ).sense(egui::Sense::click()));
+            let new_tab_response = ui.add(
+                egui::Label::new(
+                    egui::RichText::new(" + ")
+                        .color(self.theme.accent)
+                        .size(14.0),
+                )
+                .sense(egui::Sense::click()),
+            );
 
             if new_tab_response.clicked() {
                 self.new_tab();
@@ -1163,9 +1192,10 @@ impl eframe::App for ZaxiomApp {
         }
 
         // Request repaint if any PTY is active (for streaming output)
-        let has_active_pty = self.tabs.iter().any(|tab| {
-            tab.panes.values().any(|pane| pane.pty_session.is_some())
-        });
+        let has_active_pty = self
+            .tabs
+            .iter()
+            .any(|tab| tab.panes.values().any(|pane| pane.pty_session.is_some()));
         if has_active_pty {
             ctx.request_repaint();
         }
@@ -1258,22 +1288,52 @@ impl eframe::App for ZaxiomApp {
         ctx.input(|i| {
             // Handle editor keyboard when open - editor consumes all input FIRST
             if editor_is_open {
-                if i.key_pressed(egui::Key::Escape) { editor_exit = true; }
-                if i.modifiers.ctrl && i.key_pressed(egui::Key::X) { editor_exit = true; }
-                if i.modifiers.ctrl && i.key_pressed(egui::Key::S) { editor_save = true; }
-                if i.key_pressed(egui::Key::Backspace) { editor_backspace = true; }
-                if i.key_pressed(egui::Key::Enter) { editor_enter = true; }
-                if i.key_pressed(egui::Key::ArrowUp) { editor_up = true; }
-                if i.key_pressed(egui::Key::ArrowDown) { editor_down = true; }
-                if i.key_pressed(egui::Key::ArrowLeft) { editor_left = true; }
-                if i.key_pressed(egui::Key::ArrowRight) { editor_right = true; }
-                if i.key_pressed(egui::Key::PageUp) { editor_page_up = true; }
-                if i.key_pressed(egui::Key::PageDown) { editor_page_down = true; }
+                if i.key_pressed(egui::Key::Escape) {
+                    editor_exit = true;
+                }
+                if i.modifiers.ctrl && i.key_pressed(egui::Key::X) {
+                    editor_exit = true;
+                }
+                if i.modifiers.ctrl && i.key_pressed(egui::Key::S) {
+                    editor_save = true;
+                }
+                if i.key_pressed(egui::Key::Backspace) {
+                    editor_backspace = true;
+                }
+                if i.key_pressed(egui::Key::Enter) {
+                    editor_enter = true;
+                }
+                if i.key_pressed(egui::Key::ArrowUp) {
+                    editor_up = true;
+                }
+                if i.key_pressed(egui::Key::ArrowDown) {
+                    editor_down = true;
+                }
+                if i.key_pressed(egui::Key::ArrowLeft) {
+                    editor_left = true;
+                }
+                if i.key_pressed(egui::Key::ArrowRight) {
+                    editor_right = true;
+                }
+                if i.key_pressed(egui::Key::PageUp) {
+                    editor_page_up = true;
+                }
+                if i.key_pressed(egui::Key::PageDown) {
+                    editor_page_down = true;
+                }
                 if i.key_pressed(egui::Key::Home) {
-                    if i.modifiers.ctrl { editor_ctrl_home = true; } else { editor_home = true; }
+                    if i.modifiers.ctrl {
+                        editor_ctrl_home = true;
+                    } else {
+                        editor_home = true;
+                    }
                 }
                 if i.key_pressed(egui::Key::End) {
-                    if i.modifiers.ctrl { editor_ctrl_end = true; } else { editor_end = true; }
+                    if i.modifiers.ctrl {
+                        editor_ctrl_end = true;
+                    } else {
+                        editor_end = true;
+                    }
                 }
                 // Capture text input
                 for event in &i.events {
@@ -1288,17 +1348,22 @@ impl eframe::App for ZaxiomApp {
             }
 
             // Zaxiom shortcuts that always work (even in raw PTY mode)
-            let is_zaxiom_shortcut =
-                (i.modifiers.ctrl && !i.modifiers.shift && (
+            let is_zaxiom_shortcut = (i.modifiers.ctrl
+                && !i.modifiers.shift
+                && (
                     i.key_pressed(egui::Key::T) ||  // New tab
                     i.key_pressed(egui::Key::P) ||  // Command palette
                     i.key_pressed(egui::Key::W) ||  // Close pane/tab
-                    i.key_pressed(egui::Key::Tab)   // Switch focus
-                )) ||
-                (i.modifiers.ctrl && i.modifiers.shift && (
-                    i.key_pressed(egui::Key::E) ||  // Split horizontal
-                    i.key_pressed(egui::Key::D)     // Split vertical
-                ));
+                    i.key_pressed(egui::Key::Tab)
+                    // Switch focus
+                ))
+                || (i.modifiers.ctrl
+                    && i.modifiers.shift
+                    && (
+                        i.key_pressed(egui::Key::E) ||  // Split horizontal
+                    i.key_pressed(egui::Key::D)
+                        // Split vertical
+                    ));
 
             // Handle these shortcuts FIRST, before raw PTY mode
             if i.modifiers.ctrl && !i.modifiers.shift && i.key_pressed(egui::Key::T) {
@@ -1316,18 +1381,58 @@ impl eframe::App for ZaxiomApp {
                 }
                 // Capture key presses for PTY
                 for key in [
-                    egui::Key::Enter, egui::Key::Backspace, egui::Key::Tab,
-                    egui::Key::Escape, egui::Key::Delete, egui::Key::Insert,
-                    egui::Key::Home, egui::Key::End, egui::Key::PageUp, egui::Key::PageDown,
-                    egui::Key::ArrowUp, egui::Key::ArrowDown, egui::Key::ArrowLeft, egui::Key::ArrowRight,
-                    egui::Key::F1, egui::Key::F2, egui::Key::F3, egui::Key::F4,
-                    egui::Key::F5, egui::Key::F6, egui::Key::F7, egui::Key::F8,
-                    egui::Key::F9, egui::Key::F10, egui::Key::F11, egui::Key::F12,
-                    egui::Key::A, egui::Key::B, egui::Key::C, egui::Key::D, egui::Key::E,
-                    egui::Key::F, egui::Key::G, egui::Key::H, egui::Key::I, egui::Key::J,
-                    egui::Key::K, egui::Key::L, egui::Key::M, egui::Key::N, egui::Key::O,
-                    egui::Key::P, egui::Key::Q, egui::Key::R, egui::Key::S, egui::Key::T,
-                    egui::Key::U, egui::Key::V, egui::Key::W, egui::Key::X, egui::Key::Y, egui::Key::Z,
+                    egui::Key::Enter,
+                    egui::Key::Backspace,
+                    egui::Key::Tab,
+                    egui::Key::Escape,
+                    egui::Key::Delete,
+                    egui::Key::Insert,
+                    egui::Key::Home,
+                    egui::Key::End,
+                    egui::Key::PageUp,
+                    egui::Key::PageDown,
+                    egui::Key::ArrowUp,
+                    egui::Key::ArrowDown,
+                    egui::Key::ArrowLeft,
+                    egui::Key::ArrowRight,
+                    egui::Key::F1,
+                    egui::Key::F2,
+                    egui::Key::F3,
+                    egui::Key::F4,
+                    egui::Key::F5,
+                    egui::Key::F6,
+                    egui::Key::F7,
+                    egui::Key::F8,
+                    egui::Key::F9,
+                    egui::Key::F10,
+                    egui::Key::F11,
+                    egui::Key::F12,
+                    egui::Key::A,
+                    egui::Key::B,
+                    egui::Key::C,
+                    egui::Key::D,
+                    egui::Key::E,
+                    egui::Key::F,
+                    egui::Key::G,
+                    egui::Key::H,
+                    egui::Key::I,
+                    egui::Key::J,
+                    egui::Key::K,
+                    egui::Key::L,
+                    egui::Key::M,
+                    egui::Key::N,
+                    egui::Key::O,
+                    egui::Key::P,
+                    egui::Key::Q,
+                    egui::Key::R,
+                    egui::Key::S,
+                    egui::Key::T,
+                    egui::Key::U,
+                    egui::Key::V,
+                    egui::Key::W,
+                    egui::Key::X,
+                    egui::Key::Y,
+                    egui::Key::Z,
                 ] {
                     if i.key_pressed(key) {
                         pty_raw_key = Some(key);
@@ -1348,7 +1453,9 @@ impl eframe::App for ZaxiomApp {
             }
             // Handle command palette keyboard when open - palette consumes all input
             if self.command_palette.is_open {
-                if i.key_pressed(egui::Key::Escape) { palette_escape = true; }
+                if i.key_pressed(egui::Key::Escape) {
+                    palette_escape = true;
+                }
                 if i.key_pressed(egui::Key::Enter) {
                     if i.modifiers.ctrl {
                         palette_ctrl_enter = true;
@@ -1356,23 +1463,52 @@ impl eframe::App for ZaxiomApp {
                         palette_enter = true;
                     }
                 }
-                if i.key_pressed(egui::Key::ArrowUp) { palette_up = true; }
-                if i.key_pressed(egui::Key::ArrowDown) { palette_down = true; }
-                if i.key_pressed(egui::Key::Backspace) { palette_backspace = true; }
+                if i.key_pressed(egui::Key::ArrowUp) {
+                    palette_up = true;
+                }
+                if i.key_pressed(egui::Key::ArrowDown) {
+                    palette_down = true;
+                }
+                if i.key_pressed(egui::Key::Backspace) {
+                    palette_backspace = true;
+                }
                 // Capture letter/number keys for filtering
                 for (key, ch) in [
-                    (egui::Key::A, 'a'), (egui::Key::B, 'b'), (egui::Key::C, 'c'),
-                    (egui::Key::D, 'd'), (egui::Key::E, 'e'), (egui::Key::F, 'f'),
-                    (egui::Key::G, 'g'), (egui::Key::H, 'h'), (egui::Key::I, 'i'),
-                    (egui::Key::J, 'j'), (egui::Key::K, 'k'), (egui::Key::L, 'l'),
-                    (egui::Key::M, 'm'), (egui::Key::N, 'n'), (egui::Key::O, 'o'),
-                    (egui::Key::P, 'p'), (egui::Key::Q, 'q'), (egui::Key::R, 'r'),
-                    (egui::Key::S, 's'), (egui::Key::T, 't'), (egui::Key::U, 'u'),
-                    (egui::Key::V, 'v'), (egui::Key::W, 'w'), (egui::Key::X, 'x'),
-                    (egui::Key::Y, 'y'), (egui::Key::Z, 'z'),
-                    (egui::Key::Num0, '0'), (egui::Key::Num1, '1'), (egui::Key::Num2, '2'),
-                    (egui::Key::Num3, '3'), (egui::Key::Num4, '4'), (egui::Key::Num5, '5'),
-                    (egui::Key::Num6, '6'), (egui::Key::Num7, '7'), (egui::Key::Num8, '8'),
+                    (egui::Key::A, 'a'),
+                    (egui::Key::B, 'b'),
+                    (egui::Key::C, 'c'),
+                    (egui::Key::D, 'd'),
+                    (egui::Key::E, 'e'),
+                    (egui::Key::F, 'f'),
+                    (egui::Key::G, 'g'),
+                    (egui::Key::H, 'h'),
+                    (egui::Key::I, 'i'),
+                    (egui::Key::J, 'j'),
+                    (egui::Key::K, 'k'),
+                    (egui::Key::L, 'l'),
+                    (egui::Key::M, 'm'),
+                    (egui::Key::N, 'n'),
+                    (egui::Key::O, 'o'),
+                    (egui::Key::P, 'p'),
+                    (egui::Key::Q, 'q'),
+                    (egui::Key::R, 'r'),
+                    (egui::Key::S, 's'),
+                    (egui::Key::T, 't'),
+                    (egui::Key::U, 'u'),
+                    (egui::Key::V, 'v'),
+                    (egui::Key::W, 'w'),
+                    (egui::Key::X, 'x'),
+                    (egui::Key::Y, 'y'),
+                    (egui::Key::Z, 'z'),
+                    (egui::Key::Num0, '0'),
+                    (egui::Key::Num1, '1'),
+                    (egui::Key::Num2, '2'),
+                    (egui::Key::Num3, '3'),
+                    (egui::Key::Num4, '4'),
+                    (egui::Key::Num5, '5'),
+                    (egui::Key::Num6, '6'),
+                    (egui::Key::Num7, '7'),
+                    (egui::Key::Num8, '8'),
                     (egui::Key::Num9, '9'),
                 ] {
                     if i.key_pressed(key) && !i.modifiers.ctrl {
@@ -1380,8 +1516,12 @@ impl eframe::App for ZaxiomApp {
                         break;
                     }
                 }
-                if i.key_pressed(egui::Key::Space) { palette_char = Some(' '); }
-                if i.key_pressed(egui::Key::Minus) { palette_char = Some('-'); }
+                if i.key_pressed(egui::Key::Space) {
+                    palette_char = Some(' ');
+                }
+                if i.key_pressed(egui::Key::Minus) {
+                    palette_char = Some('-');
+                }
                 // Early return - palette consumes all keyboard input
                 return;
             }
@@ -1479,7 +1619,11 @@ impl eframe::App for ZaxiomApp {
                 toggle_vi_mode = true;
             }
             // Ctrl+R: Fuzzy history search
-            if i.modifiers.ctrl && !i.modifiers.shift && i.key_pressed(egui::Key::R) && !focused_in_fuzzy {
+            if i.modifiers.ctrl
+                && !i.modifiers.shift
+                && i.key_pressed(egui::Key::R)
+                && !focused_in_fuzzy
+            {
                 fuzzy_history = true;
             }
             // Ctrl+Shift+F: Fuzzy file search (Ctrl+F is for search in buffer)
@@ -1487,13 +1631,21 @@ impl eframe::App for ZaxiomApp {
                 fuzzy_files = true;
             }
             // Ctrl+G: Fuzzy git branches
-            if i.modifiers.ctrl && !i.modifiers.shift && i.key_pressed(egui::Key::G) && !focused_in_fuzzy {
+            if i.modifiers.ctrl
+                && !i.modifiers.shift
+                && i.key_pressed(egui::Key::G)
+                && !focused_in_fuzzy
+            {
                 fuzzy_branches = true;
             }
             // Handle fuzzy finder keyboard input - fuzzy finder consumes all input
             if focused_in_fuzzy {
-                if i.key_pressed(egui::Key::ArrowUp) { fuzzy_up = true; }
-                if i.key_pressed(egui::Key::ArrowDown) { fuzzy_down = true; }
+                if i.key_pressed(egui::Key::ArrowUp) {
+                    fuzzy_up = true;
+                }
+                if i.key_pressed(egui::Key::ArrowDown) {
+                    fuzzy_down = true;
+                }
                 if i.key_pressed(egui::Key::Enter) {
                     if i.modifiers.ctrl {
                         fuzzy_ctrl_enter = true;
@@ -1501,7 +1653,9 @@ impl eframe::App for ZaxiomApp {
                         fuzzy_enter = true;
                     }
                 }
-                if i.key_pressed(egui::Key::Backspace) { fuzzy_backspace = true; }
+                if i.key_pressed(egui::Key::Backspace) {
+                    fuzzy_backspace = true;
+                }
                 // Capture text input for query
                 for event in &i.events {
                     if let egui::Event::Text(text) = event {
@@ -1531,15 +1685,32 @@ impl eframe::App for ZaxiomApp {
                 }
                 // Capture letter keys for filtering
                 for (key, ch) in [
-                    (egui::Key::A, 'a'), (egui::Key::B, 'b'), (egui::Key::C, 'c'),
-                    (egui::Key::D, 'd'), (egui::Key::E, 'e'), (egui::Key::F, 'f'),
-                    (egui::Key::G, 'g'), (egui::Key::H, 'h'), (egui::Key::I, 'i'),
-                    (egui::Key::J, 'j'), (egui::Key::K, 'k'), (egui::Key::L, 'l'),
-                    (egui::Key::M, 'm'), (egui::Key::N, 'n'), (egui::Key::O, 'o'),
-                    (egui::Key::P, 'p'), (egui::Key::Q, 'q'), (egui::Key::R, 'r'),
-                    (egui::Key::S, 's'), (egui::Key::T, 't'), (egui::Key::U, 'u'),
-                    (egui::Key::V, 'v'), (egui::Key::W, 'w'), (egui::Key::X, 'x'),
-                    (egui::Key::Y, 'y'), (egui::Key::Z, 'z'),
+                    (egui::Key::A, 'a'),
+                    (egui::Key::B, 'b'),
+                    (egui::Key::C, 'c'),
+                    (egui::Key::D, 'd'),
+                    (egui::Key::E, 'e'),
+                    (egui::Key::F, 'f'),
+                    (egui::Key::G, 'g'),
+                    (egui::Key::H, 'h'),
+                    (egui::Key::I, 'i'),
+                    (egui::Key::J, 'j'),
+                    (egui::Key::K, 'k'),
+                    (egui::Key::L, 'l'),
+                    (egui::Key::M, 'm'),
+                    (egui::Key::N, 'n'),
+                    (egui::Key::O, 'o'),
+                    (egui::Key::P, 'p'),
+                    (egui::Key::Q, 'q'),
+                    (egui::Key::R, 'r'),
+                    (egui::Key::S, 's'),
+                    (egui::Key::T, 't'),
+                    (egui::Key::U, 'u'),
+                    (egui::Key::V, 'v'),
+                    (egui::Key::W, 'w'),
+                    (egui::Key::X, 'x'),
+                    (egui::Key::Y, 'y'),
+                    (egui::Key::Z, 'z'),
                 ] {
                     if i.key_pressed(key) {
                         hints_filter_char = Some(ch);
@@ -1551,35 +1722,79 @@ impl eframe::App for ZaxiomApp {
             if focused_in_vi && !i.modifiers.alt {
                 // Ctrl key combinations
                 if i.modifiers.ctrl {
-                    if i.key_pressed(egui::Key::F) { vi_ctrl_key = Some('\x06'); } // Ctrl+F page down
-                    else if i.key_pressed(egui::Key::B) { vi_ctrl_key = Some('\x02'); } // Ctrl+B page up
-                    else if i.key_pressed(egui::Key::D) { vi_ctrl_key = Some('\x04'); } // Ctrl+D half page down
-                    else if i.key_pressed(egui::Key::U) { vi_ctrl_key = Some('\x15'); } // Ctrl+U half page up
-                    else if i.key_pressed(egui::Key::O) { vi_ctrl_key = Some('\x0f'); } // Ctrl+O jump back
-                    else if i.key_pressed(egui::Key::I) { vi_ctrl_key = Some('\x09'); } // Ctrl+I jump forward
+                    if i.key_pressed(egui::Key::F) {
+                        vi_ctrl_key = Some('\x06');
+                    }
+                    // Ctrl+F page down
+                    else if i.key_pressed(egui::Key::B) {
+                        vi_ctrl_key = Some('\x02');
+                    }
+                    // Ctrl+B page up
+                    else if i.key_pressed(egui::Key::D) {
+                        vi_ctrl_key = Some('\x04');
+                    }
+                    // Ctrl+D half page down
+                    else if i.key_pressed(egui::Key::U) {
+                        vi_ctrl_key = Some('\x15');
+                    }
+                    // Ctrl+U half page up
+                    else if i.key_pressed(egui::Key::O) {
+                        vi_ctrl_key = Some('\x0f');
+                    }
+                    // Ctrl+O jump back
+                    else if i.key_pressed(egui::Key::I) {
+                        vi_ctrl_key = Some('\x09');
+                    } // Ctrl+I jump forward
                 } else {
                     // Regular keys
                     for (key, ch) in [
-                        (egui::Key::A, 'a'), (egui::Key::B, 'b'), (egui::Key::C, 'c'),
-                        (egui::Key::D, 'd'), (egui::Key::E, 'e'), (egui::Key::F, 'f'),
-                        (egui::Key::G, 'g'), (egui::Key::H, 'h'), (egui::Key::I, 'i'),
-                        (egui::Key::J, 'j'), (egui::Key::K, 'k'), (egui::Key::L, 'l'),
-                        (egui::Key::M, 'm'), (egui::Key::N, 'n'), (egui::Key::O, 'o'),
-                        (egui::Key::P, 'p'), (egui::Key::Q, 'q'), (egui::Key::R, 'r'),
-                        (egui::Key::S, 's'), (egui::Key::T, 't'), (egui::Key::U, 'u'),
-                        (egui::Key::V, 'v'), (egui::Key::W, 'w'), (egui::Key::X, 'x'),
-                        (egui::Key::Y, 'y'), (egui::Key::Z, 'z'),
+                        (egui::Key::A, 'a'),
+                        (egui::Key::B, 'b'),
+                        (egui::Key::C, 'c'),
+                        (egui::Key::D, 'd'),
+                        (egui::Key::E, 'e'),
+                        (egui::Key::F, 'f'),
+                        (egui::Key::G, 'g'),
+                        (egui::Key::H, 'h'),
+                        (egui::Key::I, 'i'),
+                        (egui::Key::J, 'j'),
+                        (egui::Key::K, 'k'),
+                        (egui::Key::L, 'l'),
+                        (egui::Key::M, 'm'),
+                        (egui::Key::N, 'n'),
+                        (egui::Key::O, 'o'),
+                        (egui::Key::P, 'p'),
+                        (egui::Key::Q, 'q'),
+                        (egui::Key::R, 'r'),
+                        (egui::Key::S, 's'),
+                        (egui::Key::T, 't'),
+                        (egui::Key::U, 'u'),
+                        (egui::Key::V, 'v'),
+                        (egui::Key::W, 'w'),
+                        (egui::Key::X, 'x'),
+                        (egui::Key::Y, 'y'),
+                        (egui::Key::Z, 'z'),
                     ] {
                         if i.key_pressed(key) {
-                            vi_key_char = Some(if i.modifiers.shift { ch.to_ascii_uppercase() } else { ch });
+                            vi_key_char = Some(if i.modifiers.shift {
+                                ch.to_ascii_uppercase()
+                            } else {
+                                ch
+                            });
                             break;
                         }
                     }
                     // Number keys
                     for (key, ch) in [
-                        (egui::Key::Num0, '0'), (egui::Key::Num1, '1'), (egui::Key::Num2, '2'),
-                        (egui::Key::Num3, '3'), (egui::Key::Num4, '4'), (egui::Key::Num5, '5'),
-                        (egui::Key::Num6, '6'), (egui::Key::Num7, '7'), (egui::Key::Num8, '8'),
+                        (egui::Key::Num0, '0'),
+                        (egui::Key::Num1, '1'),
+                        (egui::Key::Num2, '2'),
+                        (egui::Key::Num3, '3'),
+                        (egui::Key::Num4, '4'),
+                        (egui::Key::Num5, '5'),
+                        (egui::Key::Num6, '6'),
+                        (egui::Key::Num7, '7'),
+                        (egui::Key::Num8, '8'),
                         (egui::Key::Num9, '9'),
                     ] {
                         if i.key_pressed(key) {
@@ -1588,17 +1803,35 @@ impl eframe::App for ZaxiomApp {
                         }
                     }
                     // Special keys
-                    if i.key_pressed(egui::Key::Escape) { vi_key_char = Some('\x1b'); }
-                    if i.key_pressed(egui::Key::Enter) { vi_key_char = Some('\n'); }
-                    if i.key_pressed(egui::Key::Backspace) { vi_key_char = Some('\x08'); }
-                    if i.key_pressed(egui::Key::Minus) { vi_key_char = Some('-'); }
-                    if i.key_pressed(egui::Key::Space) { vi_key_char = Some(' '); }
+                    if i.key_pressed(egui::Key::Escape) {
+                        vi_key_char = Some('\x1b');
+                    }
+                    if i.key_pressed(egui::Key::Enter) {
+                        vi_key_char = Some('\n');
+                    }
+                    if i.key_pressed(egui::Key::Backspace) {
+                        vi_key_char = Some('\x08');
+                    }
+                    if i.key_pressed(egui::Key::Minus) {
+                        vi_key_char = Some('-');
+                    }
+                    if i.key_pressed(egui::Key::Space) {
+                        vi_key_char = Some(' ');
+                    }
                     // Shift+4 = $, Shift+6 = ^, Shift+/ = ?
                     if i.modifiers.shift {
-                        if i.key_pressed(egui::Key::Num4) { vi_key_char = Some('$'); }
-                        if i.key_pressed(egui::Key::Num6) { vi_key_char = Some('^'); }
-                        if i.key_pressed(egui::Key::Slash) { vi_key_char = Some('?'); }
-                    } else if i.key_pressed(egui::Key::Slash) { vi_key_char = Some('/'); }
+                        if i.key_pressed(egui::Key::Num4) {
+                            vi_key_char = Some('$');
+                        }
+                        if i.key_pressed(egui::Key::Num6) {
+                            vi_key_char = Some('^');
+                        }
+                        if i.key_pressed(egui::Key::Slash) {
+                            vi_key_char = Some('?');
+                        }
+                    } else if i.key_pressed(egui::Key::Slash) {
+                        vi_key_char = Some('/');
+                    }
                 }
             }
             // Ctrl+1-9: Switch to specific tab
@@ -1672,17 +1905,12 @@ impl eframe::App for ZaxiomApp {
                     let interrupted = format!("{}^C", pane.input);
                     pane.buffer.push_line(&interrupted);
                     pane.input.clear();
-                    self.clipboard_feedback = Some((
-                        "^C".to_string(),
-                        std::time::Instant::now(),
-                    ));
+                    self.clipboard_feedback = Some(("^C".to_string(), std::time::Instant::now()));
                 } else {
                     // Empty input, just show ^C
                     pane.buffer.push_line("^C");
-                    self.clipboard_feedback = Some((
-                        "^C (interrupt)".to_string(),
-                        std::time::Instant::now(),
-                    ));
+                    self.clipboard_feedback =
+                        Some(("^C (interrupt)".to_string(), std::time::Instant::now()));
                 }
             }
         }
@@ -1791,7 +2019,14 @@ impl eframe::App for ZaxiomApp {
                 HintType::Url => {
                     let _ = open::that(&text);
                     self.clipboard_feedback = Some((
-                        format!("🌐 Opening~ {}", if text.len() > 40 { format!("{}...", &text[..37]) } else { text }),
+                        format!(
+                            "🌐 Opening~ {}",
+                            if text.len() > 40 {
+                                format!("{}...", &text[..37])
+                            } else {
+                                text
+                            }
+                        ),
                         std::time::Instant::now(),
                     ));
                 }
@@ -1882,7 +2117,14 @@ impl eframe::App for ZaxiomApp {
                             if let Some(ref mut clipboard) = self.clipboard {
                                 let _ = clipboard.set_text(text.clone());
                                 self.clipboard_feedback = Some((
-                                    format!("📋 Yanked: {}", if text.len() > 30 { format!("{}...", &text[..27]) } else { text }),
+                                    format!(
+                                        "📋 Yanked: {}",
+                                        if text.len() > 30 {
+                                            format!("{}...", &text[..27])
+                                        } else {
+                                            text
+                                        }
+                                    ),
                                     std::time::Instant::now(),
                                 ));
                             }
@@ -1922,7 +2164,9 @@ impl eframe::App for ZaxiomApp {
                             if text.contains("http://") || text.contains("https://") {
                                 // Find URL
                                 if let Some(start) = text.find("http") {
-                                    let end = text[start..].find(|c: char| c.is_whitespace()).unwrap_or(text.len() - start);
+                                    let end = text[start..]
+                                        .find(|c: char| c.is_whitespace())
+                                        .unwrap_or(text.len() - start);
                                     let url = &text[start..start + end];
                                     let _ = open::that(url);
                                     self.clipboard_feedback = Some((
@@ -1947,7 +2191,9 @@ impl eframe::App for ZaxiomApp {
                 let cwd = pane.state.cwd().to_path_buf();
                 pane.fuzzy_finder.activate(FuzzyMode::History, &cwd);
                 // Populate with history items
-                let history_items: Vec<(String, Option<String>)> = pane.history.all()
+                let history_items: Vec<(String, Option<String>)> = pane
+                    .history
+                    .all()
                     .map(|e| (e.command.clone(), Some(e.cwd.display().to_string())))
                     .collect();
                 pane.fuzzy_finder.set_history_items(history_items);
@@ -2025,7 +2271,11 @@ impl eframe::App for ZaxiomApp {
                         let prompt = format!("{} ❯ {}", cwd_display, value);
                         pane.buffer.push_line(&prompt);
                         let history_cmds = pane.history.recent_commands(10);
-                        match self.executor.execute_with_history(&value, &mut pane.state, Some(&history_cmds)) {
+                        match self.executor.execute_with_history(
+                            &value,
+                            &mut pane.state,
+                            Some(&history_cmds),
+                        ) {
                             Ok(output) => {
                                 for line in output.lines() {
                                     pane.buffer.push_line(line);
@@ -2035,7 +2285,8 @@ impl eframe::App for ZaxiomApp {
                                 pane.buffer.push_error(&format!("Error: {}", e));
                             }
                         }
-                        pane.history.add(&value, pane.state.cwd().to_path_buf(), None);
+                        pane.history
+                            .add(&value, pane.state.cwd().to_path_buf(), None);
                         pane.input.clear();
                         pane.scroll_to_bottom = true;
                     }
@@ -2112,7 +2363,11 @@ impl eframe::App for ZaxiomApp {
                         let prompt = pane.state.format_prompt();
                         pane.buffer.push_line(&format!("{}{}", prompt, cmd));
                         let history = pane.history.recent_commands(10);
-                        match self.executor.execute_with_history(&cmd, &mut pane.state, Some(&history)) {
+                        match self.executor.execute_with_history(
+                            &cmd,
+                            &mut pane.state,
+                            Some(&history),
+                        ) {
                             Ok(output) => {
                                 if !output.is_empty() && !output.starts_with("\x1b[") {
                                     for line in output.lines() {
@@ -2179,7 +2434,8 @@ impl eframe::App for ZaxiomApp {
                 match editor.save() {
                     Ok(()) => {
                         if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
-                            pane.buffer.push_line(&format!("✅ Saved: {}", editor.file_path.display()));
+                            pane.buffer
+                                .push_line(&format!("✅ Saved: {}", editor.file_path.display()));
                         }
                     }
                     Err(e) => {
@@ -2328,23 +2584,37 @@ impl eframe::App for ZaxiomApp {
                         .stroke(egui::Stroke::new(2.0, palette_accent))
                         .corner_radius(egui::CornerRadius::same(8))
                         .inner_margin(egui::Margin::same(12))
-                        .shadow(egui::epaint::Shadow { spread: 8, blur: 16, color: egui::Color32::from_black_alpha(120), offset: [0, 4] })
+                        .shadow(egui::epaint::Shadow {
+                            spread: 8,
+                            blur: 16,
+                            color: egui::Color32::from_black_alpha(120),
+                            offset: [0, 4],
+                        })
                         .show(ui, |ui| {
                             ui.set_min_width(400.0);
                             ui.set_max_width(500.0);
 
                             // Search input display
                             ui.horizontal(|ui| {
-                                ui.add(egui::Label::new(egui::RichText::new("⌘").color(palette_accent).size(16.0)));
+                                ui.add(egui::Label::new(
+                                    egui::RichText::new("⌘").color(palette_accent).size(16.0),
+                                ));
                                 ui.add_space(8.0);
                                 let query_display = if self.command_palette.query.is_empty() {
                                     "Type to search commands...".to_string()
                                 } else {
                                     self.command_palette.query.clone()
                                 };
-                                ui.add(egui::Label::new(egui::RichText::new(&query_display)
-                                    .color(if self.command_palette.query.is_empty() { palette_comment } else { palette_fg })
-                                    .size(14.0).monospace()));
+                                ui.add(egui::Label::new(
+                                    egui::RichText::new(&query_display)
+                                        .color(if self.command_palette.query.is_empty() {
+                                            palette_comment
+                                        } else {
+                                            palette_fg
+                                        })
+                                        .size(14.0)
+                                        .monospace(),
+                                ));
                             });
 
                             ui.add_space(8.0);
@@ -2352,42 +2622,93 @@ impl eframe::App for ZaxiomApp {
                             ui.add_space(8.0);
 
                             // Results list (scrollable with auto-scroll to selection)
-                            egui::ScrollArea::vertical().max_height(300.0).auto_shrink([false, false]).show(ui, |ui| {
-                                for (i, entry) in self.command_palette.entries.iter().enumerate() {
-                                    let is_selected = i == self.command_palette.selected;
-                                    let bg = if is_selected { palette_accent.linear_multiply(0.3) } else { egui::Color32::TRANSPARENT };
+                            egui::ScrollArea::vertical()
+                                .max_height(300.0)
+                                .auto_shrink([false, false])
+                                .show(ui, |ui| {
+                                    for (i, entry) in
+                                        self.command_palette.entries.iter().enumerate()
+                                    {
+                                        let is_selected = i == self.command_palette.selected;
+                                        let bg = if is_selected {
+                                            palette_accent.linear_multiply(0.3)
+                                        } else {
+                                            egui::Color32::TRANSPARENT
+                                        };
 
-                                    let response = egui::Frame::default().fill(bg).corner_radius(egui::CornerRadius::same(4)).inner_margin(egui::Margin::symmetric(8, 4)).show(ui, |ui| {
-                                        ui.horizontal(|ui| {
-                                            if is_selected {
-                                                ui.add(egui::Label::new(egui::RichText::new("▶").color(palette_success).size(10.0)));
-                                            } else {
-                                                ui.add_space(14.0);
-                                            }
-                                            ui.add(egui::Label::new(egui::RichText::new(&entry.name).color(if is_selected { palette_accent } else { palette_fg }).size(13.0)));
-                                            ui.add_space(8.0);
-                                            ui.add(egui::Label::new(egui::RichText::new(&entry.description).color(palette_comment).size(11.0)));
-                                            if let Some(ref shortcut) = entry.shortcut {
-                                                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                                    ui.add(egui::Label::new(egui::RichText::new(shortcut).color(palette_comment).size(10.0).monospace()));
+                                        let response = egui::Frame::default()
+                                            .fill(bg)
+                                            .corner_radius(egui::CornerRadius::same(4))
+                                            .inner_margin(egui::Margin::symmetric(8, 4))
+                                            .show(ui, |ui| {
+                                                ui.horizontal(|ui| {
+                                                    if is_selected {
+                                                        ui.add(egui::Label::new(
+                                                            egui::RichText::new("▶")
+                                                                .color(palette_success)
+                                                                .size(10.0),
+                                                        ));
+                                                    } else {
+                                                        ui.add_space(14.0);
+                                                    }
+                                                    ui.add(egui::Label::new(
+                                                        egui::RichText::new(&entry.name)
+                                                            .color(if is_selected {
+                                                                palette_accent
+                                                            } else {
+                                                                palette_fg
+                                                            })
+                                                            .size(13.0),
+                                                    ));
+                                                    ui.add_space(8.0);
+                                                    ui.add(egui::Label::new(
+                                                        egui::RichText::new(&entry.description)
+                                                            .color(palette_comment)
+                                                            .size(11.0),
+                                                    ));
+                                                    if let Some(ref shortcut) = entry.shortcut {
+                                                        ui.with_layout(
+                                                            egui::Layout::right_to_left(
+                                                                egui::Align::Center,
+                                                            ),
+                                                            |ui| {
+                                                                ui.add(egui::Label::new(
+                                                                    egui::RichText::new(shortcut)
+                                                                        .color(palette_comment)
+                                                                        .size(10.0)
+                                                                        .monospace(),
+                                                                ));
+                                                            },
+                                                        );
+                                                    }
                                                 });
-                                            }
-                                        });
-                                    });
+                                            });
 
-                                    // Auto-scroll to keep selected item visible
-                                    if is_selected {
-                                        response.response.scroll_to_me(Some(egui::Align::Center));
+                                        // Auto-scroll to keep selected item visible
+                                        if is_selected {
+                                            response
+                                                .response
+                                                .scroll_to_me(Some(egui::Align::Center));
+                                        }
                                     }
-                                }
-                                if self.command_palette.entries.is_empty() {
-                                    ui.add(egui::Label::new(egui::RichText::new("No matching commands").color(palette_comment).size(12.0)));
-                                }
-                            });
+                                    if self.command_palette.entries.is_empty() {
+                                        ui.add(egui::Label::new(
+                                            egui::RichText::new("No matching commands")
+                                                .color(palette_comment)
+                                                .size(12.0),
+                                        ));
+                                    }
+                                });
 
                             ui.add_space(4.0);
                             ui.horizontal(|ui| {
-                                ui.add(egui::Label::new(egui::RichText::new("↑↓ navigate  ↵ copy to input  ^↵ execute  esc close").color(palette_comment).size(10.0)));
+                                ui.add(egui::Label::new(
+                                    egui::RichText::new(
+                                        "↑↓ navigate  ↵ copy to input  ^↵ execute  esc close",
+                                    )
+                                    .color(palette_comment)
+                                    .size(10.0),
+                                ));
                             });
                         });
                 });
@@ -2411,68 +2732,131 @@ impl eframe::App for ZaxiomApp {
                             .stroke(egui::Stroke::new(2.0, fuzzy_accent))
                             .corner_radius(egui::CornerRadius::same(8))
                             .inner_margin(egui::Margin::same(12))
-                            .shadow(egui::epaint::Shadow { spread: 8, blur: 16, color: egui::Color32::from_black_alpha(120), offset: [0, -4] })
+                            .shadow(egui::epaint::Shadow {
+                                spread: 8,
+                                blur: 16,
+                                color: egui::Color32::from_black_alpha(120),
+                                offset: [0, -4],
+                            })
                             .show(ui, |ui| {
                                 ui.set_min_width(500.0);
                                 ui.set_max_width(600.0);
 
                                 // Results list (bottom-up style - results above input)
-                                egui::ScrollArea::vertical().max_height(250.0).show(ui, |ui| {
-                                    let items: Vec<_> = pane.fuzzy_finder.visible_items().collect();
-                                    for (idx, item) in items.iter() {
-                                        let is_selected = *idx == pane.fuzzy_finder.selected;
-                                        let bg = if is_selected { fuzzy_accent.linear_multiply(0.3) } else { egui::Color32::TRANSPARENT };
+                                egui::ScrollArea::vertical()
+                                    .max_height(250.0)
+                                    .show(ui, |ui| {
+                                        let items: Vec<_> =
+                                            pane.fuzzy_finder.visible_items().collect();
+                                        for (idx, item) in items.iter() {
+                                            let is_selected = *idx == pane.fuzzy_finder.selected;
+                                            let bg = if is_selected {
+                                                fuzzy_accent.linear_multiply(0.3)
+                                            } else {
+                                                egui::Color32::TRANSPARENT
+                                            };
 
-                                        egui::Frame::default().fill(bg).corner_radius(egui::CornerRadius::same(4)).inner_margin(egui::Margin::symmetric(8, 4)).show(ui, |ui| {
-                                            ui.horizontal(|ui| {
-                                                // Selection indicator
-                                                if is_selected {
-                                                    ui.add(egui::Label::new(egui::RichText::new("▶").color(fuzzy_success).size(10.0)));
-                                                } else {
-                                                    ui.add_space(14.0);
-                                                }
-
-                                                // Icon
-                                                ui.add(egui::Label::new(egui::RichText::new(item.icon).size(12.0)));
-
-                                                // Display text with match highlighting
-                                                let display_text = &item.display;
-                                                if item.match_positions.is_empty() {
-                                                    ui.add(egui::Label::new(egui::RichText::new(display_text).color(if is_selected { fuzzy_accent } else { fuzzy_fg }).size(13.0).monospace()));
-                                                } else {
-                                                    // Build highlighted text
-                                                    let mut job = egui::text::LayoutJob::default();
-                                                    let chars: Vec<char> = display_text.chars().collect();
-                                                    for (i, ch) in chars.iter().enumerate() {
-                                                        let color = if item.match_positions.contains(&i) {
-                                                            fuzzy_accent
-                                                        } else if is_selected {
-                                                            fuzzy_fg
+                                            egui::Frame::default()
+                                                .fill(bg)
+                                                .corner_radius(egui::CornerRadius::same(4))
+                                                .inner_margin(egui::Margin::symmetric(8, 4))
+                                                .show(ui, |ui| {
+                                                    ui.horizontal(|ui| {
+                                                        // Selection indicator
+                                                        if is_selected {
+                                                            ui.add(egui::Label::new(
+                                                                egui::RichText::new("▶")
+                                                                    .color(fuzzy_success)
+                                                                    .size(10.0),
+                                                            ));
                                                         } else {
-                                                            fuzzy_comment
-                                                        };
-                                                        job.append(&ch.to_string(), 0.0, egui::TextFormat {
-                                                            font_id: egui::FontId::monospace(13.0),
-                                                            color,
-                                                            ..Default::default()
-                                                        });
-                                                    }
-                                                    ui.label(job);
-                                                }
+                                                            ui.add_space(14.0);
+                                                        }
 
-                                                // Preview text (right-aligned)
-                                                if let Some(ref preview) = item.preview {
-                                                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                                        ui.add(egui::Label::new(egui::RichText::new(preview).color(fuzzy_comment).size(10.0).monospace()));
+                                                        // Icon
+                                                        ui.add(egui::Label::new(
+                                                            egui::RichText::new(item.icon)
+                                                                .size(12.0),
+                                                        ));
+
+                                                        // Display text with match highlighting
+                                                        let display_text = &item.display;
+                                                        if item.match_positions.is_empty() {
+                                                            ui.add(egui::Label::new(
+                                                                egui::RichText::new(display_text)
+                                                                    .color(if is_selected {
+                                                                        fuzzy_accent
+                                                                    } else {
+                                                                        fuzzy_fg
+                                                                    })
+                                                                    .size(13.0)
+                                                                    .monospace(),
+                                                            ));
+                                                        } else {
+                                                            // Build highlighted text
+                                                            let mut job =
+                                                                egui::text::LayoutJob::default();
+                                                            let chars: Vec<char> =
+                                                                display_text.chars().collect();
+                                                            for (i, ch) in chars.iter().enumerate()
+                                                            {
+                                                                let color = if item
+                                                                    .match_positions
+                                                                    .contains(&i)
+                                                                {
+                                                                    fuzzy_accent
+                                                                } else if is_selected {
+                                                                    fuzzy_fg
+                                                                } else {
+                                                                    fuzzy_comment
+                                                                };
+                                                                job.append(
+                                                                    &ch.to_string(),
+                                                                    0.0,
+                                                                    egui::TextFormat {
+                                                                        font_id:
+                                                                            egui::FontId::monospace(
+                                                                                13.0,
+                                                                            ),
+                                                                        color,
+                                                                        ..Default::default()
+                                                                    },
+                                                                );
+                                                            }
+                                                            ui.label(job);
+                                                        }
+
+                                                        // Preview text (right-aligned)
+                                                        if let Some(ref preview) = item.preview {
+                                                            ui.with_layout(
+                                                                egui::Layout::right_to_left(
+                                                                    egui::Align::Center,
+                                                                ),
+                                                                |ui| {
+                                                                    ui.add(egui::Label::new(
+                                                                        egui::RichText::new(
+                                                                            preview,
+                                                                        )
+                                                                        .color(fuzzy_comment)
+                                                                        .size(10.0)
+                                                                        .monospace(),
+                                                                    ));
+                                                                },
+                                                            );
+                                                        }
                                                     });
-                                                }
-                                            });
-                                        });
-                                    }
-                                    if pane.fuzzy_finder.items.is_empty() && !pane.fuzzy_finder.query.is_empty() {
-                                        ui.add(egui::Label::new(egui::RichText::new("No matches found").color(fuzzy_comment).size(12.0)));
-                                    }
-                                });
+                                                });
+                                        }
+                                        if pane.fuzzy_finder.items.is_empty()
+                                            && !pane.fuzzy_finder.query.is_empty()
+                                        {
+                                            ui.add(egui::Label::new(
+                                                egui::RichText::new("No matches found")
+                                                    .color(fuzzy_comment)
+                                                    .size(12.0),
+                                            ));
+                                        }
+                                    });
 
                                 ui.add_space(8.0);
                                 ui.separator();
@@ -2480,9 +2864,19 @@ impl eframe::App for ZaxiomApp {
 
                                 // Query input line
                                 ui.horizontal(|ui| {
-                                    ui.add(egui::Label::new(egui::RichText::new(pane.fuzzy_finder.mode_icon()).size(14.0)));
-                                    ui.add(egui::Label::new(egui::RichText::new(pane.fuzzy_finder.mode_name()).color(fuzzy_accent).size(12.0).strong()));
-                                    ui.add(egui::Label::new(egui::RichText::new(" > ").color(fuzzy_comment).size(12.0)));
+                                    ui.add(egui::Label::new(
+                                        egui::RichText::new(pane.fuzzy_finder.mode_icon())
+                                            .size(14.0),
+                                    ));
+                                    ui.add(egui::Label::new(
+                                        egui::RichText::new(pane.fuzzy_finder.mode_name())
+                                            .color(fuzzy_accent)
+                                            .size(12.0)
+                                            .strong(),
+                                    ));
+                                    ui.add(egui::Label::new(
+                                        egui::RichText::new(" > ").color(fuzzy_comment).size(12.0),
+                                    ));
 
                                     // Query with cursor
                                     let query_display = if pane.fuzzy_finder.query.is_empty() {
@@ -2490,21 +2884,43 @@ impl eframe::App for ZaxiomApp {
                                     } else {
                                         format!("{}▏", pane.fuzzy_finder.query)
                                     };
-                                    ui.add(egui::Label::new(egui::RichText::new(&query_display)
-                                        .color(if pane.fuzzy_finder.query.is_empty() { fuzzy_comment } else { fuzzy_fg })
-                                        .size(13.0).monospace()));
+                                    ui.add(egui::Label::new(
+                                        egui::RichText::new(&query_display)
+                                            .color(if pane.fuzzy_finder.query.is_empty() {
+                                                fuzzy_comment
+                                            } else {
+                                                fuzzy_fg
+                                            })
+                                            .size(13.0)
+                                            .monospace(),
+                                    ));
 
                                     // Status (match count)
-                                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                        ui.add(egui::Label::new(egui::RichText::new(pane.fuzzy_finder.status_text())
-                                            .color(fuzzy_comment).size(11.0).monospace()));
-                                    });
+                                    ui.with_layout(
+                                        egui::Layout::right_to_left(egui::Align::Center),
+                                        |ui| {
+                                            ui.add(egui::Label::new(
+                                                egui::RichText::new(
+                                                    pane.fuzzy_finder.status_text(),
+                                                )
+                                                .color(fuzzy_comment)
+                                                .size(11.0)
+                                                .monospace(),
+                                            ));
+                                        },
+                                    );
                                 });
 
                                 ui.add_space(4.0);
                                 // Keyboard hints
                                 ui.horizontal(|ui| {
-                                    ui.add(egui::Label::new(egui::RichText::new("↑↓ navigate  ↵ insert  ^↵ execute  esc close").color(fuzzy_comment).size(10.0)));
+                                    ui.add(egui::Label::new(
+                                        egui::RichText::new(
+                                            "↑↓ navigate  ↵ insert  ^↵ execute  esc close",
+                                        )
+                                        .color(fuzzy_comment)
+                                        .size(10.0),
+                                    ));
                                 });
                             });
                     });
@@ -2526,161 +2942,185 @@ impl eframe::App for ZaxiomApp {
                 .order(egui::Order::Foreground)
                 .show(ctx, |ui| {
                     let screen = ui.ctx().screen_rect();
-                    egui::Frame::default()
-                        .fill(editor_bg)
-                        .show(ui, |ui| {
-                            ui.set_min_size(screen.size());
+                    egui::Frame::default().fill(editor_bg).show(ui, |ui| {
+                        ui.set_min_size(screen.size());
 
-                            // Header bar
-                            egui::Frame::default()
-                                .fill(self.theme.background_secondary)
-                                .inner_margin(egui::Margin::symmetric(12, 8))
-                                .show(ui, |ui| {
-                                    ui.horizontal(|ui| {
-                                        ui.add(egui::Label::new(
-                                            egui::RichText::new("📝 nano")
-                                                .color(editor_accent)
-                                                .size(14.0)
-                                                .strong(),
-                                        ));
-                                        ui.add(egui::Label::new(
-                                            egui::RichText::new(format!(" — {}{}", editor.file_path.display(), modified_indicator))
-                                                .color(editor_fg)
-                                                .size(13.0),
-                                        ));
-                                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        // Header bar
+                        egui::Frame::default()
+                            .fill(self.theme.background_secondary)
+                            .inner_margin(egui::Margin::symmetric(12, 8))
+                            .show(ui, |ui| {
+                                ui.horizontal(|ui| {
+                                    ui.add(egui::Label::new(
+                                        egui::RichText::new("📝 nano")
+                                            .color(editor_accent)
+                                            .size(14.0)
+                                            .strong(),
+                                    ));
+                                    ui.add(egui::Label::new(
+                                        egui::RichText::new(format!(
+                                            " — {}{}",
+                                            editor.file_path.display(),
+                                            modified_indicator
+                                        ))
+                                        .color(editor_fg)
+                                        .size(13.0),
+                                    ));
+                                    ui.with_layout(
+                                        egui::Layout::right_to_left(egui::Align::Center),
+                                        |ui| {
                                             ui.add(egui::Label::new(
                                                 egui::RichText::new("^X Exit  ^S Save")
                                                     .color(editor_comment)
                                                     .size(11.0),
                                             ));
-                                        });
-                                    });
+                                        },
+                                    );
                                 });
+                            });
 
-                            // Editor content
-                            egui::ScrollArea::vertical()
-                                .auto_shrink([false, false])
-                                .show(ui, |ui| {
-                                    ui.set_min_width(screen.width() - 20.0);
+                        // Editor content
+                        egui::ScrollArea::vertical()
+                            .auto_shrink([false, false])
+                            .show(ui, |ui| {
+                                ui.set_min_width(screen.width() - 20.0);
 
-                                    let lines: Vec<&str> = editor.content.lines().collect();
-                                    let line_count = lines.len().max(1);
-                                    let line_num_width = (line_count as f32).log10().floor() as usize + 1;
+                                let lines: Vec<&str> = editor.content.lines().collect();
+                                let line_count = lines.len().max(1);
+                                let line_num_width =
+                                    (line_count as f32).log10().floor() as usize + 1;
 
-                                    for (i, line) in lines.iter().enumerate() {
-                                        ui.horizontal(|ui| {
-                                            // Line number
-                                            ui.add(egui::Label::new(
-                                                egui::RichText::new(format!("{:>width$} ", i + 1, width = line_num_width))
-                                                    .color(line_num_color)
-                                                    .size(13.0)
-                                                    .monospace(),
-                                            ));
+                                for (i, line) in lines.iter().enumerate() {
+                                    ui.horizontal(|ui| {
+                                        // Line number
+                                        ui.add(egui::Label::new(
+                                            egui::RichText::new(format!(
+                                                "{:>width$} ",
+                                                i + 1,
+                                                width = line_num_width
+                                            ))
+                                            .color(line_num_color)
+                                            .size(13.0)
+                                            .monospace(),
+                                        ));
 
-                                            // Line content with cursor
-                                            if i == editor.cursor_line {
-                                                // Show cursor on this line
-                                                let before = if editor.cursor_col <= line.len() {
-                                                    &line[..editor.cursor_col]
-                                                } else {
-                                                    *line
-                                                };
-                                                let cursor_char = if editor.cursor_col < line.len() {
-                                                    &line[editor.cursor_col..editor.cursor_col + 1]
-                                                } else {
-                                                    " "
-                                                };
-                                                let after = if editor.cursor_col + 1 < line.len() {
-                                                    &line[editor.cursor_col + 1..]
-                                                } else {
-                                                    ""
-                                                };
-
-                                                ui.add(egui::Label::new(
-                                                    egui::RichText::new(before)
-                                                        .color(editor_fg)
-                                                        .size(13.0)
-                                                        .monospace(),
-                                                ));
-                                                ui.add(egui::Label::new(
-                                                    egui::RichText::new(cursor_char)
-                                                        .color(editor_bg)
-                                                        .background_color(cursor_color)
-                                                        .size(13.0)
-                                                        .monospace(),
-                                                ));
-                                                ui.add(egui::Label::new(
-                                                    egui::RichText::new(after)
-                                                        .color(editor_fg)
-                                                        .size(13.0)
-                                                        .monospace(),
-                                                ));
+                                        // Line content with cursor
+                                        if i == editor.cursor_line {
+                                            // Show cursor on this line
+                                            let before = if editor.cursor_col <= line.len() {
+                                                &line[..editor.cursor_col]
                                             } else {
-                                                ui.add(egui::Label::new(
-                                                    egui::RichText::new(*line)
-                                                        .color(editor_fg)
-                                                        .size(13.0)
-                                                        .monospace(),
-                                                ));
-                                            }
-                                        });
-                                    }
+                                                *line
+                                            };
+                                            let cursor_char = if editor.cursor_col < line.len() {
+                                                &line[editor.cursor_col..editor.cursor_col + 1]
+                                            } else {
+                                                " "
+                                            };
+                                            let after = if editor.cursor_col + 1 < line.len() {
+                                                &line[editor.cursor_col + 1..]
+                                            } else {
+                                                ""
+                                            };
 
-                                    // Show cursor on empty file or past last line
-                                    if lines.is_empty() || editor.cursor_line >= lines.len() {
-                                        ui.horizontal(|ui| {
-                                            let line_num = if lines.is_empty() { 1 } else { lines.len() + 1 };
                                             ui.add(egui::Label::new(
-                                                egui::RichText::new(format!("{:>width$} ", line_num, width = line_num_width))
-                                                    .color(line_num_color)
+                                                egui::RichText::new(before)
+                                                    .color(editor_fg)
                                                     .size(13.0)
                                                     .monospace(),
                                             ));
                                             ui.add(egui::Label::new(
-                                                egui::RichText::new(" ")
+                                                egui::RichText::new(cursor_char)
                                                     .color(editor_bg)
                                                     .background_color(cursor_color)
                                                     .size(13.0)
                                                     .monospace(),
                                             ));
-                                        });
-                                    }
-                                });
+                                            ui.add(egui::Label::new(
+                                                egui::RichText::new(after)
+                                                    .color(editor_fg)
+                                                    .size(13.0)
+                                                    .monospace(),
+                                            ));
+                                        } else {
+                                            ui.add(egui::Label::new(
+                                                egui::RichText::new(*line)
+                                                    .color(editor_fg)
+                                                    .size(13.0)
+                                                    .monospace(),
+                                            ));
+                                        }
+                                    });
+                                }
 
-                            // Keyboard hints bar
-                            egui::Frame::default()
-                                .fill(self.theme.background_secondary)
-                                .inner_margin(egui::Margin::symmetric(12, 8))
-                                .show(ui, |ui| {
+                                // Show cursor on empty file or past last line
+                                if lines.is_empty() || editor.cursor_line >= lines.len() {
                                     ui.horizontal(|ui| {
-                                        // Left side: position info
+                                        let line_num =
+                                            if lines.is_empty() { 1 } else { lines.len() + 1 };
                                         ui.add(egui::Label::new(
-                                            egui::RichText::new(format!("Line {}, Col {}", editor.cursor_line + 1, editor.cursor_col + 1))
-                                                .color(editor_comment)
+                                            egui::RichText::new(format!(
+                                                "{:>width$} ",
+                                                line_num,
+                                                width = line_num_width
+                                            ))
+                                            .color(line_num_color)
+                                            .size(13.0)
+                                            .monospace(),
+                                        ));
+                                        ui.add(egui::Label::new(
+                                            egui::RichText::new(" ")
+                                                .color(editor_bg)
+                                                .background_color(cursor_color)
+                                                .size(13.0)
+                                                .monospace(),
+                                        ));
+                                    });
+                                }
+                            });
+
+                        // Keyboard hints bar
+                        egui::Frame::default()
+                            .fill(self.theme.background_secondary)
+                            .inner_margin(egui::Margin::symmetric(12, 8))
+                            .show(ui, |ui| {
+                                ui.horizontal(|ui| {
+                                    // Left side: position info
+                                    ui.add(egui::Label::new(
+                                        egui::RichText::new(format!(
+                                            "Line {}, Col {}",
+                                            editor.cursor_line + 1,
+                                            editor.cursor_col + 1
+                                        ))
+                                        .color(editor_comment)
+                                        .size(11.0),
+                                    ));
+                                    ui.add_space(20.0);
+
+                                    // Show status message if any
+                                    if !editor.status.is_empty() {
+                                        ui.add(egui::Label::new(
+                                            egui::RichText::new(&editor.status)
+                                                .color(self.theme.success_color)
                                                 .size(11.0),
                                         ));
                                         ui.add_space(20.0);
+                                    }
 
-                                        // Show status message if any
-                                        if !editor.status.is_empty() {
-                                            ui.add(egui::Label::new(
-                                                egui::RichText::new(&editor.status)
-                                                    .color(self.theme.success_color)
-                                                    .size(11.0),
-                                            ));
-                                            ui.add_space(20.0);
-                                        }
-
-                                        // Keyboard shortcuts
-                                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                    // Keyboard shortcuts
+                                    ui.with_layout(
+                                        egui::Layout::right_to_left(egui::Align::Center),
+                                        |ui| {
                                             for (keys, desc) in [
                                                 ("Esc/^X", "exit"),
                                                 ("^S", "save"),
                                                 ("PgUp/Dn", "scroll"),
                                                 ("Home/End", "line"),
                                                 ("^Home/End", "file"),
-                                            ].iter().rev() {
+                                            ]
+                                            .iter()
+                                            .rev()
+                                            {
                                                 ui.add(egui::Label::new(
                                                     egui::RichText::new(*desc)
                                                         .color(editor_comment)
@@ -2694,10 +3134,11 @@ impl eframe::App for ZaxiomApp {
                                                 ));
                                                 ui.add_space(8.0);
                                             }
-                                        });
-                                    });
+                                        },
+                                    );
                                 });
-                        });
+                            });
+                    });
                 });
         }
 
@@ -2736,9 +3177,11 @@ impl eframe::App for ZaxiomApp {
 
         // Top panel for tab bar
         egui::TopBottomPanel::top("tab_bar")
-            .frame(egui::Frame::default()
-                .fill(self.theme.background_tertiary)
-                .inner_margin(egui::Margin::symmetric(4, 2)))
+            .frame(
+                egui::Frame::default()
+                    .fill(self.theme.background_tertiary)
+                    .inner_margin(egui::Margin::symmetric(4, 2)),
+            )
             .show(ctx, |ui| {
                 self.render_tab_bar(ui);
             });
@@ -2776,36 +3219,30 @@ impl eframe::App for ZaxiomApp {
         let status_bg = self.theme.background_tertiary;
 
         egui::TopBottomPanel::bottom("status_bar")
-            .frame(egui::Frame::default()
-                .fill(status_bg)
-                .inner_margin(egui::Margin::symmetric(8, 2)))
+            .frame(
+                egui::Frame::default()
+                    .fill(status_bg)
+                    .inner_margin(egui::Margin::symmetric(8, 2)),
+            )
             .exact_height(status_bar_height)
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     // Git branch (if in a git repo)
                     if let Some(branch) = &git_branch {
                         ui.add(egui::Label::new(
-                            egui::RichText::new(" ")
-                                .color(status_accent)
-                                .size(12.0),
+                            egui::RichText::new(" ").color(status_accent).size(12.0),
                         ));
                         ui.add(egui::Label::new(
-                            egui::RichText::new(branch)
-                                .color(status_fg)
-                                .size(12.0),
+                            egui::RichText::new(branch).color(status_fg).size(12.0),
                         ));
                         ui.add(egui::Label::new(
-                            egui::RichText::new(" │ ")
-                                .color(status_comment)
-                                .size(12.0),
+                            egui::RichText::new(" │ ").color(status_comment).size(12.0),
                         ));
                     }
 
                     // Current directory
                     ui.add(egui::Label::new(
-                        egui::RichText::new(" ")
-                            .color(status_accent)
-                            .size(12.0),
+                        egui::RichText::new(" ").color(status_accent).size(12.0),
                     ));
                     ui.add(egui::Label::new(
                         egui::RichText::new(&cwd_display)
@@ -2864,7 +3301,11 @@ impl eframe::App for ZaxiomApp {
         // Search bar (if in search mode)
         let (search_mode, search_match_count, current_match) = {
             if let Some(pane) = self.tabs[self.active_tab].focused_pane() {
-                (pane.search_mode, pane.search_matches.len(), pane.current_match)
+                (
+                    pane.search_mode,
+                    pane.search_matches.len(),
+                    pane.current_match,
+                )
             } else {
                 (false, 0, 0)
             }
@@ -2879,16 +3320,16 @@ impl eframe::App for ZaxiomApp {
             let theme_comment = self.theme.comment_color;
 
             egui::TopBottomPanel::bottom("search_bar")
-                .frame(egui::Frame::default()
-                    .fill(self.theme.background_secondary)
-                    .inner_margin(egui::Margin::symmetric(8, 4)))
+                .frame(
+                    egui::Frame::default()
+                        .fill(self.theme.background_secondary)
+                        .inner_margin(egui::Margin::symmetric(8, 4)),
+                )
                 .show(ctx, |ui| {
                     if let Some(pane) = self.tabs[self.active_tab].panes.get_mut(&pane_id) {
                         ui.horizontal(|ui| {
                             ui.add(egui::Label::new(
-                                egui::RichText::new("🔍 ")
-                                    .color(theme_accent)
-                                    .size(14.0),
+                                egui::RichText::new("🔍 ").color(theme_accent).size(14.0),
                             ));
 
                             let response = ui.add(
@@ -2908,9 +3349,13 @@ impl eframe::App for ZaxiomApp {
                             // Match count
                             if search_match_count > 0 {
                                 ui.add(egui::Label::new(
-                                    egui::RichText::new(format!(" {}/{} ", current_match + 1, search_match_count))
-                                        .color(theme_fg)
-                                        .size(12.0),
+                                    egui::RichText::new(format!(
+                                        " {}/{} ",
+                                        current_match + 1,
+                                        search_match_count
+                                    ))
+                                    .color(theme_fg)
+                                    .size(12.0),
                                 ));
                             } else if !pane.search_query.is_empty() {
                                 ui.add(egui::Label::new(
@@ -2959,13 +3404,15 @@ impl eframe::App for ZaxiomApp {
             .unwrap_or(false);
 
         if has_suggestions
-            && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Tab)) {
-                apply_suggestion = true;
-            }
+            && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Tab))
+        {
+            apply_suggestion = true;
+        }
         if showing_suggestions
-            && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Escape)) {
-                close_suggestions = true;
-            }
+            && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Escape))
+        {
+            close_suggestions = true;
+        }
 
         // Get focused pane ID for central panel
         let focused_pane_id = self.tabs[self.active_tab].splits.focused_pane_id();
@@ -3806,7 +4253,8 @@ impl eframe::App for ZaxiomApp {
         if suggestion_down {
             if let Some(pane) = self.tabs[self.active_tab].focused_pane_mut() {
                 if !pane.suggestions.is_empty() {
-                    pane.selected_suggestion = (pane.selected_suggestion + 1) % pane.suggestions.len();
+                    pane.selected_suggestion =
+                        (pane.selected_suggestion + 1) % pane.suggestions.len();
                 }
             }
         }
@@ -3836,14 +4284,17 @@ impl eframe::App for ZaxiomApp {
         // Render autocomplete popup
         let (show_suggestions, suggestions, selected) = {
             if let Some(pane) = self.tabs[self.active_tab].focused_pane() {
-                (pane.show_suggestions, pane.suggestions.clone(), pane.selected_suggestion)
+                (
+                    pane.show_suggestions,
+                    pane.suggestions.clone(),
+                    pane.selected_suggestion,
+                )
             } else {
                 (false, Vec::new(), 0)
             }
         };
 
         if show_suggestions {
-
             egui::Area::new(egui::Id::new("autocomplete_popup"))
                 .order(egui::Order::Foreground)
                 .anchor(egui::Align2::LEFT_BOTTOM, egui::vec2(100.0, -35.0))

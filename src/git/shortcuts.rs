@@ -24,95 +24,140 @@ impl GitShortcuts {
     pub fn new() -> Self {
         let mut shortcuts = HashMap::new();
 
-        shortcuts.insert("gs", ShortcutDef {
-            template: "git status",
-            requires_args: false,
-            description: "Show git status",
-        });
+        shortcuts.insert(
+            "gs",
+            ShortcutDef {
+                template: "git status",
+                requires_args: false,
+                description: "Show git status",
+            },
+        );
 
-        shortcuts.insert("gd", ShortcutDef {
-            template: "git diff",
-            requires_args: false,
-            description: "Show git diff",
-        });
+        shortcuts.insert(
+            "gd",
+            ShortcutDef {
+                template: "git diff",
+                requires_args: false,
+                description: "Show git diff",
+            },
+        );
 
-        shortcuts.insert("gds", ShortcutDef {
-            template: "git diff --staged",
-            requires_args: false,
-            description: "Show staged changes",
-        });
+        shortcuts.insert(
+            "gds",
+            ShortcutDef {
+                template: "git diff --staged",
+                requires_args: false,
+                description: "Show staged changes",
+            },
+        );
 
-        shortcuts.insert("gl", ShortcutDef {
-            template: "git log --oneline -20",
-            requires_args: false,
-            description: "Show recent commits",
-        });
+        shortcuts.insert(
+            "gl",
+            ShortcutDef {
+                template: "git log --oneline -20",
+                requires_args: false,
+                description: "Show recent commits",
+            },
+        );
 
-        shortcuts.insert("gp", ShortcutDef {
-            template: "git push",
-            requires_args: false,
-            description: "Push to remote",
-        });
+        shortcuts.insert(
+            "gp",
+            ShortcutDef {
+                template: "git push",
+                requires_args: false,
+                description: "Push to remote",
+            },
+        );
 
-        shortcuts.insert("gpl", ShortcutDef {
-            template: "git pull",
-            requires_args: false,
-            description: "Pull from remote",
-        });
+        shortcuts.insert(
+            "gpl",
+            ShortcutDef {
+                template: "git pull",
+                requires_args: false,
+                description: "Pull from remote",
+            },
+        );
 
-        shortcuts.insert("ga", ShortcutDef {
-            template: "git add",
-            requires_args: false, // Defaults to . if no args
-            description: "Stage files",
-        });
+        shortcuts.insert(
+            "ga",
+            ShortcutDef {
+                template: "git add",
+                requires_args: false, // Defaults to . if no args
+                description: "Stage files",
+            },
+        );
 
-        shortcuts.insert("gc", ShortcutDef {
-            template: "git commit -m",
-            requires_args: true,
-            description: "Commit with message",
-        });
+        shortcuts.insert(
+            "gc",
+            ShortcutDef {
+                template: "git commit -m",
+                requires_args: true,
+                description: "Commit with message",
+            },
+        );
 
-        shortcuts.insert("gco", ShortcutDef {
-            template: "git checkout",
-            requires_args: true,
-            description: "Checkout branch/file",
-        });
+        shortcuts.insert(
+            "gco",
+            ShortcutDef {
+                template: "git checkout",
+                requires_args: true,
+                description: "Checkout branch/file",
+            },
+        );
 
-        shortcuts.insert("gb", ShortcutDef {
-            template: "git branch",
-            requires_args: false,
-            description: "List branches",
-        });
+        shortcuts.insert(
+            "gb",
+            ShortcutDef {
+                template: "git branch",
+                requires_args: false,
+                description: "List branches",
+            },
+        );
 
-        shortcuts.insert("gba", ShortcutDef {
-            template: "git branch -a",
-            requires_args: false,
-            description: "List all branches",
-        });
+        shortcuts.insert(
+            "gba",
+            ShortcutDef {
+                template: "git branch -a",
+                requires_args: false,
+                description: "List all branches",
+            },
+        );
 
-        shortcuts.insert("gcb", ShortcutDef {
-            template: "git checkout -b",
-            requires_args: true,
-            description: "Create and checkout branch",
-        });
+        shortcuts.insert(
+            "gcb",
+            ShortcutDef {
+                template: "git checkout -b",
+                requires_args: true,
+                description: "Create and checkout branch",
+            },
+        );
 
-        shortcuts.insert("grh", ShortcutDef {
-            template: "git reset --hard HEAD",
-            requires_args: false,
-            description: "Hard reset to HEAD",
-        });
+        shortcuts.insert(
+            "grh",
+            ShortcutDef {
+                template: "git reset --hard HEAD",
+                requires_args: false,
+                description: "Hard reset to HEAD",
+            },
+        );
 
-        shortcuts.insert("gst", ShortcutDef {
-            template: "git stash",
-            requires_args: false,
-            description: "Stash changes",
-        });
+        shortcuts.insert(
+            "gst",
+            ShortcutDef {
+                template: "git stash",
+                requires_args: false,
+                description: "Stash changes",
+            },
+        );
 
-        shortcuts.insert("gstp", ShortcutDef {
-            template: "git stash pop",
-            requires_args: false,
-            description: "Pop stashed changes",
-        });
+        shortcuts.insert(
+            "gstp",
+            ShortcutDef {
+                template: "git stash pop",
+                requires_args: false,
+                description: "Pop stashed changes",
+            },
+        );
 
         Self { shortcuts }
     }
@@ -144,7 +189,8 @@ impl GitShortcuts {
 
     /// List all shortcuts with descriptions
     pub fn list(&self) -> Vec<(&'static str, &'static str)> {
-        let mut list: Vec<_> = self.shortcuts
+        let mut list: Vec<_> = self
+            .shortcuts
             .iter()
             .map(|(k, v)| (*k, v.description))
             .collect();

@@ -54,7 +54,8 @@ RELATED COMMANDS:
   cd       Change directory
   ls       List directory contents
   tree     Show directory tree
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, _args: &[String], state: &mut TerminalState) -> Result<String> {

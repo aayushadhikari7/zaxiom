@@ -51,7 +51,8 @@ impl CommandPalette {
     /// Build all palette entries from the command registry
     fn build_entries() -> Vec<PaletteEntry> {
         let registry = CommandRegistry::new();
-        let mut entries: Vec<PaletteEntry> = registry.list()
+        let mut entries: Vec<PaletteEntry> = registry
+            .list()
             .into_iter()
             .map(|(name, desc)| {
                 let category = Self::categorize_command(name);
@@ -112,25 +113,25 @@ impl CommandPalette {
     fn categorize_command(name: &str) -> String {
         match name {
             "ls" | "cd" | "pwd" | "tree" | "clear" | "help" => "Navigation",
-            "cat" | "touch" | "rm" | "mkdir" | "cp" | "mv" | "ln" | "stat" | "file"
-            | "chmod" | "readlink" | "mktemp" | "nano" | "vim" | "vi" | "edit" => "Files",
-            "echo" | "head" | "tail" | "wc" | "sort" | "uniq" | "grep" | "find"
-            | "cut" | "paste" | "diff" | "tr" | "sed" | "awk" | "rev" | "nl"
-            | "printf" | "xargs" | "column" | "strings" | "split" | "join" | "comm" => "Text",
-            "exit" | "which" | "du" | "df" | "ps" | "kill" | "whoami" | "hostname"
-            | "uname" | "uptime" | "free" | "date" | "cal" | "id" | "neofetch"
-            | "printenv" | "lscpu" | "history" | "test" | "man" => "System",
-            "curl" | "wget" | "ping" | "netstat" | "traceroute" | "nslookup"
-            | "host" | "ifconfig" => "Network",
-            "md5sum" | "sha1sum" | "sha224sum" | "sha256sum" | "sha384sum"
-            | "sha512sum" | "blake3sum" | "b3sum" | "crc32" | "base64" | "xxd" => "Hash",
+            "cat" | "touch" | "rm" | "mkdir" | "cp" | "mv" | "ln" | "stat" | "file" | "chmod"
+            | "readlink" | "mktemp" | "nano" | "vim" | "vi" | "edit" => "Files",
+            "echo" | "head" | "tail" | "wc" | "sort" | "uniq" | "grep" | "find" | "cut"
+            | "paste" | "diff" | "tr" | "sed" | "awk" | "rev" | "nl" | "printf" | "xargs"
+            | "column" | "strings" | "split" | "join" | "comm" => "Text",
+            "exit" | "which" | "du" | "df" | "ps" | "kill" | "whoami" | "hostname" | "uname"
+            | "uptime" | "free" | "date" | "cal" | "id" | "neofetch" | "printenv" | "lscpu"
+            | "history" | "test" | "man" => "System",
+            "curl" | "wget" | "ping" | "netstat" | "traceroute" | "nslookup" | "host"
+            | "ifconfig" => "Network",
+            "md5sum" | "sha1sum" | "sha224sum" | "sha256sum" | "sha384sum" | "sha512sum"
+            | "blake3sum" | "b3sum" | "crc32" | "base64" | "xxd" => "Hash",
             "tar" | "zip" | "unzip" | "gzip" | "gunzip" => "Compress",
-            "alias" | "env" | "export" | "sleep" | "seq" | "yes" | "true" | "false"
-            | "expr" | "bc" | "tee" | "timeout" | "type" | "command"
-            | "pushd" | "popd" | "dirs" => "Shell",
+            "alias" | "env" | "export" | "sleep" | "seq" | "yes" | "true" | "false" | "expr"
+            | "bc" | "tee" | "timeout" | "type" | "command" | "pushd" | "popd" | "dirs" => "Shell",
             "fortune" | "cowsay" | "coffee" | "matrix" => "Fun",
             _ => "Other",
-        }.to_string()
+        }
+        .to_string()
     }
 
     /// Toggle the palette
@@ -163,7 +164,8 @@ impl CommandPalette {
             self.entries = self.all_entries.clone();
         } else {
             let query_lower = self.query.to_lowercase();
-            self.entries = self.all_entries
+            self.entries = self
+                .all_entries
                 .iter()
                 .filter_map(|entry| {
                     let name_lower = entry.name.to_lowercase();

@@ -1,8 +1,8 @@
 //! stat command - display file status
 
-use std::fs;
 use anyhow::Result;
 use chrono::{DateTime, Local};
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -33,14 +33,18 @@ impl Command for StatCommand {
             if arg.starts_with('-') {
                 if arg == "--help" || arg == "-h" {
                     return Ok("Usage: stat <file> [file2...]\n\
-                        Display file metadata including size, type, and timestamps.".to_string());
+                        Display file metadata including size, type, and timestamps."
+                        .to_string());
                 }
                 continue;
             }
 
             let path = state.resolve_path(arg);
             if !path.exists() {
-                output.push(format!("stat: cannot stat '{}': No such file or directory", arg));
+                output.push(format!(
+                    "stat: cannot stat '{}': No such file or directory",
+                    arg
+                ));
                 continue;
             }
 

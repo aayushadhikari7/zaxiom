@@ -64,7 +64,8 @@ RELATED COMMANDS:
   ls -l    Show permissions
   stat     Detailed file info
   chown    Change owner (not available)
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {

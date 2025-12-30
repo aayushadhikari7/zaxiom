@@ -80,32 +80,39 @@ impl SplitManager {
     }
 
     /// Split a specific node
-    fn split_node(&self, node: SplitNode, target_id: usize, direction: SplitDirection, new_id: usize) -> SplitNode {
+    fn split_node(
+        &self,
+        node: SplitNode,
+        target_id: usize,
+        direction: SplitDirection,
+        new_id: usize,
+    ) -> SplitNode {
         match node {
-            SplitNode::Pane(pane) if pane.id == target_id => {
-                SplitNode::Split {
-                    direction,
-                    ratio: 0.5,
-                    first: Box::new(SplitNode::Pane(Pane {
-                        id: pane.id,
-                        ratio: 1.0,
-                        focused: false,
-                    })),
-                    second: Box::new(SplitNode::Pane(Pane {
-                        id: new_id,
-                        ratio: 1.0,
-                        focused: true,
-                    })),
-                }
-            }
-            SplitNode::Split { direction: dir, ratio, first, second } => {
-                SplitNode::Split {
-                    direction: dir,
-                    ratio,
-                    first: Box::new(self.split_node(*first, target_id, direction, new_id)),
-                    second: Box::new(self.split_node(*second, target_id, direction, new_id)),
-                }
-            }
+            SplitNode::Pane(pane) if pane.id == target_id => SplitNode::Split {
+                direction,
+                ratio: 0.5,
+                first: Box::new(SplitNode::Pane(Pane {
+                    id: pane.id,
+                    ratio: 1.0,
+                    focused: false,
+                })),
+                second: Box::new(SplitNode::Pane(Pane {
+                    id: new_id,
+                    ratio: 1.0,
+                    focused: true,
+                })),
+            },
+            SplitNode::Split {
+                direction: dir,
+                ratio,
+                first,
+                second,
+            } => SplitNode::Split {
+                direction: dir,
+                ratio,
+                first: Box::new(self.split_node(*first, target_id, direction, new_id)),
+                second: Box::new(self.split_node(*second, target_id, direction, new_id)),
+            },
             other => other,
         }
     }
@@ -131,19 +138,22 @@ impl SplitManager {
     /// Remove a pane from the tree
     fn remove_pane(&self, node: SplitNode, pane_id: usize) -> SplitNode {
         match node {
-            SplitNode::Split { direction, ratio, first, second } => {
+            SplitNode::Split {
+                direction,
+                ratio,
+                first,
+                second,
+            } => {
                 // Check if either child is the pane to remove
                 match (first.as_ref(), second.as_ref()) {
                     (SplitNode::Pane(p), other) if p.id == pane_id => other.clone(),
                     (other, SplitNode::Pane(p)) if p.id == pane_id => other.clone(),
-                    _ => {
-                        SplitNode::Split {
-                            direction,
-                            ratio,
-                            first: Box::new(self.remove_pane(*first, pane_id)),
-                            second: Box::new(self.remove_pane(*second, pane_id)),
-                        }
-                    }
+                    _ => SplitNode::Split {
+                        direction,
+                        ratio,
+                        first: Box::new(self.remove_pane(*first, pane_id)),
+                        second: Box::new(self.remove_pane(*second, pane_id)),
+                    },
                 }
             }
             other => other,
@@ -163,14 +173,17 @@ impl SplitManager {
                 pane.focused = pane.id == target_id;
                 SplitNode::Pane(pane)
             }
-            SplitNode::Split { direction, ratio, first, second } => {
-                SplitNode::Split {
-                    direction,
-                    ratio,
-                    first: Box::new(self.set_focus(*first, target_id)),
-                    second: Box::new(self.set_focus(*second, target_id)),
-                }
-            }
+            SplitNode::Split {
+                direction,
+                ratio,
+                first,
+                second,
+            } => SplitNode::Split {
+                direction,
+                ratio,
+                first: Box::new(self.set_focus(*first, target_id)),
+                second: Box::new(self.set_focus(*second, target_id)),
+            },
         }
     }
 
@@ -200,7 +213,12 @@ impl SplitManager {
     /// Resize a split in the tree
     fn resize_split(&self, node: SplitNode, target_id: usize, delta: f32) -> SplitNode {
         match node {
-            SplitNode::Split { direction, mut ratio, first, second } => {
+            SplitNode::Split {
+                direction,
+                mut ratio,
+                first,
+                second,
+            } => {
                 // Check if either child contains the target
                 let first_contains = self.contains_pane(&first, target_id);
 
@@ -283,12 +301,22 @@ impl SplitManager {
         layouts
     }
 
-    fn layout_node(&self, node: &SplitNode, rect: egui::Rect, layouts: &mut Vec<(usize, egui::Rect)>) {
+    fn layout_node(
+        &self,
+        node: &SplitNode,
+        rect: egui::Rect,
+        layouts: &mut Vec<(usize, egui::Rect)>,
+    ) {
         match node {
             SplitNode::Pane(pane) => {
                 layouts.push((pane.id, rect));
             }
-            SplitNode::Split { direction, ratio, first, second } => {
+            SplitNode::Split {
+                direction,
+                ratio,
+                first,
+                second,
+            } => {
                 let (first_rect, second_rect) = match direction {
                     SplitDirection::Horizontal => {
                         let split_y = rect.top() + rect.height() * ratio;

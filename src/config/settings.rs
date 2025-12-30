@@ -7,8 +7,8 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-use super::theme::ThemeConfig;
 use super::aliases::AliasConfig;
+use super::theme::ThemeConfig;
 
 /// Main configuration
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -37,8 +37,7 @@ pub struct Config {
 }
 
 /// AI provider configuration
-#[derive(Debug, Deserialize, Serialize)]
-#[derive(Default)]
+#[derive(Debug, Deserialize, Serialize, Default)]
 pub struct AiConfig {
     /// Default provider: "groq", "anthropic", "openai", "gemini", "ollama"
     pub default_provider: Option<String>,
@@ -46,7 +45,6 @@ pub struct AiConfig {
     /// Default model override (uses provider's default if not set)
     pub default_model: Option<String>,
 }
-
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FontConfig {
@@ -98,14 +96,12 @@ impl Config {
 
         if config_path.exists() {
             match std::fs::read_to_string(&config_path) {
-                Ok(contents) => {
-                    match toml::from_str(&contents) {
-                        Ok(config) => return config,
-                        Err(e) => {
-                            eprintln!("Failed to parse config: {}", e);
-                        }
+                Ok(contents) => match toml::from_str(&contents) {
+                    Ok(config) => return config,
+                    Err(e) => {
+                        eprintln!("Failed to parse config: {}", e);
                     }
-                }
+                },
                 Err(e) => {
                     eprintln!("Failed to read config: {}", e);
                 }
@@ -119,8 +115,7 @@ impl Config {
     pub fn save(&self) -> std::io::Result<()> {
         Self::ensure_config_dir()?;
         let config_path = Self::config_path();
-        let contents = toml::to_string_pretty(self)
-            .map_err(std::io::Error::other)?;
+        let contents = toml::to_string_pretty(self).map_err(std::io::Error::other)?;
         std::fs::write(config_path, contents)
     }
 

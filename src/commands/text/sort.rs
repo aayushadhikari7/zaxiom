@@ -1,7 +1,7 @@
 //! sort command - sort lines of text
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -61,14 +61,20 @@ RELATED COMMANDS:
   wc       Count lines
   head     First N lines
   tail     Last N lines
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut reverse = false;
         let mut numeric = false;
         let mut unique = false;
@@ -84,7 +90,8 @@ RELATED COMMANDS:
                         Options:\n  \
                         -r    Reverse the result\n  \
                         -n    Compare according to string numerical value\n  \
-                        -u    Output only unique lines".to_string());
+                        -u    Output only unique lines"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => files.push(arg),
                 _ => {}
@@ -111,13 +118,19 @@ RELATED COMMANDS:
 
         if numeric {
             all_lines.sort_by(|a, b| {
-                let a_num: f64 = a.split_whitespace().next()
+                let a_num: f64 = a
+                    .split_whitespace()
+                    .next()
                     .and_then(|s| s.parse().ok())
                     .unwrap_or(f64::MAX);
-                let b_num: f64 = b.split_whitespace().next()
+                let b_num: f64 = b
+                    .split_whitespace()
+                    .next()
                     .and_then(|s| s.parse().ok())
                     .unwrap_or(f64::MAX);
-                a_num.partial_cmp(&b_num).unwrap_or(std::cmp::Ordering::Equal)
+                a_num
+                    .partial_cmp(&b_num)
+                    .unwrap_or(std::cmp::Ordering::Equal)
             });
         } else {
             all_lines.sort();

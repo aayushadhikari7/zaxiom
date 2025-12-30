@@ -69,11 +69,15 @@ impl Command for CoffeeCommand {
                     Options:\n  \
                       --espresso  Small but mighty\n  \
                       --tea       For the tea lovers\n\n\
-                    Take a break, you deserve it!".to_string());
+                    Take a break, you deserve it!"
+                    .to_string());
             }
 
             if arg == "--espresso" || arg == "-e" {
-                return Ok(format!("{}\n\n  A quick shot to keep you going!", ESPRESSO_ART));
+                return Ok(format!(
+                    "{}\n\n  A quick shot to keep you going!",
+                    ESPRESSO_ART
+                ));
             }
 
             if arg == "--tea" || arg == "-t" {
@@ -81,6 +85,9 @@ impl Command for CoffeeCommand {
             }
         }
 
-        Ok(format!("{}\n\n  ☕ Fresh hot coffee, just for you!", COFFEE_ART))
+        Ok(format!(
+            "{}\n\n  ☕ Fresh hot coffee, just for you!",
+            COFFEE_ART
+        ))
     }
 }

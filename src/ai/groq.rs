@@ -3,8 +3,8 @@
 //! Fast inference with free tier (30 requests/minute).
 //! Uses OpenAI-compatible API format.
 
-use anyhow::{anyhow, Result};
 use super::provider::AiProvider;
+use anyhow::{anyhow, Result};
 
 const GROQ_API_URL: &str = "https://api.groq.com/openai/v1/chat/completions";
 const ENV_KEY: &str = "GROQ_API_KEY";
@@ -60,7 +60,8 @@ impl AiProvider for GroqProvider {
     }
 
     fn chat(&self, prompt: &str, model: Option<&str>) -> Result<String> {
-        let api_key = self.get_or_prompt_api_key()
+        let api_key = self
+            .get_or_prompt_api_key()
             .ok_or_else(|| anyhow!("{}", self.get_setup_instructions()))?;
 
         let model = model.unwrap_or(DEFAULT_MODEL);
@@ -87,7 +88,8 @@ impl AiProvider for GroqProvider {
             return Err(anyhow!("Groq API error ({}): {}", status, body));
         }
 
-        let json: serde_json::Value = response.json()
+        let json: serde_json::Value = response
+            .json()
             .map_err(|e| anyhow!("Failed to parse Groq response: {}", e))?;
 
         json["choices"][0]["message"]["content"]

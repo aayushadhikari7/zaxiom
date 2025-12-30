@@ -1,10 +1,10 @@
 //! gzip command - compress files
 
-use std::fs::File;
-use std::io::{Read, Write};
 use anyhow::Result;
 use flate2::write::GzEncoder;
 use flate2::Compression;
+use std::fs::File;
+use std::io::{Read, Write};
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -73,7 +73,8 @@ RELATED COMMANDS:
   zcat     View compressed file contents
   tar      Bundle + compress directories
   zip      ZIP format (keeps files together)
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -89,7 +90,8 @@ RELATED COMMANDS:
                     return Ok("Usage: gzip [OPTIONS] <file> [file2...]\n\
                         Options:\n  \
                         -k    Keep original file\n  \
-                        -f    Force compression".to_string());
+                        -f    Force compression"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => files.push(arg),
                 _ => {}
@@ -104,17 +106,21 @@ RELATED COMMANDS:
 
         for file in files {
             let input_path = state.resolve_path(file);
-            let output_path = input_path.with_extension(
-                format!("{}.gz", input_path.extension().map(|e| e.to_string_lossy()).unwrap_or_default())
-            );
+            let output_path = input_path.with_extension(format!(
+                "{}.gz",
+                input_path
+                    .extension()
+                    .map(|e| e.to_string_lossy())
+                    .unwrap_or_default()
+            ));
 
             if output_path.exists() && !force {
                 output.push(format!("gzip: {}.gz already exists", file));
                 continue;
             }
 
-            let mut input_file = File::open(&input_path)
-                .map_err(|e| anyhow::anyhow!("gzip: {}: {}", file, e))?;
+            let mut input_file =
+                File::open(&input_path).map_err(|e| anyhow::anyhow!("gzip: {}: {}", file, e))?;
 
             let mut buffer = Vec::new();
             input_file.read_to_end(&mut buffer)?;

@@ -1,7 +1,7 @@
 //! tree command - list directory contents in tree format
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -82,7 +82,8 @@ RELATED COMMANDS:
   ls       List directory contents
   find     Search for files
   pwd      Current directory
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -107,7 +108,8 @@ RELATED COMMANDS:
                         Options:\n  \
                         -L <n>    Descend only n levels deep\n  \
                         -a        Show hidden files\n  \
-                        -d        List directories only".to_string());
+                        -d        List directories only"
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => {
                     target_path = state.resolve_path(&args[i]);
@@ -118,10 +120,14 @@ RELATED COMMANDS:
         }
 
         if !target_path.exists() {
-            return Err(anyhow::anyhow!("tree: '{}' does not exist", target_path.display()));
+            return Err(anyhow::anyhow!(
+                "tree: '{}' does not exist",
+                target_path.display()
+            ));
         }
 
-        let mut output = vec![target_path.file_name()
+        let mut output = vec![target_path
+            .file_name()
             .map(|n| n.to_string_lossy().to_string())
             .unwrap_or_else(|| ".".to_string())];
 
@@ -180,7 +186,9 @@ fn print_tree(
         .collect();
 
     entries.sort_by(|a, b| {
-        a.file_name().to_string_lossy().to_lowercase()
+        a.file_name()
+            .to_string_lossy()
+            .to_lowercase()
             .cmp(&b.file_name().to_string_lossy().to_lowercase())
     });
 

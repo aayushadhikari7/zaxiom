@@ -2,9 +2,9 @@
 
 use anyhow::Result;
 
+use super::pushd::DIR_STACK;
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
-use super::pushd::DIR_STACK;
 
 pub struct PopdCommand;
 
@@ -36,7 +36,12 @@ impl Command for PopdCommand {
         // Show remaining directory stack
         let stack = DIR_STACK.lock().unwrap();
         let mut dirs: Vec<String> = vec![target.display().to_string()];
-        dirs.extend(stack.iter().rev().map(|p: &std::path::PathBuf| p.display().to_string()));
+        dirs.extend(
+            stack
+                .iter()
+                .rev()
+                .map(|p: &std::path::PathBuf| p.display().to_string()),
+        );
 
         Ok(dirs.join(" "))
     }

@@ -1,7 +1,7 @@
 //! id command - print user identity
 
-use std::env;
 use anyhow::Result;
+use std::env;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -33,7 +33,8 @@ impl Command for IdCommand {
                     return Ok("Usage: id [OPTIONS]\n\
                         Options:\n  \
                         -u    Print only the user ID\n  \
-                        -n    Print name instead of number".to_string());
+                        -n    Print name instead of number"
+                        .to_string());
                 }
                 _ => {}
             }

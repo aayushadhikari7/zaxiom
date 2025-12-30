@@ -34,7 +34,12 @@ pub trait Command: Send + Sync {
 
     /// Execute the command with stdin input (for piping)
     /// Default implementation ignores stdin and calls execute
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         // Default: ignore stdin, just call execute
         let _ = stdin;
         self.execute(args, state)

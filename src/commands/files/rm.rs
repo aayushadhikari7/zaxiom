@@ -65,7 +65,8 @@ RELATED COMMANDS:
   rmdir    Remove empty directories
   mv       Move to trash (manual)
   find     Find and delete files
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -97,12 +98,18 @@ RELATED COMMANDS:
                 if force {
                     continue;
                 }
-                return Err(anyhow::anyhow!("No such file or directory: {}", path.display()));
+                return Err(anyhow::anyhow!(
+                    "No such file or directory: {}",
+                    path.display()
+                ));
             }
 
             if path.is_dir() {
                 if !recursive {
-                    return Err(anyhow::anyhow!("Cannot remove directory (use -r): {}", path.display()));
+                    return Err(anyhow::anyhow!(
+                        "Cannot remove directory (use -r): {}",
+                        path.display()
+                    ));
                 }
                 fs::remove_dir_all(&path)
                     .map_err(|e| anyhow::anyhow!("Cannot remove {}: {}", path.display(), e))?;

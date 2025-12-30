@@ -53,7 +53,8 @@ ENVIRONMENT VARIABLES:
 RELATED COMMANDS:
   printf   Formatted output
   cat      Print file contents
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {

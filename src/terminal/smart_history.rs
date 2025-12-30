@@ -59,11 +59,7 @@ impl HistoryEntry {
     /// Add output snippet
     pub fn set_output(&mut self, output: &str) {
         // Keep first 3 lines or first 200 chars, whichever is shorter
-        let snippet: String = output
-            .lines()
-            .take(3)
-            .collect::<Vec<_>>()
-            .join("\n");
+        let snippet: String = output.lines().take(3).collect::<Vec<_>>().join("\n");
         let snippet = if snippet.len() > 200 {
             format!("{}...", &snippet[..200])
         } else {
@@ -324,10 +320,7 @@ impl SmartHistory {
                 .collect();
         }
 
-        self.filtered
-            .iter()
-            .map(|&i| &self.entries[i])
-            .collect()
+        self.filtered.iter().map(|&i| &self.entries[i]).collect()
     }
 
     /// Get previous command (up arrow)
@@ -468,10 +461,7 @@ impl SmartHistory {
 
     /// Get history for a specific directory
     pub fn for_directory(&self, cwd: &PathBuf) -> Vec<&HistoryEntry> {
-        self.entries
-            .iter()
-            .filter(|e| e.cwd == *cwd)
-            .collect()
+        self.entries.iter().filter(|e| e.cwd == *cwd).collect()
     }
 
     /// Get commands from current session
@@ -510,11 +500,7 @@ impl SmartHistory {
     /// Get statistics
     pub fn stats(&self) -> HistoryStats<'_> {
         let total = self.entries.len();
-        let successful = self
-            .entries
-            .iter()
-            .filter(|e| e.is_success())
-            .count();
+        let successful = self.entries.iter().filter(|e| e.is_success()).count();
         let failed = self
             .entries
             .iter()

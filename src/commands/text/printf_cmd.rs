@@ -37,7 +37,8 @@ impl Command for PrintfCommand {
                 Escape sequences:\n  \
                 \\n   Newline\n  \
                 \\t   Tab\n  \
-                \\\\   Backslash".to_string());
+                \\\\   Backslash"
+                .to_string());
         }
 
         let format = &args[0];

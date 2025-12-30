@@ -1,9 +1,9 @@
 //! gunzip command - decompress files
 
-use std::fs::File;
-use std::io::{Read, Write};
 use anyhow::Result;
 use flate2::read::GzDecoder;
+use std::fs::File;
+use std::io::{Read, Write};
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -78,7 +78,8 @@ RELATED COMMANDS:
   tar      Extract .tar.gz archives
   zcat     View compressed file
   unzip    Extract ZIP archives
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -94,7 +95,8 @@ RELATED COMMANDS:
                     return Ok("Usage: gunzip [OPTIONS] <file.gz> [file2.gz...]\n\
                         Options:\n  \
                         -k    Keep original file\n  \
-                        -f    Force decompression".to_string());
+                        -f    Force decompression"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => files.push(arg),
                 _ => {}
@@ -123,8 +125,8 @@ RELATED COMMANDS:
                 continue;
             }
 
-            let input_file = File::open(&input_path)
-                .map_err(|e| anyhow::anyhow!("gunzip: {}: {}", file, e))?;
+            let input_file =
+                File::open(&input_path).map_err(|e| anyhow::anyhow!("gunzip: {}: {}", file, e))?;
 
             let mut decoder = GzDecoder::new(input_file);
             let mut buffer = Vec::new();

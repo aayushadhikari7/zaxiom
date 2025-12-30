@@ -2,8 +2,8 @@
 //!
 //! Access to Grok models via xAI's API.
 
-use anyhow::{anyhow, Result};
 use super::provider::AiProvider;
+use anyhow::{anyhow, Result};
 
 const XAI_API_URL: &str = "https://api.x.ai/v1/chat/completions";
 const ENV_KEY: &str = "XAI_API_KEY";
@@ -49,15 +49,12 @@ impl AiProvider for XaiProvider {
     }
 
     fn models(&self) -> Vec<&'static str> {
-        vec![
-            "grok-2-latest",
-            "grok-2-vision-latest",
-            "grok-beta",
-        ]
+        vec!["grok-2-latest", "grok-2-vision-latest", "grok-beta"]
     }
 
     fn chat(&self, prompt: &str, model: Option<&str>) -> Result<String> {
-        let api_key = self.get_or_prompt_api_key()
+        let api_key = self
+            .get_or_prompt_api_key()
             .ok_or_else(|| anyhow!("{}", self.get_setup_instructions()))?;
 
         let model = model.unwrap_or(DEFAULT_MODEL);
@@ -84,7 +81,8 @@ impl AiProvider for XaiProvider {
             return Err(anyhow!("xAI API error ({}): {}", status, body));
         }
 
-        let json: serde_json::Value = response.json()
+        let json: serde_json::Value = response
+            .json()
             .map_err(|e| anyhow!("Failed to parse xAI response: {}", e))?;
 
         json["choices"][0]["message"]["content"]

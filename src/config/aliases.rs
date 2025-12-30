@@ -4,8 +4,8 @@
 
 #![allow(dead_code)]
 
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// Alias configuration
 #[derive(Debug, Default, Deserialize, Serialize)]

@@ -9,64 +9,156 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::terminal::state::TerminalState;
-use super::traits::Command;
-use super::nav::{LsCommand, CdCommand, PwdCommand, ClearCommand, TreeCommand, HelpCommand};
-use super::files::{CatCommand, TouchCommand, RmCommand, MkdirCommand, CpCommand, MvCommand, LnCommand, StatCommand, FileCommand, BasenameCommand, DirnameCommand, RealpathCommand, ChmodCommand, ReadlinkCommand, MktempCommand, NanoCommand, VimCommand, ViCommand, EditCommand};
-use super::text::{EchoCommand, HeadCommand, TailCommand, WcCommand, SortCommand, UniqCommand, TacCommand, CutCommand, PasteCommand, DiffCommand, TrCommand, SedCommand, AwkCommand, RevCommand, NlCommand, PrintfCommand, XargsCommand, ColumnCommand, StringsCommand, SplitCommand, JoinCommand, CommCommand};
-use super::search::{GrepCommand, FindCommand};
-use super::system::{ExitCommand, WhichCommand, DuCommand, DfCommand, PsCommand, KillCommand, WhoamiCommand, HostnameCommand, UnameCommand, UptimeCommand, FreeCommand, DateCommand, CalCommand, IdCommand, NeofetchCommand, PrintenvCommand, LscpuCommand, HistoryCommand, TestCommand, ManCommand, ThemeCommand};
-use super::net::{CurlCommand, WgetCommand, PingCommand, NetstatCommand, TracerouteCommand, NslookupCommand, HostCommand, IfconfigCommand};
-use super::hash::{Md5sumCommand, Sha1sumCommand, Sha224sumCommand, Sha256sumCommand, Sha384sumCommand, Sha512sumCommand, Blake3sumCommand, Crc32Command, Base64Command, XxdCommand};
-use super::compress::{TarCommand, ZipCommand, UnzipCommand, GzipCommand, GunzipCommand};
-use super::fun::{FortuneCommand, CowsayCommand, CoffeeCommand, MatrixCommand, PetCommand};
-use super::shell::{AliasCommand, EnvCommand, ExportCommand, SleepCommand, WatchCommand, SeqCommand, YesCommand, TrueCommand, FalseCommand, ExprCommand, BcCommand, TeeCommand, TimeoutCommand, TypeCommand, CommandCommand, PushdCommand, PopdCommand, DirsCommand};
 use super::ai::{AiCommand, OllamaCommand};
+use super::compress::{GunzipCommand, GzipCommand, TarCommand, UnzipCommand, ZipCommand};
+use super::files::{
+    BasenameCommand, CatCommand, ChmodCommand, CpCommand, DirnameCommand, EditCommand, FileCommand,
+    LnCommand, MkdirCommand, MktempCommand, MvCommand, NanoCommand, ReadlinkCommand,
+    RealpathCommand, RmCommand, StatCommand, TouchCommand, ViCommand, VimCommand,
+};
+use super::fun::{CoffeeCommand, CowsayCommand, FortuneCommand, MatrixCommand, PetCommand};
+use super::hash::{
+    Base64Command, Blake3sumCommand, Crc32Command, Md5sumCommand, Sha1sumCommand, Sha224sumCommand,
+    Sha256sumCommand, Sha384sumCommand, Sha512sumCommand, XxdCommand,
+};
+use super::nav::{CdCommand, ClearCommand, HelpCommand, LsCommand, PwdCommand, TreeCommand};
+use super::net::{
+    CurlCommand, HostCommand, IfconfigCommand, NetstatCommand, NslookupCommand, PingCommand,
+    TracerouteCommand, WgetCommand,
+};
+use super::search::{FindCommand, GrepCommand};
+use super::shell::{
+    AliasCommand, BcCommand, CommandCommand, DirsCommand, EnvCommand, ExportCommand, ExprCommand,
+    FalseCommand, PopdCommand, PushdCommand, SeqCommand, SleepCommand, TeeCommand, TimeoutCommand,
+    TrueCommand, TypeCommand, WatchCommand, YesCommand,
+};
+use super::system::{
+    CalCommand, DateCommand, DfCommand, DuCommand, ExitCommand, FreeCommand, HistoryCommand,
+    HostnameCommand, IdCommand, KillCommand, LscpuCommand, ManCommand, NeofetchCommand,
+    PrintenvCommand, PsCommand, TestCommand, ThemeCommand, UnameCommand, UptimeCommand,
+    WhichCommand, WhoamiCommand,
+};
+use super::text::{
+    AwkCommand, ColumnCommand, CommCommand, CutCommand, DiffCommand, EchoCommand, HeadCommand,
+    JoinCommand, NlCommand, PasteCommand, PrintfCommand, RevCommand, SedCommand, SortCommand,
+    SplitCommand, StringsCommand, TacCommand, TailCommand, TrCommand, UniqCommand, WcCommand,
+    XargsCommand,
+};
 use super::tools::{
-    // Node.js
-    NpmCommand, NpxCommand, YarnCommand, PnpmCommand, BunCommand, NodeCommand, DenoCommand,
-    // Python
-    PythonCommand, Python3Command, PipCommand, Pip3Command, UvCommand, PoetryCommand,
+    AnsibleCommand,
+    ArCommand,
+    AsCommand,
+    AwsCommand,
+    AzCommand,
+    BlackCommand,
+    BunCommand,
+    BundleCommand,
+    CabalCommand,
     // Rust
-    CargoCommand, RustcCommand, RustupCommand,
-    // Go
-    GoCommand,
-    // Java/JVM
-    JavaCommand, JavacCommand, MvnCommand, GradleCommand,
+    CargoCommand,
+    ClangCommand,
+    // More C/C++ tools
+    ClangppCommand,
+    CmakeCommand,
+    CobolCommand,
+    // Utilities
+    CodeCommand,
+    ComposerCommand,
+    ConvertCommand,
+    CursorCommand,
+    DenoCommand,
+    // Containers
+    DockerCommand,
     // .NET
     DotnetCommand,
-    // Containers
-    DockerCommand, KubectlCommand,
-    // Build tools
-    MakeCommand, CmakeCommand,
+    DuneCommand,
+    // Elixir/Erlang
+    ElixirCommand,
+    ErlCommand,
+    EslintCommand,
+    FfmpegCommand,
+    GccCommand,
+    GcloudCommand,
+    GdbCommand,
+    GemCommand,
+    GfortranCommand,
+    GhCommand,
+    // Haskell
+    GhcCommand,
     // Version control
     GitCommand,
-    // Other languages
-    RubyCommand, GemCommand, BundleCommand, PhpCommand, ComposerCommand,
-    SwiftCommand, ZigCommand, GccCommand, GppCommand, ClangCommand,
-    // Utilities
-    CodeCommand, CursorCommand, SublCommand, SshCommand, ScpCommand, RsyncCommand,
-    GhCommand, AwsCommand, AzCommand, GcloudCommand, TerraformCommand, AnsibleCommand,
-    FfmpegCommand, ConvertCommand,
-    // More C/C++ tools
-    ClangppCommand, LdCommand, ArCommand, NmCommand, ObjdumpCommand,
-    GdbCommand, LldbCommand, ValgrindCommand,
-    // Assembly
-    NasmCommand, AsCommand,
-    // Haskell
-    GhcCommand, CabalCommand, StackCommand,
-    // Elixir/Erlang
-    ElixirCommand, MixCommand, IexCommand, ErlCommand,
-    // Scala/Kotlin
-    ScalaCommand, SbtCommand, KotlinCommand, KotlincCommand,
+    // Go
+    GoCommand,
+    GppCommand,
+    GradleCommand,
+    IexCommand,
+    // Java/JVM
+    JavaCommand,
+    JavacCommand,
+    JestCommand,
+    JuliaCommand,
+    KotlinCommand,
+    KotlincCommand,
+    KubectlCommand,
+    LdCommand,
+    LldbCommand,
     // More languages
-    LuaCommand, LuarocksCommand, PerlCommand, RCommand, RscriptCommand,
-    JuliaCommand, OcamlCommand, OpamCommand, DuneCommand,
-    RacketCommand, SbclCommand, GfortranCommand, CobolCommand,
+    LuaCommand,
+    LuarocksCommand,
+    // Build tools
+    MakeCommand,
+    MixCommand,
+    MvnCommand,
+    MypyCommand,
+    // Assembly
+    NasmCommand,
+    NmCommand,
+    NodeCommand,
+    // Node.js
+    NpmCommand,
+    NpxCommand,
+    ObjdumpCommand,
+    OcamlCommand,
+    OpamCommand,
+    PerlCommand,
+    PhpCommand,
+    Pip3Command,
+    PipCommand,
+    PnpmCommand,
+    PoetryCommand,
     // Linters & formatters
-    PrettierCommand, EslintCommand, BlackCommand, RuffCommand, MypyCommand,
-    PytestCommand, JestCommand, VitestCommand,
+    PrettierCommand,
+    PytestCommand,
+    Python3Command,
+    // Python
+    PythonCommand,
+    RCommand,
+    RacketCommand,
+    RscriptCommand,
+    RsyncCommand,
+    // Other languages
+    RubyCommand,
+    RuffCommand,
+    RustcCommand,
+    RustupCommand,
+    SbclCommand,
+    SbtCommand,
+    // Scala/Kotlin
+    ScalaCommand,
+    ScpCommand,
+    SshCommand,
+    StackCommand,
+    SublCommand,
+    SwiftCommand,
+    TerraformCommand,
+    UvCommand,
+    ValgrindCommand,
+    VitestCommand,
+    YarnCommand,
+    ZigCommand,
 };
+use super::traits::Command;
+use crate::terminal::state::TerminalState;
 
 /// Registry of all built-in commands
 pub struct CommandRegistry {
@@ -377,7 +469,12 @@ impl CommandRegistry {
     }
 
     /// Execute a command
-    pub fn execute(&self, name: &str, args: &[String], state: &mut TerminalState) -> Result<String> {
+    pub fn execute(
+        &self,
+        name: &str,
+        args: &[String],
+        state: &mut TerminalState,
+    ) -> Result<String> {
         match self.commands.get(name) {
             Some(cmd) => cmd.execute(args, state),
             None => Err(anyhow::anyhow!("Command not found: {}", name)),
@@ -385,7 +482,13 @@ impl CommandRegistry {
     }
 
     /// Execute a command with stdin input (for piping)
-    pub fn execute_with_stdin(&self, name: &str, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    pub fn execute_with_stdin(
+        &self,
+        name: &str,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         match self.commands.get(name) {
             Some(cmd) => cmd.execute_with_stdin(args, stdin, state),
             None => Err(anyhow::anyhow!("Command not found: {}", name)),
@@ -399,7 +502,8 @@ impl CommandRegistry {
 
     /// List all commands
     pub fn list(&self) -> Vec<(&'static str, &'static str)> {
-        let mut list: Vec<_> = self.commands
+        let mut list: Vec<_> = self
+            .commands
             .iter()
             .map(|(name, cmd)| (*name, cmd.description()))
             .collect();

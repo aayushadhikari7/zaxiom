@@ -1,7 +1,7 @@
 //! rev command - reverse lines character by character
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -25,10 +25,16 @@ impl Command for RevCommand {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         if !args.is_empty() && (args[0] == "-h" || args[0] == "--help") {
             return Ok("Usage: rev [FILE]\n\
-                Reverse each line of input.".to_string());
+                Reverse each line of input."
+                .to_string());
         }
 
         let content = if args.is_empty() {
@@ -39,8 +45,7 @@ impl Command for RevCommand {
             }
         } else {
             let path = state.resolve_path(&args[0]);
-            fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("rev: {}: {}", args[0], e))?
+            fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("rev: {}: {}", args[0], e))?
         };
 
         let reversed: Vec<String> = content

@@ -11,42 +11,42 @@ use serde::{Deserialize, Serialize};
 /// Nerd Font icons for terminal indicators
 pub mod icons {
     // Folder icons
-    pub const FOLDER: &str = "";           // nf-fa-folder
-    pub const FOLDER_OPEN: &str = "";      // nf-fa-folder_open
-    pub const HOME: &str = "";             // nf-fa-home
-    pub const ROOT: &str = "";             // nf-md-folder_cog
+    pub const FOLDER: &str = ""; // nf-fa-folder
+    pub const FOLDER_OPEN: &str = ""; // nf-fa-folder_open
+    pub const HOME: &str = ""; // nf-fa-home
+    pub const ROOT: &str = ""; // nf-md-folder_cog
 
     // Git icons
-    pub const GIT_BRANCH: &str = "";       // nf-fa-code_fork
-    pub const GIT_COMMIT: &str = "";       // nf-oct-git_commit
-    pub const GIT_MODIFIED: &str = "";     // nf-fa-circle (modified)
-    pub const GIT_STAGED: &str = "";       // nf-fa-check
-    pub const GIT_UNTRACKED: &str = "";    // nf-fa-question
-    pub const GIT_CLEAN: &str = "";        // nf-fa-check_circle
-    pub const GIT_DIRTY: &str = "";        // nf-fa-exclamation_circle
+    pub const GIT_BRANCH: &str = ""; // nf-fa-code_fork
+    pub const GIT_COMMIT: &str = ""; // nf-oct-git_commit
+    pub const GIT_MODIFIED: &str = ""; // nf-fa-circle (modified)
+    pub const GIT_STAGED: &str = ""; // nf-fa-check
+    pub const GIT_UNTRACKED: &str = ""; // nf-fa-question
+    pub const GIT_CLEAN: &str = ""; // nf-fa-check_circle
+    pub const GIT_DIRTY: &str = ""; // nf-fa-exclamation_circle
 
     // File type icons
-    pub const FILE: &str = "";             // nf-fa-file
-    pub const FILE_CODE: &str = "";        // nf-fa-file_code_o
-    pub const FILE_TEXT: &str = "";        // nf-fa-file_text
-    pub const FILE_IMAGE: &str = "";       // nf-fa-file_image_o
-    pub const FILE_ZIP: &str = "";         // nf-fa-file_archive_o
-    pub const SYMLINK: &str = "";          // nf-fa-external_link
+    pub const FILE: &str = ""; // nf-fa-file
+    pub const FILE_CODE: &str = ""; // nf-fa-file_code_o
+    pub const FILE_TEXT: &str = ""; // nf-fa-file_text
+    pub const FILE_IMAGE: &str = ""; // nf-fa-file_image_o
+    pub const FILE_ZIP: &str = ""; // nf-fa-file_archive_o
+    pub const SYMLINK: &str = ""; // nf-fa-external_link
 
     // Status icons
-    pub const SUCCESS: &str = "";          // nf-fa-check
-    pub const ERROR: &str = "";            // nf-fa-times
-    pub const WARNING: &str = "";          // nf-fa-exclamation_triangle
-    pub const INFO: &str = "";             // nf-fa-info_circle
-    pub const ARROW_RIGHT: &str = "";      // nf-fa-arrow_right
-    pub const CHEVRON: &str = "";          // nf-fa-chevron_right
-    pub const PROMPT: &str = "❯";           // Unicode prompt (works everywhere)
+    pub const SUCCESS: &str = ""; // nf-fa-check
+    pub const ERROR: &str = ""; // nf-fa-times
+    pub const WARNING: &str = ""; // nf-fa-exclamation_triangle
+    pub const INFO: &str = ""; // nf-fa-info_circle
+    pub const ARROW_RIGHT: &str = ""; // nf-fa-arrow_right
+    pub const CHEVRON: &str = ""; // nf-fa-chevron_right
+    pub const PROMPT: &str = "❯"; // Unicode prompt (works everywhere)
 
     // System icons
-    pub const WINDOWS: &str = "";          // nf-fa-windows
-    pub const LINUX: &str = "";            // nf-fa-linux
-    pub const APPLE: &str = "";            // nf-fa-apple
-    pub const TERMINAL: &str = "";         // nf-oct-terminal
+    pub const WINDOWS: &str = ""; // nf-fa-windows
+    pub const LINUX: &str = ""; // nf-fa-linux
+    pub const APPLE: &str = ""; // nf-fa-apple
+    pub const TERMINAL: &str = ""; // nf-oct-terminal
 }
 
 /// Theme configuration
@@ -122,47 +122,47 @@ impl Default for Theme {
         // https://catppuccin.com/palette/
         Self {
             // Font settings - bigger for better readability
-            font_size: 16.0,    // Larger than typical 12-14pt
-            line_height: 1.4,   // Comfortable line spacing
+            font_size: 16.0,  // Larger than typical 12-14pt
+            line_height: 1.4, // Comfortable line spacing
 
             // Base colors
-            background: Color32::from_rgb(0x1e, 0x1e, 0x2e),           // base
+            background: Color32::from_rgb(0x1e, 0x1e, 0x2e), // base
             background_secondary: Color32::from_rgb(0x18, 0x18, 0x25), // mantle
-            background_tertiary: Color32::from_rgb(0x11, 0x11, 0x1b),  // crust
-            foreground: Color32::from_rgb(0xcd, 0xd6, 0xf4),           // text
-            foreground_dim: Color32::from_rgb(0xa6, 0xad, 0xc8),       // subtext0
+            background_tertiary: Color32::from_rgb(0x11, 0x11, 0x1b), // crust
+            foreground: Color32::from_rgb(0xcd, 0xd6, 0xf4), // text
+            foreground_dim: Color32::from_rgb(0xa6, 0xad, 0xc8), // subtext0
 
             // UI elements
-            cursor: Color32::from_rgb(0xf5, 0xe0, 0xdc),               // rosewater
-            selection: Color32::from_rgb(0x45, 0x47, 0x5a),            // surface1
+            cursor: Color32::from_rgb(0xf5, 0xe0, 0xdc), // rosewater
+            selection: Color32::from_rgb(0x45, 0x47, 0x5a), // surface1
 
             // Syntax colors
-            path_color: Color32::from_rgb(0x94, 0xe2, 0xd5),           // teal
-            branch_color: Color32::from_rgb(0xfa, 0xb3, 0x87),         // peach
-            command_color: Color32::from_rgb(0xcb, 0xa6, 0xf7),        // mauve
-            string_color: Color32::from_rgb(0xa6, 0xe3, 0xa1),         // green
-            number_color: Color32::from_rgb(0xfa, 0xb3, 0x87),         // peach
-            flag_color: Color32::from_rgb(0x89, 0xdc, 0xeb),           // sky
+            path_color: Color32::from_rgb(0x94, 0xe2, 0xd5), // teal
+            branch_color: Color32::from_rgb(0xfa, 0xb3, 0x87), // peach
+            command_color: Color32::from_rgb(0xcb, 0xa6, 0xf7), // mauve
+            string_color: Color32::from_rgb(0xa6, 0xe3, 0xa1), // green
+            number_color: Color32::from_rgb(0xfa, 0xb3, 0x87), // peach
+            flag_color: Color32::from_rgb(0x89, 0xdc, 0xeb), // sky
 
             // Status colors
-            error_color: Color32::from_rgb(0xf3, 0x8b, 0xa8),          // red
-            warning_color: Color32::from_rgb(0xf9, 0xe2, 0xaf),        // yellow
-            success_color: Color32::from_rgb(0xa6, 0xe3, 0xa1),        // green
-            info_color: Color32::from_rgb(0x89, 0xb4, 0xfa),           // blue
+            error_color: Color32::from_rgb(0xf3, 0x8b, 0xa8), // red
+            warning_color: Color32::from_rgb(0xf9, 0xe2, 0xaf), // yellow
+            success_color: Color32::from_rgb(0xa6, 0xe3, 0xa1), // green
+            info_color: Color32::from_rgb(0x89, 0xb4, 0xfa),  // blue
 
             // Accents
-            accent: Color32::from_rgb(0xcb, 0xa6, 0xf7),               // mauve
-            accent_secondary: Color32::from_rgb(0xf5, 0xc2, 0xe7),     // pink
-            link_color: Color32::from_rgb(0x74, 0xc7, 0xec),           // sapphire
-            comment_color: Color32::from_rgb(0x6c, 0x70, 0x86),        // overlay0
+            accent: Color32::from_rgb(0xcb, 0xa6, 0xf7), // mauve
+            accent_secondary: Color32::from_rgb(0xf5, 0xc2, 0xe7), // pink
+            link_color: Color32::from_rgb(0x74, 0xc7, 0xec), // sapphire
+            comment_color: Color32::from_rgb(0x6c, 0x70, 0x86), // overlay0
 
             // Icon/Indicator colors (iTerm/Warp style)
-            folder_color: Color32::from_rgb(0xf9, 0xe2, 0xaf),         // yellow
-            git_icon_color: Color32::from_rgb(0xfa, 0xb3, 0x87),       // peach
-            git_clean_color: Color32::from_rgb(0xa6, 0xe3, 0xa1),      // green
-            git_dirty_color: Color32::from_rgb(0xf9, 0xe2, 0xaf),      // yellow
-            prompt_color: Color32::from_rgb(0xcb, 0xa6, 0xf7),         // mauve
-            root_color: Color32::from_rgb(0xf3, 0x8b, 0xa8),           // red
+            folder_color: Color32::from_rgb(0xf9, 0xe2, 0xaf), // yellow
+            git_icon_color: Color32::from_rgb(0xfa, 0xb3, 0x87), // peach
+            git_clean_color: Color32::from_rgb(0xa6, 0xe3, 0xa1), // green
+            git_dirty_color: Color32::from_rgb(0xf9, 0xe2, 0xaf), // yellow
+            prompt_color: Color32::from_rgb(0xcb, 0xa6, 0xf7), // mauve
+            root_color: Color32::from_rgb(0xf3, 0x8b, 0xa8),   // red
         }
     }
 }
@@ -418,33 +418,33 @@ impl Theme {
         Self {
             font_size: 16.0,
             line_height: 1.4,
-            background: Color32::from_rgb(0xef, 0xf1, 0xf5),           // base
+            background: Color32::from_rgb(0xef, 0xf1, 0xf5), // base
             background_secondary: Color32::from_rgb(0xe6, 0xe9, 0xef), // mantle
-            background_tertiary: Color32::from_rgb(0xdc, 0xe0, 0xe8),  // crust
-            foreground: Color32::from_rgb(0x4c, 0x4f, 0x69),           // text
-            foreground_dim: Color32::from_rgb(0x6c, 0x6f, 0x85),       // subtext0
-            cursor: Color32::from_rgb(0xdc, 0x8a, 0x78),               // rosewater
-            selection: Color32::from_rgb(0xcc, 0xd0, 0xda),            // surface1
-            path_color: Color32::from_rgb(0x17, 0x93, 0x99),           // teal
-            branch_color: Color32::from_rgb(0xfe, 0x64, 0x0b),         // peach
-            command_color: Color32::from_rgb(0x88, 0x39, 0xef),        // mauve
-            string_color: Color32::from_rgb(0x40, 0xa0, 0x2b),         // green
-            number_color: Color32::from_rgb(0xfe, 0x64, 0x0b),         // peach
-            flag_color: Color32::from_rgb(0x04, 0xa5, 0xe5),           // sky
-            error_color: Color32::from_rgb(0xd2, 0x00, 0x65),          // red
-            warning_color: Color32::from_rgb(0xdf, 0x8e, 0x1d),        // yellow
-            success_color: Color32::from_rgb(0x40, 0xa0, 0x2b),        // green
-            info_color: Color32::from_rgb(0x1e, 0x66, 0xf5),           // blue
-            accent: Color32::from_rgb(0x88, 0x39, 0xef),               // mauve
-            accent_secondary: Color32::from_rgb(0xea, 0x76, 0xcb),     // pink
-            link_color: Color32::from_rgb(0x20, 0x9f, 0xb5),           // sapphire
-            comment_color: Color32::from_rgb(0x8c, 0x8f, 0xa1),        // overlay0
-            folder_color: Color32::from_rgb(0xdf, 0x8e, 0x1d),         // yellow
-            git_icon_color: Color32::from_rgb(0xfe, 0x64, 0x0b),       // peach
-            git_clean_color: Color32::from_rgb(0x40, 0xa0, 0x2b),      // green
-            git_dirty_color: Color32::from_rgb(0xdf, 0x8e, 0x1d),      // yellow
-            prompt_color: Color32::from_rgb(0x88, 0x39, 0xef),         // mauve
-            root_color: Color32::from_rgb(0xd2, 0x00, 0x65),           // red
+            background_tertiary: Color32::from_rgb(0xdc, 0xe0, 0xe8), // crust
+            foreground: Color32::from_rgb(0x4c, 0x4f, 0x69), // text
+            foreground_dim: Color32::from_rgb(0x6c, 0x6f, 0x85), // subtext0
+            cursor: Color32::from_rgb(0xdc, 0x8a, 0x78),     // rosewater
+            selection: Color32::from_rgb(0xcc, 0xd0, 0xda),  // surface1
+            path_color: Color32::from_rgb(0x17, 0x93, 0x99), // teal
+            branch_color: Color32::from_rgb(0xfe, 0x64, 0x0b), // peach
+            command_color: Color32::from_rgb(0x88, 0x39, 0xef), // mauve
+            string_color: Color32::from_rgb(0x40, 0xa0, 0x2b), // green
+            number_color: Color32::from_rgb(0xfe, 0x64, 0x0b), // peach
+            flag_color: Color32::from_rgb(0x04, 0xa5, 0xe5), // sky
+            error_color: Color32::from_rgb(0xd2, 0x00, 0x65), // red
+            warning_color: Color32::from_rgb(0xdf, 0x8e, 0x1d), // yellow
+            success_color: Color32::from_rgb(0x40, 0xa0, 0x2b), // green
+            info_color: Color32::from_rgb(0x1e, 0x66, 0xf5), // blue
+            accent: Color32::from_rgb(0x88, 0x39, 0xef),     // mauve
+            accent_secondary: Color32::from_rgb(0xea, 0x76, 0xcb), // pink
+            link_color: Color32::from_rgb(0x20, 0x9f, 0xb5), // sapphire
+            comment_color: Color32::from_rgb(0x8c, 0x8f, 0xa1), // overlay0
+            folder_color: Color32::from_rgb(0xdf, 0x8e, 0x1d), // yellow
+            git_icon_color: Color32::from_rgb(0xfe, 0x64, 0x0b), // peach
+            git_clean_color: Color32::from_rgb(0x40, 0xa0, 0x2b), // green
+            git_dirty_color: Color32::from_rgb(0xdf, 0x8e, 0x1d), // yellow
+            prompt_color: Color32::from_rgb(0x88, 0x39, 0xef), // mauve
+            root_color: Color32::from_rgb(0xd2, 0x00, 0x65), // red
         }
     }
 
@@ -460,26 +460,26 @@ impl Theme {
             foreground_dim: Color32::from_rgb(0x62, 0x72, 0x84),
             cursor: Color32::from_rgb(0xf8, 0xf8, 0xf2),
             selection: Color32::from_rgb(0x44, 0x47, 0x5a),
-            path_color: Color32::from_rgb(0x8b, 0xe9, 0xfd),           // cyan
-            branch_color: Color32::from_rgb(0xff, 0xb8, 0x6c),         // orange
-            command_color: Color32::from_rgb(0xbd, 0x93, 0xf9),        // purple
-            string_color: Color32::from_rgb(0xf1, 0xfa, 0x8c),         // yellow
-            number_color: Color32::from_rgb(0xbd, 0x93, 0xf9),         // purple
-            flag_color: Color32::from_rgb(0x8b, 0xe9, 0xfd),           // cyan
-            error_color: Color32::from_rgb(0xff, 0x55, 0x55),          // red
-            warning_color: Color32::from_rgb(0xff, 0xb8, 0x6c),        // orange
-            success_color: Color32::from_rgb(0x50, 0xfa, 0x7b),        // green
-            info_color: Color32::from_rgb(0x8b, 0xe9, 0xfd),           // cyan
-            accent: Color32::from_rgb(0xff, 0x79, 0xc6),               // pink
-            accent_secondary: Color32::from_rgb(0xbd, 0x93, 0xf9),     // purple
-            link_color: Color32::from_rgb(0x8b, 0xe9, 0xfd),           // cyan
+            path_color: Color32::from_rgb(0x8b, 0xe9, 0xfd), // cyan
+            branch_color: Color32::from_rgb(0xff, 0xb8, 0x6c), // orange
+            command_color: Color32::from_rgb(0xbd, 0x93, 0xf9), // purple
+            string_color: Color32::from_rgb(0xf1, 0xfa, 0x8c), // yellow
+            number_color: Color32::from_rgb(0xbd, 0x93, 0xf9), // purple
+            flag_color: Color32::from_rgb(0x8b, 0xe9, 0xfd), // cyan
+            error_color: Color32::from_rgb(0xff, 0x55, 0x55), // red
+            warning_color: Color32::from_rgb(0xff, 0xb8, 0x6c), // orange
+            success_color: Color32::from_rgb(0x50, 0xfa, 0x7b), // green
+            info_color: Color32::from_rgb(0x8b, 0xe9, 0xfd), // cyan
+            accent: Color32::from_rgb(0xff, 0x79, 0xc6),     // pink
+            accent_secondary: Color32::from_rgb(0xbd, 0x93, 0xf9), // purple
+            link_color: Color32::from_rgb(0x8b, 0xe9, 0xfd), // cyan
             comment_color: Color32::from_rgb(0x62, 0x72, 0x84),
-            folder_color: Color32::from_rgb(0xf1, 0xfa, 0x8c),         // yellow
-            git_icon_color: Color32::from_rgb(0xff, 0xb8, 0x6c),       // orange
-            git_clean_color: Color32::from_rgb(0x50, 0xfa, 0x7b),      // green
-            git_dirty_color: Color32::from_rgb(0xf1, 0xfa, 0x8c),      // yellow
-            prompt_color: Color32::from_rgb(0xff, 0x79, 0xc6),         // pink
-            root_color: Color32::from_rgb(0xff, 0x55, 0x55),           // red
+            folder_color: Color32::from_rgb(0xf1, 0xfa, 0x8c), // yellow
+            git_icon_color: Color32::from_rgb(0xff, 0xb8, 0x6c), // orange
+            git_clean_color: Color32::from_rgb(0x50, 0xfa, 0x7b), // green
+            git_dirty_color: Color32::from_rgb(0xf1, 0xfa, 0x8c), // yellow
+            prompt_color: Color32::from_rgb(0xff, 0x79, 0xc6), // pink
+            root_color: Color32::from_rgb(0xff, 0x55, 0x55),   // red
         }
     }
 
@@ -488,33 +488,33 @@ impl Theme {
         Self {
             font_size: 16.0,
             line_height: 1.4,
-            background: Color32::from_rgb(0x2e, 0x34, 0x40),           // nord0
+            background: Color32::from_rgb(0x2e, 0x34, 0x40), // nord0
             background_secondary: Color32::from_rgb(0x3b, 0x42, 0x52), // nord1
-            background_tertiary: Color32::from_rgb(0x43, 0x4c, 0x5e),  // nord2
-            foreground: Color32::from_rgb(0xec, 0xef, 0xf4),           // nord6
-            foreground_dim: Color32::from_rgb(0xd8, 0xde, 0xe9),       // nord4
+            background_tertiary: Color32::from_rgb(0x43, 0x4c, 0x5e), // nord2
+            foreground: Color32::from_rgb(0xec, 0xef, 0xf4), // nord6
+            foreground_dim: Color32::from_rgb(0xd8, 0xde, 0xe9), // nord4
             cursor: Color32::from_rgb(0xd8, 0xde, 0xe9),
-            selection: Color32::from_rgb(0x43, 0x4c, 0x5e),            // nord3
-            path_color: Color32::from_rgb(0x8f, 0xbc, 0xbb),           // nord7 (frost)
-            branch_color: Color32::from_rgb(0xd0, 0x87, 0x70),         // nord12 (aurora orange)
-            command_color: Color32::from_rgb(0x81, 0xa1, 0xc1),        // nord9 (frost)
-            string_color: Color32::from_rgb(0xa3, 0xbe, 0x8c),         // nord14 (aurora green)
-            number_color: Color32::from_rgb(0xb4, 0x8e, 0xad),         // nord15 (aurora purple)
-            flag_color: Color32::from_rgb(0x88, 0xc0, 0xd0),           // nord8 (frost)
-            error_color: Color32::from_rgb(0xbf, 0x61, 0x6a),          // nord11 (aurora red)
-            warning_color: Color32::from_rgb(0xeb, 0xcb, 0x8b),        // nord13 (aurora yellow)
-            success_color: Color32::from_rgb(0xa3, 0xbe, 0x8c),        // nord14
-            info_color: Color32::from_rgb(0x5e, 0x81, 0xac),           // nord10
-            accent: Color32::from_rgb(0x88, 0xc0, 0xd0),               // nord8
-            accent_secondary: Color32::from_rgb(0x81, 0xa1, 0xc1),     // nord9
-            link_color: Color32::from_rgb(0x5e, 0x81, 0xac),           // nord10
-            comment_color: Color32::from_rgb(0x4c, 0x56, 0x6a),        // nord3
-            folder_color: Color32::from_rgb(0xeb, 0xcb, 0x8b),         // nord13
-            git_icon_color: Color32::from_rgb(0xd0, 0x87, 0x70),       // nord12
-            git_clean_color: Color32::from_rgb(0xa3, 0xbe, 0x8c),      // nord14
-            git_dirty_color: Color32::from_rgb(0xeb, 0xcb, 0x8b),      // nord13
-            prompt_color: Color32::from_rgb(0x88, 0xc0, 0xd0),         // nord8
-            root_color: Color32::from_rgb(0xbf, 0x61, 0x6a),           // nord11
+            selection: Color32::from_rgb(0x43, 0x4c, 0x5e), // nord3
+            path_color: Color32::from_rgb(0x8f, 0xbc, 0xbb), // nord7 (frost)
+            branch_color: Color32::from_rgb(0xd0, 0x87, 0x70), // nord12 (aurora orange)
+            command_color: Color32::from_rgb(0x81, 0xa1, 0xc1), // nord9 (frost)
+            string_color: Color32::from_rgb(0xa3, 0xbe, 0x8c), // nord14 (aurora green)
+            number_color: Color32::from_rgb(0xb4, 0x8e, 0xad), // nord15 (aurora purple)
+            flag_color: Color32::from_rgb(0x88, 0xc0, 0xd0), // nord8 (frost)
+            error_color: Color32::from_rgb(0xbf, 0x61, 0x6a), // nord11 (aurora red)
+            warning_color: Color32::from_rgb(0xeb, 0xcb, 0x8b), // nord13 (aurora yellow)
+            success_color: Color32::from_rgb(0xa3, 0xbe, 0x8c), // nord14
+            info_color: Color32::from_rgb(0x5e, 0x81, 0xac), // nord10
+            accent: Color32::from_rgb(0x88, 0xc0, 0xd0),    // nord8
+            accent_secondary: Color32::from_rgb(0x81, 0xa1, 0xc1), // nord9
+            link_color: Color32::from_rgb(0x5e, 0x81, 0xac), // nord10
+            comment_color: Color32::from_rgb(0x4c, 0x56, 0x6a), // nord3
+            folder_color: Color32::from_rgb(0xeb, 0xcb, 0x8b), // nord13
+            git_icon_color: Color32::from_rgb(0xd0, 0x87, 0x70), // nord12
+            git_clean_color: Color32::from_rgb(0xa3, 0xbe, 0x8c), // nord14
+            git_dirty_color: Color32::from_rgb(0xeb, 0xcb, 0x8b), // nord13
+            prompt_color: Color32::from_rgb(0x88, 0xc0, 0xd0), // nord8
+            root_color: Color32::from_rgb(0xbf, 0x61, 0x6a), // nord11
         }
     }
 
@@ -523,33 +523,33 @@ impl Theme {
         Self {
             font_size: 16.0,
             line_height: 1.4,
-            background: Color32::from_rgb(0x28, 0x28, 0x28),           // bg
+            background: Color32::from_rgb(0x28, 0x28, 0x28), // bg
             background_secondary: Color32::from_rgb(0x1d, 0x20, 0x21), // bg0_h
-            background_tertiary: Color32::from_rgb(0x32, 0x30, 0x2f),  // bg1
-            foreground: Color32::from_rgb(0xeb, 0xdb, 0xb2),           // fg
-            foreground_dim: Color32::from_rgb(0xbd, 0xae, 0x93),       // fg3
+            background_tertiary: Color32::from_rgb(0x32, 0x30, 0x2f), // bg1
+            foreground: Color32::from_rgb(0xeb, 0xdb, 0xb2), // fg
+            foreground_dim: Color32::from_rgb(0xbd, 0xae, 0x93), // fg3
             cursor: Color32::from_rgb(0xeb, 0xdb, 0xb2),
-            selection: Color32::from_rgb(0x50, 0x49, 0x45),            // bg2
-            path_color: Color32::from_rgb(0x83, 0xa5, 0x98),           // aqua
-            branch_color: Color32::from_rgb(0xfe, 0x80, 0x19),         // orange
-            command_color: Color32::from_rgb(0xd3, 0x86, 0x9b),        // purple
-            string_color: Color32::from_rgb(0xb8, 0xbb, 0x26),         // green
-            number_color: Color32::from_rgb(0xd3, 0x86, 0x9b),         // purple
-            flag_color: Color32::from_rgb(0x83, 0xa5, 0x98),           // aqua
-            error_color: Color32::from_rgb(0xfb, 0x49, 0x34),          // red
-            warning_color: Color32::from_rgb(0xfa, 0xbd, 0x2f),        // yellow
-            success_color: Color32::from_rgb(0xb8, 0xbb, 0x26),        // green
-            info_color: Color32::from_rgb(0x83, 0xa5, 0x98),           // aqua
-            accent: Color32::from_rgb(0xfe, 0x80, 0x19),               // orange
-            accent_secondary: Color32::from_rgb(0xd3, 0x86, 0x9b),     // purple
-            link_color: Color32::from_rgb(0x45, 0x85, 0x88),           // blue
-            comment_color: Color32::from_rgb(0x92, 0x83, 0x74),        // gray
-            folder_color: Color32::from_rgb(0xfa, 0xbd, 0x2f),         // yellow
-            git_icon_color: Color32::from_rgb(0xfe, 0x80, 0x19),       // orange
-            git_clean_color: Color32::from_rgb(0xb8, 0xbb, 0x26),      // green
-            git_dirty_color: Color32::from_rgb(0xfa, 0xbd, 0x2f),      // yellow
-            prompt_color: Color32::from_rgb(0xfe, 0x80, 0x19),         // orange
-            root_color: Color32::from_rgb(0xfb, 0x49, 0x34),           // red
+            selection: Color32::from_rgb(0x50, 0x49, 0x45), // bg2
+            path_color: Color32::from_rgb(0x83, 0xa5, 0x98), // aqua
+            branch_color: Color32::from_rgb(0xfe, 0x80, 0x19), // orange
+            command_color: Color32::from_rgb(0xd3, 0x86, 0x9b), // purple
+            string_color: Color32::from_rgb(0xb8, 0xbb, 0x26), // green
+            number_color: Color32::from_rgb(0xd3, 0x86, 0x9b), // purple
+            flag_color: Color32::from_rgb(0x83, 0xa5, 0x98), // aqua
+            error_color: Color32::from_rgb(0xfb, 0x49, 0x34), // red
+            warning_color: Color32::from_rgb(0xfa, 0xbd, 0x2f), // yellow
+            success_color: Color32::from_rgb(0xb8, 0xbb, 0x26), // green
+            info_color: Color32::from_rgb(0x83, 0xa5, 0x98), // aqua
+            accent: Color32::from_rgb(0xfe, 0x80, 0x19),    // orange
+            accent_secondary: Color32::from_rgb(0xd3, 0x86, 0x9b), // purple
+            link_color: Color32::from_rgb(0x45, 0x85, 0x88), // blue
+            comment_color: Color32::from_rgb(0x92, 0x83, 0x74), // gray
+            folder_color: Color32::from_rgb(0xfa, 0xbd, 0x2f), // yellow
+            git_icon_color: Color32::from_rgb(0xfe, 0x80, 0x19), // orange
+            git_clean_color: Color32::from_rgb(0xb8, 0xbb, 0x26), // green
+            git_dirty_color: Color32::from_rgb(0xfa, 0xbd, 0x2f), // yellow
+            prompt_color: Color32::from_rgb(0xfe, 0x80, 0x19), // orange
+            root_color: Color32::from_rgb(0xfb, 0x49, 0x34), // red
         }
     }
 
@@ -558,33 +558,33 @@ impl Theme {
         Self {
             font_size: 16.0,
             line_height: 1.4,
-            background: Color32::from_rgb(0xfb, 0xf1, 0xc7),           // bg
+            background: Color32::from_rgb(0xfb, 0xf1, 0xc7), // bg
             background_secondary: Color32::from_rgb(0xf9, 0xf5, 0xd7), // bg0_h
-            background_tertiary: Color32::from_rgb(0xeb, 0xdb, 0xb2),  // bg1
-            foreground: Color32::from_rgb(0x3c, 0x38, 0x36),           // fg
-            foreground_dim: Color32::from_rgb(0x66, 0x5c, 0x54),       // fg3
+            background_tertiary: Color32::from_rgb(0xeb, 0xdb, 0xb2), // bg1
+            foreground: Color32::from_rgb(0x3c, 0x38, 0x36), // fg
+            foreground_dim: Color32::from_rgb(0x66, 0x5c, 0x54), // fg3
             cursor: Color32::from_rgb(0x3c, 0x38, 0x36),
-            selection: Color32::from_rgb(0xd5, 0xc4, 0xa1),            // bg2
-            path_color: Color32::from_rgb(0x42, 0x7b, 0x58),           // aqua
-            branch_color: Color32::from_rgb(0xaf, 0x3a, 0x03),         // orange
-            command_color: Color32::from_rgb(0x8f, 0x3f, 0x71),        // purple
-            string_color: Color32::from_rgb(0x79, 0x74, 0x0e),         // green
-            number_color: Color32::from_rgb(0x8f, 0x3f, 0x71),         // purple
-            flag_color: Color32::from_rgb(0x42, 0x7b, 0x58),           // aqua
-            error_color: Color32::from_rgb(0xcc, 0x24, 0x1d),          // red
-            warning_color: Color32::from_rgb(0xb5, 0x76, 0x14),        // yellow
-            success_color: Color32::from_rgb(0x79, 0x74, 0x0e),        // green
-            info_color: Color32::from_rgb(0x42, 0x7b, 0x58),           // aqua
-            accent: Color32::from_rgb(0xaf, 0x3a, 0x03),               // orange
-            accent_secondary: Color32::from_rgb(0x8f, 0x3f, 0x71),     // purple
-            link_color: Color32::from_rgb(0x07, 0x66, 0x78),           // blue
-            comment_color: Color32::from_rgb(0x7c, 0x6f, 0x64),        // gray
-            folder_color: Color32::from_rgb(0xb5, 0x76, 0x14),         // yellow
-            git_icon_color: Color32::from_rgb(0xaf, 0x3a, 0x03),       // orange
-            git_clean_color: Color32::from_rgb(0x79, 0x74, 0x0e),      // green
-            git_dirty_color: Color32::from_rgb(0xb5, 0x76, 0x14),      // yellow
-            prompt_color: Color32::from_rgb(0xaf, 0x3a, 0x03),         // orange
-            root_color: Color32::from_rgb(0xcc, 0x24, 0x1d),           // red
+            selection: Color32::from_rgb(0xd5, 0xc4, 0xa1), // bg2
+            path_color: Color32::from_rgb(0x42, 0x7b, 0x58), // aqua
+            branch_color: Color32::from_rgb(0xaf, 0x3a, 0x03), // orange
+            command_color: Color32::from_rgb(0x8f, 0x3f, 0x71), // purple
+            string_color: Color32::from_rgb(0x79, 0x74, 0x0e), // green
+            number_color: Color32::from_rgb(0x8f, 0x3f, 0x71), // purple
+            flag_color: Color32::from_rgb(0x42, 0x7b, 0x58), // aqua
+            error_color: Color32::from_rgb(0xcc, 0x24, 0x1d), // red
+            warning_color: Color32::from_rgb(0xb5, 0x76, 0x14), // yellow
+            success_color: Color32::from_rgb(0x79, 0x74, 0x0e), // green
+            info_color: Color32::from_rgb(0x42, 0x7b, 0x58), // aqua
+            accent: Color32::from_rgb(0xaf, 0x3a, 0x03),    // orange
+            accent_secondary: Color32::from_rgb(0x8f, 0x3f, 0x71), // purple
+            link_color: Color32::from_rgb(0x07, 0x66, 0x78), // blue
+            comment_color: Color32::from_rgb(0x7c, 0x6f, 0x64), // gray
+            folder_color: Color32::from_rgb(0xb5, 0x76, 0x14), // yellow
+            git_icon_color: Color32::from_rgb(0xaf, 0x3a, 0x03), // orange
+            git_clean_color: Color32::from_rgb(0x79, 0x74, 0x0e), // green
+            git_dirty_color: Color32::from_rgb(0xb5, 0x76, 0x14), // yellow
+            prompt_color: Color32::from_rgb(0xaf, 0x3a, 0x03), // orange
+            root_color: Color32::from_rgb(0xcc, 0x24, 0x1d), // red
         }
     }
 
@@ -600,26 +600,26 @@ impl Theme {
             foreground_dim: Color32::from_rgb(0x56, 0x5f, 0x89),
             cursor: Color32::from_rgb(0xc0, 0xca, 0xf5),
             selection: Color32::from_rgb(0x28, 0x2d, 0x3f),
-            path_color: Color32::from_rgb(0x7d, 0xcf, 0xff),           // cyan
-            branch_color: Color32::from_rgb(0xff, 0x9e, 0x64),         // orange
-            command_color: Color32::from_rgb(0xbb, 0x9a, 0xf7),        // purple
-            string_color: Color32::from_rgb(0x9e, 0xce, 0x6a),         // green
-            number_color: Color32::from_rgb(0xff, 0x9e, 0x64),         // orange
-            flag_color: Color32::from_rgb(0x7d, 0xcf, 0xff),           // cyan
-            error_color: Color32::from_rgb(0xf7, 0x76, 0x8e),          // red
-            warning_color: Color32::from_rgb(0xe0, 0xaf, 0x68),        // yellow
-            success_color: Color32::from_rgb(0x9e, 0xce, 0x6a),        // green
-            info_color: Color32::from_rgb(0x7a, 0xa2, 0xf7),           // blue
-            accent: Color32::from_rgb(0x7a, 0xa2, 0xf7),               // blue
-            accent_secondary: Color32::from_rgb(0xbb, 0x9a, 0xf7),     // purple
-            link_color: Color32::from_rgb(0x7d, 0xcf, 0xff),           // cyan
+            path_color: Color32::from_rgb(0x7d, 0xcf, 0xff), // cyan
+            branch_color: Color32::from_rgb(0xff, 0x9e, 0x64), // orange
+            command_color: Color32::from_rgb(0xbb, 0x9a, 0xf7), // purple
+            string_color: Color32::from_rgb(0x9e, 0xce, 0x6a), // green
+            number_color: Color32::from_rgb(0xff, 0x9e, 0x64), // orange
+            flag_color: Color32::from_rgb(0x7d, 0xcf, 0xff), // cyan
+            error_color: Color32::from_rgb(0xf7, 0x76, 0x8e), // red
+            warning_color: Color32::from_rgb(0xe0, 0xaf, 0x68), // yellow
+            success_color: Color32::from_rgb(0x9e, 0xce, 0x6a), // green
+            info_color: Color32::from_rgb(0x7a, 0xa2, 0xf7), // blue
+            accent: Color32::from_rgb(0x7a, 0xa2, 0xf7),     // blue
+            accent_secondary: Color32::from_rgb(0xbb, 0x9a, 0xf7), // purple
+            link_color: Color32::from_rgb(0x7d, 0xcf, 0xff), // cyan
             comment_color: Color32::from_rgb(0x56, 0x5f, 0x89),
-            folder_color: Color32::from_rgb(0xe0, 0xaf, 0x68),         // yellow
-            git_icon_color: Color32::from_rgb(0xff, 0x9e, 0x64),       // orange
-            git_clean_color: Color32::from_rgb(0x9e, 0xce, 0x6a),      // green
-            git_dirty_color: Color32::from_rgb(0xe0, 0xaf, 0x68),      // yellow
-            prompt_color: Color32::from_rgb(0x7a, 0xa2, 0xf7),         // blue
-            root_color: Color32::from_rgb(0xf7, 0x76, 0x8e),           // red
+            folder_color: Color32::from_rgb(0xe0, 0xaf, 0x68), // yellow
+            git_icon_color: Color32::from_rgb(0xff, 0x9e, 0x64), // orange
+            git_clean_color: Color32::from_rgb(0x9e, 0xce, 0x6a), // green
+            git_dirty_color: Color32::from_rgb(0xe0, 0xaf, 0x68), // yellow
+            prompt_color: Color32::from_rgb(0x7a, 0xa2, 0xf7), // blue
+            root_color: Color32::from_rgb(0xf7, 0x76, 0x8e),   // red
         }
     }
 
@@ -670,26 +670,26 @@ impl Theme {
             foreground_dim: Color32::from_rgb(0x5c, 0x63, 0x70),
             cursor: Color32::from_rgb(0x52, 0x8b, 0xff),
             selection: Color32::from_rgb(0x3e, 0x44, 0x51),
-            path_color: Color32::from_rgb(0x56, 0xb6, 0xc2),           // cyan
-            branch_color: Color32::from_rgb(0xd1, 0x9a, 0x66),         // orange
-            command_color: Color32::from_rgb(0xc6, 0x78, 0xdd),        // purple
-            string_color: Color32::from_rgb(0x98, 0xc3, 0x79),         // green
-            number_color: Color32::from_rgb(0xd1, 0x9a, 0x66),         // orange
-            flag_color: Color32::from_rgb(0x56, 0xb6, 0xc2),           // cyan
-            error_color: Color32::from_rgb(0xe0, 0x6c, 0x75),          // red
-            warning_color: Color32::from_rgb(0xe5, 0xc0, 0x7b),        // yellow
-            success_color: Color32::from_rgb(0x98, 0xc3, 0x79),        // green
-            info_color: Color32::from_rgb(0x61, 0xaf, 0xef),           // blue
-            accent: Color32::from_rgb(0x61, 0xaf, 0xef),               // blue
-            accent_secondary: Color32::from_rgb(0xc6, 0x78, 0xdd),     // purple
-            link_color: Color32::from_rgb(0x56, 0xb6, 0xc2),           // cyan
+            path_color: Color32::from_rgb(0x56, 0xb6, 0xc2), // cyan
+            branch_color: Color32::from_rgb(0xd1, 0x9a, 0x66), // orange
+            command_color: Color32::from_rgb(0xc6, 0x78, 0xdd), // purple
+            string_color: Color32::from_rgb(0x98, 0xc3, 0x79), // green
+            number_color: Color32::from_rgb(0xd1, 0x9a, 0x66), // orange
+            flag_color: Color32::from_rgb(0x56, 0xb6, 0xc2), // cyan
+            error_color: Color32::from_rgb(0xe0, 0x6c, 0x75), // red
+            warning_color: Color32::from_rgb(0xe5, 0xc0, 0x7b), // yellow
+            success_color: Color32::from_rgb(0x98, 0xc3, 0x79), // green
+            info_color: Color32::from_rgb(0x61, 0xaf, 0xef), // blue
+            accent: Color32::from_rgb(0x61, 0xaf, 0xef),     // blue
+            accent_secondary: Color32::from_rgb(0xc6, 0x78, 0xdd), // purple
+            link_color: Color32::from_rgb(0x56, 0xb6, 0xc2), // cyan
             comment_color: Color32::from_rgb(0x5c, 0x63, 0x70),
-            folder_color: Color32::from_rgb(0xe5, 0xc0, 0x7b),         // yellow
-            git_icon_color: Color32::from_rgb(0xd1, 0x9a, 0x66),       // orange
-            git_clean_color: Color32::from_rgb(0x98, 0xc3, 0x79),      // green
-            git_dirty_color: Color32::from_rgb(0xe5, 0xc0, 0x7b),      // yellow
-            prompt_color: Color32::from_rgb(0x61, 0xaf, 0xef),         // blue
-            root_color: Color32::from_rgb(0xe0, 0x6c, 0x75),           // red
+            folder_color: Color32::from_rgb(0xe5, 0xc0, 0x7b), // yellow
+            git_icon_color: Color32::from_rgb(0xd1, 0x9a, 0x66), // orange
+            git_clean_color: Color32::from_rgb(0x98, 0xc3, 0x79), // green
+            git_dirty_color: Color32::from_rgb(0xe5, 0xc0, 0x7b), // yellow
+            prompt_color: Color32::from_rgb(0x61, 0xaf, 0xef), // blue
+            root_color: Color32::from_rgb(0xe0, 0x6c, 0x75),   // red
         }
     }
 
@@ -698,33 +698,33 @@ impl Theme {
         Self {
             font_size: 16.0,
             line_height: 1.4,
-            background: Color32::from_rgb(0x00, 0x2b, 0x36),           // base03
+            background: Color32::from_rgb(0x00, 0x2b, 0x36), // base03
             background_secondary: Color32::from_rgb(0x07, 0x36, 0x42), // base02
             background_tertiary: Color32::from_rgb(0x00, 0x24, 0x2e),
-            foreground: Color32::from_rgb(0x83, 0x94, 0x96),           // base0
-            foreground_dim: Color32::from_rgb(0x58, 0x6e, 0x75),       // base01
+            foreground: Color32::from_rgb(0x83, 0x94, 0x96), // base0
+            foreground_dim: Color32::from_rgb(0x58, 0x6e, 0x75), // base01
             cursor: Color32::from_rgb(0x83, 0x94, 0x96),
-            selection: Color32::from_rgb(0x07, 0x36, 0x42),            // base02
-            path_color: Color32::from_rgb(0x2a, 0xa1, 0x98),           // cyan
-            branch_color: Color32::from_rgb(0xcb, 0x4b, 0x16),         // orange
-            command_color: Color32::from_rgb(0x6c, 0x71, 0xc4),        // violet
-            string_color: Color32::from_rgb(0x85, 0x99, 0x00),         // green
-            number_color: Color32::from_rgb(0xd3, 0x36, 0x82),         // magenta
-            flag_color: Color32::from_rgb(0x2a, 0xa1, 0x98),           // cyan
-            error_color: Color32::from_rgb(0xdc, 0x32, 0x2f),          // red
-            warning_color: Color32::from_rgb(0xb5, 0x89, 0x00),        // yellow
-            success_color: Color32::from_rgb(0x85, 0x99, 0x00),        // green
-            info_color: Color32::from_rgb(0x26, 0x8b, 0xd2),           // blue
-            accent: Color32::from_rgb(0x26, 0x8b, 0xd2),               // blue
-            accent_secondary: Color32::from_rgb(0x6c, 0x71, 0xc4),     // violet
-            link_color: Color32::from_rgb(0x2a, 0xa1, 0x98),           // cyan
-            comment_color: Color32::from_rgb(0x58, 0x6e, 0x75),        // base01
-            folder_color: Color32::from_rgb(0xb5, 0x89, 0x00),         // yellow
-            git_icon_color: Color32::from_rgb(0xcb, 0x4b, 0x16),       // orange
-            git_clean_color: Color32::from_rgb(0x85, 0x99, 0x00),      // green
-            git_dirty_color: Color32::from_rgb(0xb5, 0x89, 0x00),      // yellow
-            prompt_color: Color32::from_rgb(0x26, 0x8b, 0xd2),         // blue
-            root_color: Color32::from_rgb(0xdc, 0x32, 0x2f),           // red
+            selection: Color32::from_rgb(0x07, 0x36, 0x42), // base02
+            path_color: Color32::from_rgb(0x2a, 0xa1, 0x98), // cyan
+            branch_color: Color32::from_rgb(0xcb, 0x4b, 0x16), // orange
+            command_color: Color32::from_rgb(0x6c, 0x71, 0xc4), // violet
+            string_color: Color32::from_rgb(0x85, 0x99, 0x00), // green
+            number_color: Color32::from_rgb(0xd3, 0x36, 0x82), // magenta
+            flag_color: Color32::from_rgb(0x2a, 0xa1, 0x98), // cyan
+            error_color: Color32::from_rgb(0xdc, 0x32, 0x2f), // red
+            warning_color: Color32::from_rgb(0xb5, 0x89, 0x00), // yellow
+            success_color: Color32::from_rgb(0x85, 0x99, 0x00), // green
+            info_color: Color32::from_rgb(0x26, 0x8b, 0xd2), // blue
+            accent: Color32::from_rgb(0x26, 0x8b, 0xd2),    // blue
+            accent_secondary: Color32::from_rgb(0x6c, 0x71, 0xc4), // violet
+            link_color: Color32::from_rgb(0x2a, 0xa1, 0x98), // cyan
+            comment_color: Color32::from_rgb(0x58, 0x6e, 0x75), // base01
+            folder_color: Color32::from_rgb(0xb5, 0x89, 0x00), // yellow
+            git_icon_color: Color32::from_rgb(0xcb, 0x4b, 0x16), // orange
+            git_clean_color: Color32::from_rgb(0x85, 0x99, 0x00), // green
+            git_dirty_color: Color32::from_rgb(0xb5, 0x89, 0x00), // yellow
+            prompt_color: Color32::from_rgb(0x26, 0x8b, 0xd2), // blue
+            root_color: Color32::from_rgb(0xdc, 0x32, 0x2f), // red
         }
     }
 
@@ -733,33 +733,33 @@ impl Theme {
         Self {
             font_size: 16.0,
             line_height: 1.4,
-            background: Color32::from_rgb(0xfd, 0xf6, 0xe3),           // base3
+            background: Color32::from_rgb(0xfd, 0xf6, 0xe3), // base3
             background_secondary: Color32::from_rgb(0xee, 0xe8, 0xd5), // base2
             background_tertiary: Color32::from_rgb(0xfa, 0xf3, 0xdf),
-            foreground: Color32::from_rgb(0x65, 0x7b, 0x83),           // base00
-            foreground_dim: Color32::from_rgb(0x93, 0xa1, 0xa1),       // base1
+            foreground: Color32::from_rgb(0x65, 0x7b, 0x83), // base00
+            foreground_dim: Color32::from_rgb(0x93, 0xa1, 0xa1), // base1
             cursor: Color32::from_rgb(0x65, 0x7b, 0x83),
-            selection: Color32::from_rgb(0xee, 0xe8, 0xd5),            // base2
-            path_color: Color32::from_rgb(0x2a, 0xa1, 0x98),           // cyan
-            branch_color: Color32::from_rgb(0xcb, 0x4b, 0x16),         // orange
-            command_color: Color32::from_rgb(0x6c, 0x71, 0xc4),        // violet
-            string_color: Color32::from_rgb(0x85, 0x99, 0x00),         // green
-            number_color: Color32::from_rgb(0xd3, 0x36, 0x82),         // magenta
-            flag_color: Color32::from_rgb(0x2a, 0xa1, 0x98),           // cyan
-            error_color: Color32::from_rgb(0xdc, 0x32, 0x2f),          // red
-            warning_color: Color32::from_rgb(0xb5, 0x89, 0x00),        // yellow
-            success_color: Color32::from_rgb(0x85, 0x99, 0x00),        // green
-            info_color: Color32::from_rgb(0x26, 0x8b, 0xd2),           // blue
-            accent: Color32::from_rgb(0x26, 0x8b, 0xd2),               // blue
-            accent_secondary: Color32::from_rgb(0x6c, 0x71, 0xc4),     // violet
-            link_color: Color32::from_rgb(0x2a, 0xa1, 0x98),           // cyan
-            comment_color: Color32::from_rgb(0x93, 0xa1, 0xa1),        // base1
-            folder_color: Color32::from_rgb(0xb5, 0x89, 0x00),         // yellow
-            git_icon_color: Color32::from_rgb(0xcb, 0x4b, 0x16),       // orange
-            git_clean_color: Color32::from_rgb(0x85, 0x99, 0x00),      // green
-            git_dirty_color: Color32::from_rgb(0xb5, 0x89, 0x00),      // yellow
-            prompt_color: Color32::from_rgb(0x26, 0x8b, 0xd2),         // blue
-            root_color: Color32::from_rgb(0xdc, 0x32, 0x2f),           // red
+            selection: Color32::from_rgb(0xee, 0xe8, 0xd5), // base2
+            path_color: Color32::from_rgb(0x2a, 0xa1, 0x98), // cyan
+            branch_color: Color32::from_rgb(0xcb, 0x4b, 0x16), // orange
+            command_color: Color32::from_rgb(0x6c, 0x71, 0xc4), // violet
+            string_color: Color32::from_rgb(0x85, 0x99, 0x00), // green
+            number_color: Color32::from_rgb(0xd3, 0x36, 0x82), // magenta
+            flag_color: Color32::from_rgb(0x2a, 0xa1, 0x98), // cyan
+            error_color: Color32::from_rgb(0xdc, 0x32, 0x2f), // red
+            warning_color: Color32::from_rgb(0xb5, 0x89, 0x00), // yellow
+            success_color: Color32::from_rgb(0x85, 0x99, 0x00), // green
+            info_color: Color32::from_rgb(0x26, 0x8b, 0xd2), // blue
+            accent: Color32::from_rgb(0x26, 0x8b, 0xd2),    // blue
+            accent_secondary: Color32::from_rgb(0x6c, 0x71, 0xc4), // violet
+            link_color: Color32::from_rgb(0x2a, 0xa1, 0x98), // cyan
+            comment_color: Color32::from_rgb(0x93, 0xa1, 0xa1), // base1
+            folder_color: Color32::from_rgb(0xb5, 0x89, 0x00), // yellow
+            git_icon_color: Color32::from_rgb(0xcb, 0x4b, 0x16), // orange
+            git_clean_color: Color32::from_rgb(0x85, 0x99, 0x00), // green
+            git_dirty_color: Color32::from_rgb(0xb5, 0x89, 0x00), // yellow
+            prompt_color: Color32::from_rgb(0x26, 0x8b, 0xd2), // blue
+            root_color: Color32::from_rgb(0xdc, 0x32, 0x2f), // red
         }
     }
 
@@ -775,26 +775,26 @@ impl Theme {
             foreground_dim: Color32::from_rgb(0x93, 0x93, 0x91),
             cursor: Color32::from_rgb(0xfc, 0xfc, 0xfa),
             selection: Color32::from_rgb(0x40, 0x3e, 0x41),
-            path_color: Color32::from_rgb(0x78, 0xdc, 0xe8),           // cyan
-            branch_color: Color32::from_rgb(0xfc, 0x9e, 0x67),         // orange
-            command_color: Color32::from_rgb(0xab, 0x9d, 0xf2),        // purple
-            string_color: Color32::from_rgb(0xa9, 0xdc, 0x76),         // green
-            number_color: Color32::from_rgb(0xab, 0x9d, 0xf2),         // purple
-            flag_color: Color32::from_rgb(0x78, 0xdc, 0xe8),           // cyan
-            error_color: Color32::from_rgb(0xff, 0x61, 0x88),          // red/pink
-            warning_color: Color32::from_rgb(0xff, 0xd8, 0x66),        // yellow
-            success_color: Color32::from_rgb(0xa9, 0xdc, 0x76),        // green
-            info_color: Color32::from_rgb(0x78, 0xdc, 0xe8),           // cyan
-            accent: Color32::from_rgb(0xff, 0x61, 0x88),               // pink
-            accent_secondary: Color32::from_rgb(0xab, 0x9d, 0xf2),     // purple
-            link_color: Color32::from_rgb(0x78, 0xdc, 0xe8),           // cyan
+            path_color: Color32::from_rgb(0x78, 0xdc, 0xe8), // cyan
+            branch_color: Color32::from_rgb(0xfc, 0x9e, 0x67), // orange
+            command_color: Color32::from_rgb(0xab, 0x9d, 0xf2), // purple
+            string_color: Color32::from_rgb(0xa9, 0xdc, 0x76), // green
+            number_color: Color32::from_rgb(0xab, 0x9d, 0xf2), // purple
+            flag_color: Color32::from_rgb(0x78, 0xdc, 0xe8), // cyan
+            error_color: Color32::from_rgb(0xff, 0x61, 0x88), // red/pink
+            warning_color: Color32::from_rgb(0xff, 0xd8, 0x66), // yellow
+            success_color: Color32::from_rgb(0xa9, 0xdc, 0x76), // green
+            info_color: Color32::from_rgb(0x78, 0xdc, 0xe8), // cyan
+            accent: Color32::from_rgb(0xff, 0x61, 0x88),     // pink
+            accent_secondary: Color32::from_rgb(0xab, 0x9d, 0xf2), // purple
+            link_color: Color32::from_rgb(0x78, 0xdc, 0xe8), // cyan
             comment_color: Color32::from_rgb(0x72, 0x71, 0x72),
-            folder_color: Color32::from_rgb(0xff, 0xd8, 0x66),         // yellow
-            git_icon_color: Color32::from_rgb(0xfc, 0x9e, 0x67),       // orange
-            git_clean_color: Color32::from_rgb(0xa9, 0xdc, 0x76),      // green
-            git_dirty_color: Color32::from_rgb(0xff, 0xd8, 0x66),      // yellow
-            prompt_color: Color32::from_rgb(0xff, 0x61, 0x88),         // pink
-            root_color: Color32::from_rgb(0xff, 0x61, 0x88),           // red
+            folder_color: Color32::from_rgb(0xff, 0xd8, 0x66), // yellow
+            git_icon_color: Color32::from_rgb(0xfc, 0x9e, 0x67), // orange
+            git_clean_color: Color32::from_rgb(0xa9, 0xdc, 0x76), // green
+            git_dirty_color: Color32::from_rgb(0xff, 0xd8, 0x66), // yellow
+            prompt_color: Color32::from_rgb(0xff, 0x61, 0x88), // pink
+            root_color: Color32::from_rgb(0xff, 0x61, 0x88),   // red
         }
     }
 
@@ -810,26 +810,26 @@ impl Theme {
             foreground_dim: Color32::from_rgb(0x67, 0x6e, 0x95),
             cursor: Color32::from_rgb(0xff, 0xcc, 0x00),
             selection: Color32::from_rgb(0x3c, 0x43, 0x5e),
-            path_color: Color32::from_rgb(0x89, 0xdd, 0xff),           // cyan
-            branch_color: Color32::from_rgb(0xf7, 0x8c, 0x6c),         // orange
-            command_color: Color32::from_rgb(0xc7, 0x92, 0xea),        // purple
-            string_color: Color32::from_rgb(0xc3, 0xe8, 0x8d),         // green
-            number_color: Color32::from_rgb(0xf7, 0x8c, 0x6c),         // orange
-            flag_color: Color32::from_rgb(0x89, 0xdd, 0xff),           // cyan
-            error_color: Color32::from_rgb(0xff, 0x53, 0x70),          // red
-            warning_color: Color32::from_rgb(0xff, 0xcb, 0x6b),        // yellow
-            success_color: Color32::from_rgb(0xc3, 0xe8, 0x8d),        // green
-            info_color: Color32::from_rgb(0x82, 0xaa, 0xff),           // blue
-            accent: Color32::from_rgb(0x82, 0xaa, 0xff),               // blue
-            accent_secondary: Color32::from_rgb(0xc7, 0x92, 0xea),     // purple
-            link_color: Color32::from_rgb(0x89, 0xdd, 0xff),           // cyan
+            path_color: Color32::from_rgb(0x89, 0xdd, 0xff), // cyan
+            branch_color: Color32::from_rgb(0xf7, 0x8c, 0x6c), // orange
+            command_color: Color32::from_rgb(0xc7, 0x92, 0xea), // purple
+            string_color: Color32::from_rgb(0xc3, 0xe8, 0x8d), // green
+            number_color: Color32::from_rgb(0xf7, 0x8c, 0x6c), // orange
+            flag_color: Color32::from_rgb(0x89, 0xdd, 0xff), // cyan
+            error_color: Color32::from_rgb(0xff, 0x53, 0x70), // red
+            warning_color: Color32::from_rgb(0xff, 0xcb, 0x6b), // yellow
+            success_color: Color32::from_rgb(0xc3, 0xe8, 0x8d), // green
+            info_color: Color32::from_rgb(0x82, 0xaa, 0xff), // blue
+            accent: Color32::from_rgb(0x82, 0xaa, 0xff),     // blue
+            accent_secondary: Color32::from_rgb(0xc7, 0x92, 0xea), // purple
+            link_color: Color32::from_rgb(0x89, 0xdd, 0xff), // cyan
             comment_color: Color32::from_rgb(0x67, 0x6e, 0x95),
-            folder_color: Color32::from_rgb(0xff, 0xcb, 0x6b),         // yellow
-            git_icon_color: Color32::from_rgb(0xf7, 0x8c, 0x6c),       // orange
-            git_clean_color: Color32::from_rgb(0xc3, 0xe8, 0x8d),      // green
-            git_dirty_color: Color32::from_rgb(0xff, 0xcb, 0x6b),      // yellow
-            prompt_color: Color32::from_rgb(0x82, 0xaa, 0xff),         // blue
-            root_color: Color32::from_rgb(0xff, 0x53, 0x70),           // red
+            folder_color: Color32::from_rgb(0xff, 0xcb, 0x6b), // yellow
+            git_icon_color: Color32::from_rgb(0xf7, 0x8c, 0x6c), // orange
+            git_clean_color: Color32::from_rgb(0xc3, 0xe8, 0x8d), // green
+            git_dirty_color: Color32::from_rgb(0xff, 0xcb, 0x6b), // yellow
+            prompt_color: Color32::from_rgb(0x82, 0xaa, 0xff), // blue
+            root_color: Color32::from_rgb(0xff, 0x53, 0x70),   // red
         }
     }
 
@@ -845,26 +845,26 @@ impl Theme {
             foreground_dim: Color32::from_rgb(0x5c, 0x67, 0x73),
             cursor: Color32::from_rgb(0xe6, 0xb4, 0x50),
             selection: Color32::from_rgb(0x27, 0x3d, 0x51),
-            path_color: Color32::from_rgb(0x95, 0xe6, 0xcb),           // cyan/mint
-            branch_color: Color32::from_rgb(0xff, 0xb4, 0x54),         // orange
-            command_color: Color32::from_rgb(0xd2, 0xa6, 0xff),        // purple
-            string_color: Color32::from_rgb(0xaa, 0xd9, 0x4c),         // green
-            number_color: Color32::from_rgb(0xe6, 0xb4, 0x50),         // yellow/gold
-            flag_color: Color32::from_rgb(0x73, 0xd0, 0xff),           // blue
-            error_color: Color32::from_rgb(0xf0, 0x71, 0x78),          // red
-            warning_color: Color32::from_rgb(0xff, 0xb4, 0x54),        // orange
-            success_color: Color32::from_rgb(0xaa, 0xd9, 0x4c),        // green
-            info_color: Color32::from_rgb(0x59, 0xc2, 0xff),           // blue
-            accent: Color32::from_rgb(0xe6, 0xb4, 0x50),               // accent
-            accent_secondary: Color32::from_rgb(0xd2, 0xa6, 0xff),     // purple
-            link_color: Color32::from_rgb(0x59, 0xc2, 0xff),           // blue
+            path_color: Color32::from_rgb(0x95, 0xe6, 0xcb), // cyan/mint
+            branch_color: Color32::from_rgb(0xff, 0xb4, 0x54), // orange
+            command_color: Color32::from_rgb(0xd2, 0xa6, 0xff), // purple
+            string_color: Color32::from_rgb(0xaa, 0xd9, 0x4c), // green
+            number_color: Color32::from_rgb(0xe6, 0xb4, 0x50), // yellow/gold
+            flag_color: Color32::from_rgb(0x73, 0xd0, 0xff), // blue
+            error_color: Color32::from_rgb(0xf0, 0x71, 0x78), // red
+            warning_color: Color32::from_rgb(0xff, 0xb4, 0x54), // orange
+            success_color: Color32::from_rgb(0xaa, 0xd9, 0x4c), // green
+            info_color: Color32::from_rgb(0x59, 0xc2, 0xff), // blue
+            accent: Color32::from_rgb(0xe6, 0xb4, 0x50),     // accent
+            accent_secondary: Color32::from_rgb(0xd2, 0xa6, 0xff), // purple
+            link_color: Color32::from_rgb(0x59, 0xc2, 0xff), // blue
             comment_color: Color32::from_rgb(0x5c, 0x67, 0x73),
-            folder_color: Color32::from_rgb(0xff, 0xb4, 0x54),         // orange
-            git_icon_color: Color32::from_rgb(0xff, 0xb4, 0x54),       // orange
-            git_clean_color: Color32::from_rgb(0xaa, 0xd9, 0x4c),      // green
-            git_dirty_color: Color32::from_rgb(0xff, 0xb4, 0x54),      // orange
-            prompt_color: Color32::from_rgb(0xe6, 0xb4, 0x50),         // accent
-            root_color: Color32::from_rgb(0xf0, 0x71, 0x78),           // red
+            folder_color: Color32::from_rgb(0xff, 0xb4, 0x54), // orange
+            git_icon_color: Color32::from_rgb(0xff, 0xb4, 0x54), // orange
+            git_clean_color: Color32::from_rgb(0xaa, 0xd9, 0x4c), // green
+            git_dirty_color: Color32::from_rgb(0xff, 0xb4, 0x54), // orange
+            prompt_color: Color32::from_rgb(0xe6, 0xb4, 0x50), // accent
+            root_color: Color32::from_rgb(0xf0, 0x71, 0x78),   // red
         }
     }
 
@@ -915,26 +915,26 @@ impl Theme {
             foreground_dim: Color32::from_rgb(0x72, 0x71, 0x69),
             cursor: Color32::from_rgb(0xc8, 0xc0, 0x93),
             selection: Color32::from_rgb(0x2d, 0x4f, 0x67),
-            path_color: Color32::from_rgb(0x7f, 0xb4, 0xca),           // wave blue
-            branch_color: Color32::from_rgb(0xff, 0xa0, 0x66),         // autumn orange
-            command_color: Color32::from_rgb(0x95, 0x7f, 0xb8),        // spring violet
-            string_color: Color32::from_rgb(0x98, 0xbb, 0x6c),         // spring green
-            number_color: Color32::from_rgb(0xd2, 0x7e, 0x99),         // sakura pink
-            flag_color: Color32::from_rgb(0x7e, 0x9c, 0xd8),           // crystal blue
-            error_color: Color32::from_rgb(0xc3, 0x4a, 0x43),          // autumn red
-            warning_color: Color32::from_rgb(0xdc, 0xa5, 0x61),        // carpYellow
-            success_color: Color32::from_rgb(0x98, 0xbb, 0x6c),        // spring green
-            info_color: Color32::from_rgb(0x7e, 0x9c, 0xd8),           // crystal blue
-            accent: Color32::from_rgb(0x7e, 0x9c, 0xd8),               // crystal blue
-            accent_secondary: Color32::from_rgb(0x95, 0x7f, 0xb8),     // spring violet
-            link_color: Color32::from_rgb(0x7f, 0xb4, 0xca),           // wave blue
+            path_color: Color32::from_rgb(0x7f, 0xb4, 0xca), // wave blue
+            branch_color: Color32::from_rgb(0xff, 0xa0, 0x66), // autumn orange
+            command_color: Color32::from_rgb(0x95, 0x7f, 0xb8), // spring violet
+            string_color: Color32::from_rgb(0x98, 0xbb, 0x6c), // spring green
+            number_color: Color32::from_rgb(0xd2, 0x7e, 0x99), // sakura pink
+            flag_color: Color32::from_rgb(0x7e, 0x9c, 0xd8), // crystal blue
+            error_color: Color32::from_rgb(0xc3, 0x4a, 0x43), // autumn red
+            warning_color: Color32::from_rgb(0xdc, 0xa5, 0x61), // carpYellow
+            success_color: Color32::from_rgb(0x98, 0xbb, 0x6c), // spring green
+            info_color: Color32::from_rgb(0x7e, 0x9c, 0xd8), // crystal blue
+            accent: Color32::from_rgb(0x7e, 0x9c, 0xd8),     // crystal blue
+            accent_secondary: Color32::from_rgb(0x95, 0x7f, 0xb8), // spring violet
+            link_color: Color32::from_rgb(0x7f, 0xb4, 0xca), // wave blue
             comment_color: Color32::from_rgb(0x72, 0x71, 0x69),
-            folder_color: Color32::from_rgb(0xdc, 0xa5, 0x61),         // carpYellow
-            git_icon_color: Color32::from_rgb(0xff, 0xa0, 0x66),       // autumn orange
-            git_clean_color: Color32::from_rgb(0x98, 0xbb, 0x6c),      // spring green
-            git_dirty_color: Color32::from_rgb(0xdc, 0xa5, 0x61),      // carpYellow
-            prompt_color: Color32::from_rgb(0x7e, 0x9c, 0xd8),         // crystal blue
-            root_color: Color32::from_rgb(0xc3, 0x4a, 0x43),           // autumn red
+            folder_color: Color32::from_rgb(0xdc, 0xa5, 0x61), // carpYellow
+            git_icon_color: Color32::from_rgb(0xff, 0xa0, 0x66), // autumn orange
+            git_clean_color: Color32::from_rgb(0x98, 0xbb, 0x6c), // spring green
+            git_dirty_color: Color32::from_rgb(0xdc, 0xa5, 0x61), // carpYellow
+            prompt_color: Color32::from_rgb(0x7e, 0x9c, 0xd8), // crystal blue
+            root_color: Color32::from_rgb(0xc3, 0x4a, 0x43),   // autumn red
         }
     }
 
@@ -943,33 +943,33 @@ impl Theme {
         Self {
             font_size: 16.0,
             line_height: 1.4,
-            background: Color32::from_rgb(0x19, 0x17, 0x24),           // base
+            background: Color32::from_rgb(0x19, 0x17, 0x24), // base
             background_secondary: Color32::from_rgb(0x1f, 0x1d, 0x2e), // surface
-            background_tertiary: Color32::from_rgb(0x26, 0x23, 0x3a),  // overlay
-            foreground: Color32::from_rgb(0xe0, 0xde, 0xf4),           // text
-            foreground_dim: Color32::from_rgb(0x90, 0x8c, 0xaa),       // subtle
+            background_tertiary: Color32::from_rgb(0x26, 0x23, 0x3a), // overlay
+            foreground: Color32::from_rgb(0xe0, 0xde, 0xf4), // text
+            foreground_dim: Color32::from_rgb(0x90, 0x8c, 0xaa), // subtle
             cursor: Color32::from_rgb(0xe0, 0xde, 0xf4),
             selection: Color32::from_rgb(0x26, 0x23, 0x3a),
-            path_color: Color32::from_rgb(0x9c, 0xcf, 0xd8),           // foam
-            branch_color: Color32::from_rgb(0xea, 0x9a, 0x97),         // rose
-            command_color: Color32::from_rgb(0xc4, 0xa7, 0xe7),        // iris
-            string_color: Color32::from_rgb(0x31, 0x74, 0x8f),         // pine
-            number_color: Color32::from_rgb(0xf6, 0xc1, 0x77),         // gold
-            flag_color: Color32::from_rgb(0x9c, 0xcf, 0xd8),           // foam
-            error_color: Color32::from_rgb(0xeb, 0x6f, 0x92),          // love
-            warning_color: Color32::from_rgb(0xf6, 0xc1, 0x77),        // gold
-            success_color: Color32::from_rgb(0x31, 0x74, 0x8f),        // pine
-            info_color: Color32::from_rgb(0x9c, 0xcf, 0xd8),           // foam
-            accent: Color32::from_rgb(0xeb, 0x6f, 0x92),               // love
-            accent_secondary: Color32::from_rgb(0xc4, 0xa7, 0xe7),     // iris
-            link_color: Color32::from_rgb(0x9c, 0xcf, 0xd8),           // foam
-            comment_color: Color32::from_rgb(0x6e, 0x6a, 0x86),        // muted
-            folder_color: Color32::from_rgb(0xf6, 0xc1, 0x77),         // gold
-            git_icon_color: Color32::from_rgb(0xea, 0x9a, 0x97),       // rose
-            git_clean_color: Color32::from_rgb(0x31, 0x74, 0x8f),      // pine
-            git_dirty_color: Color32::from_rgb(0xf6, 0xc1, 0x77),      // gold
-            prompt_color: Color32::from_rgb(0xeb, 0x6f, 0x92),         // love
-            root_color: Color32::from_rgb(0xeb, 0x6f, 0x92),           // love
+            path_color: Color32::from_rgb(0x9c, 0xcf, 0xd8), // foam
+            branch_color: Color32::from_rgb(0xea, 0x9a, 0x97), // rose
+            command_color: Color32::from_rgb(0xc4, 0xa7, 0xe7), // iris
+            string_color: Color32::from_rgb(0x31, 0x74, 0x8f), // pine
+            number_color: Color32::from_rgb(0xf6, 0xc1, 0x77), // gold
+            flag_color: Color32::from_rgb(0x9c, 0xcf, 0xd8), // foam
+            error_color: Color32::from_rgb(0xeb, 0x6f, 0x92), // love
+            warning_color: Color32::from_rgb(0xf6, 0xc1, 0x77), // gold
+            success_color: Color32::from_rgb(0x31, 0x74, 0x8f), // pine
+            info_color: Color32::from_rgb(0x9c, 0xcf, 0xd8), // foam
+            accent: Color32::from_rgb(0xeb, 0x6f, 0x92),     // love
+            accent_secondary: Color32::from_rgb(0xc4, 0xa7, 0xe7), // iris
+            link_color: Color32::from_rgb(0x9c, 0xcf, 0xd8), // foam
+            comment_color: Color32::from_rgb(0x6e, 0x6a, 0x86), // muted
+            folder_color: Color32::from_rgb(0xf6, 0xc1, 0x77), // gold
+            git_icon_color: Color32::from_rgb(0xea, 0x9a, 0x97), // rose
+            git_clean_color: Color32::from_rgb(0x31, 0x74, 0x8f), // pine
+            git_dirty_color: Color32::from_rgb(0xf6, 0xc1, 0x77), // gold
+            prompt_color: Color32::from_rgb(0xeb, 0x6f, 0x92), // love
+            root_color: Color32::from_rgb(0xeb, 0x6f, 0x92), // love
         }
     }
 
@@ -1020,26 +1020,26 @@ impl Theme {
             foreground_dim: Color32::from_rgb(0x85, 0x9a, 0x89),
             cursor: Color32::from_rgb(0xd3, 0xc6, 0xaa),
             selection: Color32::from_rgb(0x47, 0x52, 0x58),
-            path_color: Color32::from_rgb(0x83, 0xc0, 0x92),           // aqua
-            branch_color: Color32::from_rgb(0xe6, 0x9a, 0x75),         // orange
-            command_color: Color32::from_rgb(0xd6, 0x99, 0xb6),        // purple
-            string_color: Color32::from_rgb(0xa7, 0xc0, 0x80),         // green
-            number_color: Color32::from_rgb(0xd6, 0x99, 0xb6),         // purple
-            flag_color: Color32::from_rgb(0x7f, 0xbf, 0xb3),           // blue
-            error_color: Color32::from_rgb(0xe6, 0x72, 0x79),          // red
-            warning_color: Color32::from_rgb(0xdb, 0xbc, 0x7f),        // yellow
-            success_color: Color32::from_rgb(0xa7, 0xc0, 0x80),        // green
-            info_color: Color32::from_rgb(0x7f, 0xbf, 0xb3),           // blue
-            accent: Color32::from_rgb(0xa7, 0xc0, 0x80),               // green
-            accent_secondary: Color32::from_rgb(0xd6, 0x99, 0xb6),     // purple
-            link_color: Color32::from_rgb(0x7f, 0xbf, 0xb3),           // blue
+            path_color: Color32::from_rgb(0x83, 0xc0, 0x92), // aqua
+            branch_color: Color32::from_rgb(0xe6, 0x9a, 0x75), // orange
+            command_color: Color32::from_rgb(0xd6, 0x99, 0xb6), // purple
+            string_color: Color32::from_rgb(0xa7, 0xc0, 0x80), // green
+            number_color: Color32::from_rgb(0xd6, 0x99, 0xb6), // purple
+            flag_color: Color32::from_rgb(0x7f, 0xbf, 0xb3), // blue
+            error_color: Color32::from_rgb(0xe6, 0x72, 0x79), // red
+            warning_color: Color32::from_rgb(0xdb, 0xbc, 0x7f), // yellow
+            success_color: Color32::from_rgb(0xa7, 0xc0, 0x80), // green
+            info_color: Color32::from_rgb(0x7f, 0xbf, 0xb3), // blue
+            accent: Color32::from_rgb(0xa7, 0xc0, 0x80),     // green
+            accent_secondary: Color32::from_rgb(0xd6, 0x99, 0xb6), // purple
+            link_color: Color32::from_rgb(0x7f, 0xbf, 0xb3), // blue
             comment_color: Color32::from_rgb(0x85, 0x9a, 0x89),
-            folder_color: Color32::from_rgb(0xdb, 0xbc, 0x7f),         // yellow
-            git_icon_color: Color32::from_rgb(0xe6, 0x9a, 0x75),       // orange
-            git_clean_color: Color32::from_rgb(0xa7, 0xc0, 0x80),      // green
-            git_dirty_color: Color32::from_rgb(0xdb, 0xbc, 0x7f),      // yellow
-            prompt_color: Color32::from_rgb(0xa7, 0xc0, 0x80),         // green
-            root_color: Color32::from_rgb(0xe6, 0x72, 0x79),           // red
+            folder_color: Color32::from_rgb(0xdb, 0xbc, 0x7f), // yellow
+            git_icon_color: Color32::from_rgb(0xe6, 0x9a, 0x75), // orange
+            git_clean_color: Color32::from_rgb(0xa7, 0xc0, 0x80), // green
+            git_dirty_color: Color32::from_rgb(0xdb, 0xbc, 0x7f), // yellow
+            prompt_color: Color32::from_rgb(0xa7, 0xc0, 0x80), // green
+            root_color: Color32::from_rgb(0xe6, 0x72, 0x79),   // red
         }
     }
 
@@ -1055,26 +1055,26 @@ impl Theme {
             foreground_dim: Color32::from_rgb(0x63, 0x78, 0x93),
             cursor: Color32::from_rgb(0x80, 0xa4, 0xc2),
             selection: Color32::from_rgb(0x1d, 0x3b, 0x53),
-            path_color: Color32::from_rgb(0x7f, 0xdb, 0xca),           // cyan
-            branch_color: Color32::from_rgb(0xf7, 0x8c, 0x6c),         // orange
-            command_color: Color32::from_rgb(0xc7, 0x92, 0xea),        // purple
-            string_color: Color32::from_rgb(0xad, 0xdb, 0x67),         // green
-            number_color: Color32::from_rgb(0xf7, 0x8c, 0x6c),         // orange
-            flag_color: Color32::from_rgb(0x7f, 0xdb, 0xca),           // cyan
-            error_color: Color32::from_rgb(0xef, 0x53, 0x50),          // red
-            warning_color: Color32::from_rgb(0xff, 0xcb, 0x8b),        // yellow
-            success_color: Color32::from_rgb(0xad, 0xdb, 0x67),        // green
-            info_color: Color32::from_rgb(0x82, 0xaa, 0xff),           // blue
-            accent: Color32::from_rgb(0x82, 0xaa, 0xff),               // blue
-            accent_secondary: Color32::from_rgb(0xc7, 0x92, 0xea),     // purple
-            link_color: Color32::from_rgb(0x7f, 0xdb, 0xca),           // cyan
+            path_color: Color32::from_rgb(0x7f, 0xdb, 0xca), // cyan
+            branch_color: Color32::from_rgb(0xf7, 0x8c, 0x6c), // orange
+            command_color: Color32::from_rgb(0xc7, 0x92, 0xea), // purple
+            string_color: Color32::from_rgb(0xad, 0xdb, 0x67), // green
+            number_color: Color32::from_rgb(0xf7, 0x8c, 0x6c), // orange
+            flag_color: Color32::from_rgb(0x7f, 0xdb, 0xca), // cyan
+            error_color: Color32::from_rgb(0xef, 0x53, 0x50), // red
+            warning_color: Color32::from_rgb(0xff, 0xcb, 0x8b), // yellow
+            success_color: Color32::from_rgb(0xad, 0xdb, 0x67), // green
+            info_color: Color32::from_rgb(0x82, 0xaa, 0xff), // blue
+            accent: Color32::from_rgb(0x82, 0xaa, 0xff),     // blue
+            accent_secondary: Color32::from_rgb(0xc7, 0x92, 0xea), // purple
+            link_color: Color32::from_rgb(0x7f, 0xdb, 0xca), // cyan
             comment_color: Color32::from_rgb(0x63, 0x78, 0x93),
-            folder_color: Color32::from_rgb(0xff, 0xcb, 0x8b),         // yellow
-            git_icon_color: Color32::from_rgb(0xf7, 0x8c, 0x6c),       // orange
-            git_clean_color: Color32::from_rgb(0xad, 0xdb, 0x67),      // green
-            git_dirty_color: Color32::from_rgb(0xff, 0xcb, 0x8b),      // yellow
-            prompt_color: Color32::from_rgb(0x82, 0xaa, 0xff),         // blue
-            root_color: Color32::from_rgb(0xef, 0x53, 0x50),           // red
+            folder_color: Color32::from_rgb(0xff, 0xcb, 0x8b), // yellow
+            git_icon_color: Color32::from_rgb(0xf7, 0x8c, 0x6c), // orange
+            git_clean_color: Color32::from_rgb(0xad, 0xdb, 0x67), // green
+            git_dirty_color: Color32::from_rgb(0xff, 0xcb, 0x8b), // yellow
+            prompt_color: Color32::from_rgb(0x82, 0xaa, 0xff), // blue
+            root_color: Color32::from_rgb(0xef, 0x53, 0x50),   // red
         }
     }
 
@@ -1129,13 +1129,13 @@ impl Theme {
         let mut theme = self.clone();
 
         // Lofi cozy backgrounds - warm purple/brown tones
-        theme.background = Color32::from_rgb(0x1a, 0x14, 0x1f);           // Deep purple-black
+        theme.background = Color32::from_rgb(0x1a, 0x14, 0x1f); // Deep purple-black
         theme.background_secondary = Color32::from_rgb(0x2a, 0x1f, 0x2f); // Warm purple
-        theme.foreground = Color32::from_rgb(0xe8, 0xdc, 0xd0);           // Warm cream white
+        theme.foreground = Color32::from_rgb(0xe8, 0xdc, 0xd0); // Warm cream white
 
         // Sunset pink/orange accents
-        theme.accent = Color32::from_rgb(0xf4, 0xa2, 0x9c);               // Salmon pink
-        theme.accent_secondary = Color32::from_rgb(0xc9, 0x9c, 0xd3);     // Muted lavender
+        theme.accent = Color32::from_rgb(0xf4, 0xa2, 0x9c); // Salmon pink
+        theme.accent_secondary = Color32::from_rgb(0xc9, 0x9c, 0xd3); // Muted lavender
 
         // Warm selection
         theme.selection = Color32::from_rgba_unmultiplied(0xf4, 0xa2, 0x9c, 50);
@@ -1150,16 +1150,16 @@ impl Theme {
         theme.comment_color = Color32::from_rgb(0x8a, 0x7a, 0x9a);
 
         // Soft muted success/error
-        theme.success_color = Color32::from_rgb(0xa8, 0xd8, 0xb9);        // Sage green
-        theme.error_color = Color32::from_rgb(0xe8, 0x8a, 0x8a);          // Muted coral
+        theme.success_color = Color32::from_rgb(0xa8, 0xd8, 0xb9); // Sage green
+        theme.error_color = Color32::from_rgb(0xe8, 0x8a, 0x8a); // Muted coral
 
         // Lofi syntax colors
-        theme.command_color = Color32::from_rgb(0xf4, 0xa2, 0x9c);        // Salmon commands
-        theme.string_color = Color32::from_rgb(0xa8, 0xd8, 0xb9);         // Sage green strings
-        theme.number_color = Color32::from_rgb(0xf4, 0xc4, 0x9c);         // Peach numbers
-        theme.flag_color = Color32::from_rgb(0x9c, 0xc4, 0xf4);           // Muted blue flags
-        theme.path_color = Color32::from_rgb(0xc9, 0x9c, 0xd3);           // Lavender paths
-        theme.link_color = Color32::from_rgb(0x9c, 0xc4, 0xf4);           // Muted blue links
+        theme.command_color = Color32::from_rgb(0xf4, 0xa2, 0x9c); // Salmon commands
+        theme.string_color = Color32::from_rgb(0xa8, 0xd8, 0xb9); // Sage green strings
+        theme.number_color = Color32::from_rgb(0xf4, 0xc4, 0x9c); // Peach numbers
+        theme.flag_color = Color32::from_rgb(0x9c, 0xc4, 0xf4); // Muted blue flags
+        theme.path_color = Color32::from_rgb(0xc9, 0x9c, 0xd3); // Lavender paths
+        theme.link_color = Color32::from_rgb(0x9c, 0xc4, 0xf4); // Muted blue links
 
         theme
     }
@@ -1167,14 +1167,14 @@ impl Theme {
 
 /// Kawaii mode icons - cuter alternatives
 pub mod kawaii_icons {
-    pub const PROMPT: &str = "♡";           // Heart prompt
-    pub const PROMPT_ALT: &str = "✿";       // Flower prompt
-    pub const FOLDER: &str = "📁";          // Emoji folder
-    pub const HOME: &str = "🏠";            // House emoji
-    pub const SUCCESS: &str = "✨";          // Sparkles
-    pub const ERROR: &str = "💔";           // Broken heart
-    pub const WARNING: &str = "⚠️";         // Warning (but cuter context)
-    pub const GIT_BRANCH: &str = "🌸";      // Cherry blossom for git
-    pub const STAR: &str = "⭐";            // Star
-    pub const HEART: &str = "💕";           // Hearts
+    pub const PROMPT: &str = "♡"; // Heart prompt
+    pub const PROMPT_ALT: &str = "✿"; // Flower prompt
+    pub const FOLDER: &str = "📁"; // Emoji folder
+    pub const HOME: &str = "🏠"; // House emoji
+    pub const SUCCESS: &str = "✨"; // Sparkles
+    pub const ERROR: &str = "💔"; // Broken heart
+    pub const WARNING: &str = "⚠️"; // Warning (but cuter context)
+    pub const GIT_BRANCH: &str = "🌸"; // Cherry blossom for git
+    pub const STAR: &str = "⭐"; // Star
+    pub const HEART: &str = "💕"; // Hearts
 }

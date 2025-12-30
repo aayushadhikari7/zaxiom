@@ -100,13 +100,7 @@ impl TerminalState {
         };
 
         match git_branch {
-            Some(branch) => format!(
-                "{} {}  {} {} ",
-                icon,
-                display_path,
-                git_icon,
-                branch
-            ),
+            Some(branch) => format!("{} {}  {} {} ", icon, display_path, git_icon, branch),
             None => format!("{} {} {} ", icon, display_path, prompt_icon),
         }
     }

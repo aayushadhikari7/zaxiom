@@ -1,7 +1,7 @@
 //! tr command - translate or delete characters
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -84,7 +84,8 @@ RELATED COMMANDS:
   sed      Stream editing (more powerful)
   awk      Text processing
   cut      Extract columns
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -100,7 +101,8 @@ RELATED COMMANDS:
                     return Ok("Usage: tr [OPTIONS] <set1> [set2] <file>\n\
                         Options:\n  \
                         -d    Delete characters in set1\n  \
-                        -s    Squeeze repeated characters".to_string());
+                        -s    Squeeze repeated characters"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => positional.push(arg),
                 _ => {}
@@ -115,13 +117,10 @@ RELATED COMMANDS:
             let set1 = positional[0];
             let file = positional[1];
             let path = state.resolve_path(file);
-            let content = fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("tr: {}: {}", file, e))?;
+            let content =
+                fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("tr: {}: {}", file, e))?;
 
-            let result: String = content
-                .chars()
-                .filter(|c| !set1.contains(*c))
-                .collect();
+            let result: String = content.chars().filter(|c| !set1.contains(*c)).collect();
 
             Ok(result)
         } else {
@@ -133,8 +132,8 @@ RELATED COMMANDS:
             let set2 = positional[1];
             let file = positional[2];
             let path = state.resolve_path(file);
-            let content = fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("tr: {}: {}", file, e))?;
+            let content =
+                fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("tr: {}: {}", file, e))?;
 
             let chars1: Vec<char> = expand_set(set1);
             let chars2: Vec<char> = expand_set(set2);
@@ -143,7 +142,10 @@ RELATED COMMANDS:
                 .chars()
                 .map(|c| {
                     if let Some(pos) = chars1.iter().position(|&ch| ch == c) {
-                        chars2.get(pos).copied().unwrap_or(*chars2.last().unwrap_or(&c))
+                        chars2
+                            .get(pos)
+                            .copied()
+                            .unwrap_or(*chars2.last().unwrap_or(&c))
                     } else {
                         c
                     }

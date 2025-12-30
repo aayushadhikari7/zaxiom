@@ -2,8 +2,8 @@
 //!
 //! Access to Cohere's Command models.
 
-use anyhow::{anyhow, Result};
 use super::provider::AiProvider;
+use anyhow::{anyhow, Result};
 
 const COHERE_API_URL: &str = "https://api.cohere.com/v2/chat";
 const ENV_KEY: &str = "COHERE_API_KEY";
@@ -49,16 +49,12 @@ impl AiProvider for CohereProvider {
     }
 
     fn models(&self) -> Vec<&'static str> {
-        vec![
-            "command-r-plus",
-            "command-r",
-            "command",
-            "command-light",
-        ]
+        vec!["command-r-plus", "command-r", "command", "command-light"]
     }
 
     fn chat(&self, prompt: &str, model: Option<&str>) -> Result<String> {
-        let api_key = self.get_or_prompt_api_key()
+        let api_key = self
+            .get_or_prompt_api_key()
             .ok_or_else(|| anyhow!("{}", self.get_setup_instructions()))?;
 
         let model = model.unwrap_or(DEFAULT_MODEL);
@@ -84,7 +80,8 @@ impl AiProvider for CohereProvider {
             return Err(anyhow!("Cohere API error ({}): {}", status, body));
         }
 
-        let json: serde_json::Value = response.json()
+        let json: serde_json::Value = response
+            .json()
             .map_err(|e| anyhow!("Failed to parse Cohere response: {}", e))?;
 
         // Cohere v2 returns message.content[0].text

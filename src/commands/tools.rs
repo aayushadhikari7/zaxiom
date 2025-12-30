@@ -3,13 +3,13 @@
 //! Thin wrappers around common dev tools that execute them directly.
 //! These run the actual system binaries for fast execution.
 
-use std::process::Command;
+use anyhow::{anyhow, Result};
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
-use anyhow::{Result, anyhow};
+use std::process::Command;
 
-use crate::terminal::state::TerminalState;
 use super::traits::Command as CommandTrait;
+use crate::terminal::state::TerminalState;
 
 /// Generic tool executor - runs a command with args
 fn run_tool(program: &str, args: &[String], cwd: &std::path::Path) -> Result<String> {
@@ -67,9 +67,15 @@ fn run_tool(program: &str, args: &[String], cwd: &std::path::Path) -> Result<Str
 pub struct NpmCommand;
 
 impl CommandTrait for NpmCommand {
-    fn name(&self) -> &'static str { "npm" }
-    fn description(&self) -> &'static str { "Node Package Manager" }
-    fn usage(&self) -> &'static str { "npm <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "npm"
+    }
+    fn description(&self) -> &'static str {
+        "Node Package Manager"
+    }
+    fn usage(&self) -> &'static str {
+        "npm <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -83,9 +89,15 @@ impl CommandTrait for NpmCommand {
 pub struct NpxCommand;
 
 impl CommandTrait for NpxCommand {
-    fn name(&self) -> &'static str { "npx" }
-    fn description(&self) -> &'static str { "Execute npm packages" }
-    fn usage(&self) -> &'static str { "npx <package> [args...]" }
+    fn name(&self) -> &'static str {
+        "npx"
+    }
+    fn description(&self) -> &'static str {
+        "Execute npm packages"
+    }
+    fn usage(&self) -> &'static str {
+        "npx <package> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -99,9 +111,15 @@ impl CommandTrait for NpxCommand {
 pub struct YarnCommand;
 
 impl CommandTrait for YarnCommand {
-    fn name(&self) -> &'static str { "yarn" }
-    fn description(&self) -> &'static str { "Yarn Package Manager" }
-    fn usage(&self) -> &'static str { "yarn [command] [args...]" }
+    fn name(&self) -> &'static str {
+        "yarn"
+    }
+    fn description(&self) -> &'static str {
+        "Yarn Package Manager"
+    }
+    fn usage(&self) -> &'static str {
+        "yarn [command] [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("yarn", args, state.cwd())
@@ -112,9 +130,15 @@ impl CommandTrait for YarnCommand {
 pub struct PnpmCommand;
 
 impl CommandTrait for PnpmCommand {
-    fn name(&self) -> &'static str { "pnpm" }
-    fn description(&self) -> &'static str { "Fast, disk space efficient package manager" }
-    fn usage(&self) -> &'static str { "pnpm [command] [args...]" }
+    fn name(&self) -> &'static str {
+        "pnpm"
+    }
+    fn description(&self) -> &'static str {
+        "Fast, disk space efficient package manager"
+    }
+    fn usage(&self) -> &'static str {
+        "pnpm [command] [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("pnpm", args, state.cwd())
@@ -125,9 +149,15 @@ impl CommandTrait for PnpmCommand {
 pub struct BunCommand;
 
 impl CommandTrait for BunCommand {
-    fn name(&self) -> &'static str { "bun" }
-    fn description(&self) -> &'static str { "Fast JavaScript runtime & toolkit" }
-    fn usage(&self) -> &'static str { "bun [command] [args...]" }
+    fn name(&self) -> &'static str {
+        "bun"
+    }
+    fn description(&self) -> &'static str {
+        "Fast JavaScript runtime & toolkit"
+    }
+    fn usage(&self) -> &'static str {
+        "bun [command] [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("bun", args, state.cwd())
@@ -138,9 +168,15 @@ impl CommandTrait for BunCommand {
 pub struct NodeCommand;
 
 impl CommandTrait for NodeCommand {
-    fn name(&self) -> &'static str { "node" }
-    fn description(&self) -> &'static str { "Node.js JavaScript runtime" }
-    fn usage(&self) -> &'static str { "node [script.js] [args...]" }
+    fn name(&self) -> &'static str {
+        "node"
+    }
+    fn description(&self) -> &'static str {
+        "Node.js JavaScript runtime"
+    }
+    fn usage(&self) -> &'static str {
+        "node [script.js] [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -156,9 +192,15 @@ impl CommandTrait for NodeCommand {
 pub struct DenoCommand;
 
 impl CommandTrait for DenoCommand {
-    fn name(&self) -> &'static str { "deno" }
-    fn description(&self) -> &'static str { "Secure JavaScript/TypeScript runtime" }
-    fn usage(&self) -> &'static str { "deno [command] [args...]" }
+    fn name(&self) -> &'static str {
+        "deno"
+    }
+    fn description(&self) -> &'static str {
+        "Secure JavaScript/TypeScript runtime"
+    }
+    fn usage(&self) -> &'static str {
+        "deno [command] [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("deno", args, state.cwd())
@@ -171,9 +213,15 @@ impl CommandTrait for DenoCommand {
 pub struct PythonCommand;
 
 impl CommandTrait for PythonCommand {
-    fn name(&self) -> &'static str { "python" }
-    fn description(&self) -> &'static str { "Python interpreter" }
-    fn usage(&self) -> &'static str { "python [script.py] [args...]" }
+    fn name(&self) -> &'static str {
+        "python"
+    }
+    fn description(&self) -> &'static str {
+        "Python interpreter"
+    }
+    fn usage(&self) -> &'static str {
+        "python [script.py] [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -188,9 +236,15 @@ impl CommandTrait for PythonCommand {
 pub struct Python3Command;
 
 impl CommandTrait for Python3Command {
-    fn name(&self) -> &'static str { "python3" }
-    fn description(&self) -> &'static str { "Python 3 interpreter" }
-    fn usage(&self) -> &'static str { "python3 [script.py] [args...]" }
+    fn name(&self) -> &'static str {
+        "python3"
+    }
+    fn description(&self) -> &'static str {
+        "Python 3 interpreter"
+    }
+    fn usage(&self) -> &'static str {
+        "python3 [script.py] [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -205,9 +259,15 @@ impl CommandTrait for Python3Command {
 pub struct PipCommand;
 
 impl CommandTrait for PipCommand {
-    fn name(&self) -> &'static str { "pip" }
-    fn description(&self) -> &'static str { "Python package installer" }
-    fn usage(&self) -> &'static str { "pip <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "pip"
+    }
+    fn description(&self) -> &'static str {
+        "Python package installer"
+    }
+    fn usage(&self) -> &'static str {
+        "pip <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -221,9 +281,15 @@ impl CommandTrait for PipCommand {
 pub struct Pip3Command;
 
 impl CommandTrait for Pip3Command {
-    fn name(&self) -> &'static str { "pip3" }
-    fn description(&self) -> &'static str { "Python 3 package installer" }
-    fn usage(&self) -> &'static str { "pip3 <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "pip3"
+    }
+    fn description(&self) -> &'static str {
+        "Python 3 package installer"
+    }
+    fn usage(&self) -> &'static str {
+        "pip3 <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("pip3", args, state.cwd())
@@ -234,9 +300,15 @@ impl CommandTrait for Pip3Command {
 pub struct UvCommand;
 
 impl CommandTrait for UvCommand {
-    fn name(&self) -> &'static str { "uv" }
-    fn description(&self) -> &'static str { "Fast Python package installer" }
-    fn usage(&self) -> &'static str { "uv <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "uv"
+    }
+    fn description(&self) -> &'static str {
+        "Fast Python package installer"
+    }
+    fn usage(&self) -> &'static str {
+        "uv <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("uv", args, state.cwd())
@@ -247,9 +319,15 @@ impl CommandTrait for UvCommand {
 pub struct PoetryCommand;
 
 impl CommandTrait for PoetryCommand {
-    fn name(&self) -> &'static str { "poetry" }
-    fn description(&self) -> &'static str { "Python dependency management" }
-    fn usage(&self) -> &'static str { "poetry <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "poetry"
+    }
+    fn description(&self) -> &'static str {
+        "Python dependency management"
+    }
+    fn usage(&self) -> &'static str {
+        "poetry <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("poetry", args, state.cwd())
@@ -262,9 +340,15 @@ impl CommandTrait for PoetryCommand {
 pub struct CargoCommand;
 
 impl CommandTrait for CargoCommand {
-    fn name(&self) -> &'static str { "cargo" }
-    fn description(&self) -> &'static str { "Rust package manager" }
-    fn usage(&self) -> &'static str { "cargo <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "cargo"
+    }
+    fn description(&self) -> &'static str {
+        "Rust package manager"
+    }
+    fn usage(&self) -> &'static str {
+        "cargo <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -278,9 +362,15 @@ impl CommandTrait for CargoCommand {
 pub struct RustcCommand;
 
 impl CommandTrait for RustcCommand {
-    fn name(&self) -> &'static str { "rustc" }
-    fn description(&self) -> &'static str { "Rust compiler" }
-    fn usage(&self) -> &'static str { "rustc [options] <input>" }
+    fn name(&self) -> &'static str {
+        "rustc"
+    }
+    fn description(&self) -> &'static str {
+        "Rust compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "rustc [options] <input>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -295,9 +385,15 @@ impl CommandTrait for RustcCommand {
 pub struct RustupCommand;
 
 impl CommandTrait for RustupCommand {
-    fn name(&self) -> &'static str { "rustup" }
-    fn description(&self) -> &'static str { "Rust toolchain manager" }
-    fn usage(&self) -> &'static str { "rustup <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "rustup"
+    }
+    fn description(&self) -> &'static str {
+        "Rust toolchain manager"
+    }
+    fn usage(&self) -> &'static str {
+        "rustup <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("rustup", args, state.cwd())
@@ -310,9 +406,15 @@ impl CommandTrait for RustupCommand {
 pub struct GoCommand;
 
 impl CommandTrait for GoCommand {
-    fn name(&self) -> &'static str { "go" }
-    fn description(&self) -> &'static str { "Go programming language" }
-    fn usage(&self) -> &'static str { "go <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "go"
+    }
+    fn description(&self) -> &'static str {
+        "Go programming language"
+    }
+    fn usage(&self) -> &'static str {
+        "go <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -328,9 +430,15 @@ impl CommandTrait for GoCommand {
 pub struct JavaCommand;
 
 impl CommandTrait for JavaCommand {
-    fn name(&self) -> &'static str { "java" }
-    fn description(&self) -> &'static str { "Java runtime" }
-    fn usage(&self) -> &'static str { "java [options] <class> [args...]" }
+    fn name(&self) -> &'static str {
+        "java"
+    }
+    fn description(&self) -> &'static str {
+        "Java runtime"
+    }
+    fn usage(&self) -> &'static str {
+        "java [options] <class> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -345,9 +453,15 @@ impl CommandTrait for JavaCommand {
 pub struct JavacCommand;
 
 impl CommandTrait for JavacCommand {
-    fn name(&self) -> &'static str { "javac" }
-    fn description(&self) -> &'static str { "Java compiler" }
-    fn usage(&self) -> &'static str { "javac [options] <source files>" }
+    fn name(&self) -> &'static str {
+        "javac"
+    }
+    fn description(&self) -> &'static str {
+        "Java compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "javac [options] <source files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("javac", args, state.cwd())
@@ -358,9 +472,15 @@ impl CommandTrait for JavacCommand {
 pub struct MvnCommand;
 
 impl CommandTrait for MvnCommand {
-    fn name(&self) -> &'static str { "mvn" }
-    fn description(&self) -> &'static str { "Apache Maven build tool" }
-    fn usage(&self) -> &'static str { "mvn [options] [<goal>...]" }
+    fn name(&self) -> &'static str {
+        "mvn"
+    }
+    fn description(&self) -> &'static str {
+        "Apache Maven build tool"
+    }
+    fn usage(&self) -> &'static str {
+        "mvn [options] [<goal>...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("mvn", args, state.cwd())
@@ -371,9 +491,15 @@ impl CommandTrait for MvnCommand {
 pub struct GradleCommand;
 
 impl CommandTrait for GradleCommand {
-    fn name(&self) -> &'static str { "gradle" }
-    fn description(&self) -> &'static str { "Gradle build tool" }
-    fn usage(&self) -> &'static str { "gradle [options] [tasks...]" }
+    fn name(&self) -> &'static str {
+        "gradle"
+    }
+    fn description(&self) -> &'static str {
+        "Gradle build tool"
+    }
+    fn usage(&self) -> &'static str {
+        "gradle [options] [tasks...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("gradle", args, state.cwd())
@@ -386,9 +512,15 @@ impl CommandTrait for GradleCommand {
 pub struct DotnetCommand;
 
 impl CommandTrait for DotnetCommand {
-    fn name(&self) -> &'static str { "dotnet" }
-    fn description(&self) -> &'static str { ".NET CLI" }
-    fn usage(&self) -> &'static str { "dotnet <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "dotnet"
+    }
+    fn description(&self) -> &'static str {
+        ".NET CLI"
+    }
+    fn usage(&self) -> &'static str {
+        "dotnet <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -404,9 +536,15 @@ impl CommandTrait for DotnetCommand {
 pub struct DockerCommand;
 
 impl CommandTrait for DockerCommand {
-    fn name(&self) -> &'static str { "docker" }
-    fn description(&self) -> &'static str { "Docker container CLI" }
-    fn usage(&self) -> &'static str { "docker <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "docker"
+    }
+    fn description(&self) -> &'static str {
+        "Docker container CLI"
+    }
+    fn usage(&self) -> &'static str {
+        "docker <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -420,9 +558,15 @@ impl CommandTrait for DockerCommand {
 pub struct KubectlCommand;
 
 impl CommandTrait for KubectlCommand {
-    fn name(&self) -> &'static str { "kubectl" }
-    fn description(&self) -> &'static str { "Kubernetes CLI" }
-    fn usage(&self) -> &'static str { "kubectl <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "kubectl"
+    }
+    fn description(&self) -> &'static str {
+        "Kubernetes CLI"
+    }
+    fn usage(&self) -> &'static str {
+        "kubectl <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("kubectl", args, state.cwd())
@@ -435,9 +579,15 @@ impl CommandTrait for KubectlCommand {
 pub struct MakeCommand;
 
 impl CommandTrait for MakeCommand {
-    fn name(&self) -> &'static str { "make" }
-    fn description(&self) -> &'static str { "GNU Make build tool" }
-    fn usage(&self) -> &'static str { "make [target...]" }
+    fn name(&self) -> &'static str {
+        "make"
+    }
+    fn description(&self) -> &'static str {
+        "GNU Make build tool"
+    }
+    fn usage(&self) -> &'static str {
+        "make [target...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("make", args, state.cwd())
@@ -448,9 +598,15 @@ impl CommandTrait for MakeCommand {
 pub struct CmakeCommand;
 
 impl CommandTrait for CmakeCommand {
-    fn name(&self) -> &'static str { "cmake" }
-    fn description(&self) -> &'static str { "CMake build system" }
-    fn usage(&self) -> &'static str { "cmake [options] <path>" }
+    fn name(&self) -> &'static str {
+        "cmake"
+    }
+    fn description(&self) -> &'static str {
+        "CMake build system"
+    }
+    fn usage(&self) -> &'static str {
+        "cmake [options] <path>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("cmake", args, state.cwd())
@@ -463,9 +619,15 @@ impl CommandTrait for CmakeCommand {
 pub struct GitCommand;
 
 impl CommandTrait for GitCommand {
-    fn name(&self) -> &'static str { "git" }
-    fn description(&self) -> &'static str { "Git version control" }
-    fn usage(&self) -> &'static str { "git <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "git"
+    }
+    fn description(&self) -> &'static str {
+        "Git version control"
+    }
+    fn usage(&self) -> &'static str {
+        "git <command> [args...]"
+    }
 
     fn extended_help(&self) -> String {
         r#"git - Git version control system
@@ -637,7 +799,8 @@ dist/
 
 RELATED COMMANDS:
   gh       GitHub CLI
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -654,9 +817,15 @@ RELATED COMMANDS:
 pub struct RubyCommand;
 
 impl CommandTrait for RubyCommand {
-    fn name(&self) -> &'static str { "ruby" }
-    fn description(&self) -> &'static str { "Ruby interpreter" }
-    fn usage(&self) -> &'static str { "ruby [options] [script.rb] [args...]" }
+    fn name(&self) -> &'static str {
+        "ruby"
+    }
+    fn description(&self) -> &'static str {
+        "Ruby interpreter"
+    }
+    fn usage(&self) -> &'static str {
+        "ruby [options] [script.rb] [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -671,9 +840,15 @@ impl CommandTrait for RubyCommand {
 pub struct GemCommand;
 
 impl CommandTrait for GemCommand {
-    fn name(&self) -> &'static str { "gem" }
-    fn description(&self) -> &'static str { "Ruby package manager" }
-    fn usage(&self) -> &'static str { "gem <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "gem"
+    }
+    fn description(&self) -> &'static str {
+        "Ruby package manager"
+    }
+    fn usage(&self) -> &'static str {
+        "gem <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("gem", args, state.cwd())
@@ -684,9 +859,15 @@ impl CommandTrait for GemCommand {
 pub struct BundleCommand;
 
 impl CommandTrait for BundleCommand {
-    fn name(&self) -> &'static str { "bundle" }
-    fn description(&self) -> &'static str { "Ruby Bundler" }
-    fn usage(&self) -> &'static str { "bundle <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "bundle"
+    }
+    fn description(&self) -> &'static str {
+        "Ruby Bundler"
+    }
+    fn usage(&self) -> &'static str {
+        "bundle <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("bundle", args, state.cwd())
@@ -697,9 +878,15 @@ impl CommandTrait for BundleCommand {
 pub struct PhpCommand;
 
 impl CommandTrait for PhpCommand {
-    fn name(&self) -> &'static str { "php" }
-    fn description(&self) -> &'static str { "PHP interpreter" }
-    fn usage(&self) -> &'static str { "php [options] [script.php] [args...]" }
+    fn name(&self) -> &'static str {
+        "php"
+    }
+    fn description(&self) -> &'static str {
+        "PHP interpreter"
+    }
+    fn usage(&self) -> &'static str {
+        "php [options] [script.php] [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         if args.is_empty() {
@@ -714,9 +901,15 @@ impl CommandTrait for PhpCommand {
 pub struct ComposerCommand;
 
 impl CommandTrait for ComposerCommand {
-    fn name(&self) -> &'static str { "composer" }
-    fn description(&self) -> &'static str { "PHP package manager" }
-    fn usage(&self) -> &'static str { "composer <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "composer"
+    }
+    fn description(&self) -> &'static str {
+        "PHP package manager"
+    }
+    fn usage(&self) -> &'static str {
+        "composer <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("composer", args, state.cwd())
@@ -727,9 +920,15 @@ impl CommandTrait for ComposerCommand {
 pub struct SwiftCommand;
 
 impl CommandTrait for SwiftCommand {
-    fn name(&self) -> &'static str { "swift" }
-    fn description(&self) -> &'static str { "Swift compiler" }
-    fn usage(&self) -> &'static str { "swift <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "swift"
+    }
+    fn description(&self) -> &'static str {
+        "Swift compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "swift <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("swift", args, state.cwd())
@@ -740,9 +939,15 @@ impl CommandTrait for SwiftCommand {
 pub struct ZigCommand;
 
 impl CommandTrait for ZigCommand {
-    fn name(&self) -> &'static str { "zig" }
-    fn description(&self) -> &'static str { "Zig compiler" }
-    fn usage(&self) -> &'static str { "zig <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "zig"
+    }
+    fn description(&self) -> &'static str {
+        "Zig compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "zig <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("zig", args, state.cwd())
@@ -753,9 +958,15 @@ impl CommandTrait for ZigCommand {
 pub struct GccCommand;
 
 impl CommandTrait for GccCommand {
-    fn name(&self) -> &'static str { "gcc" }
-    fn description(&self) -> &'static str { "GNU C Compiler" }
-    fn usage(&self) -> &'static str { "gcc [options] <source files>" }
+    fn name(&self) -> &'static str {
+        "gcc"
+    }
+    fn description(&self) -> &'static str {
+        "GNU C Compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "gcc [options] <source files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("gcc", args, state.cwd())
@@ -766,9 +977,15 @@ impl CommandTrait for GccCommand {
 pub struct GppCommand;
 
 impl CommandTrait for GppCommand {
-    fn name(&self) -> &'static str { "g++" }
-    fn description(&self) -> &'static str { "GNU C++ Compiler" }
-    fn usage(&self) -> &'static str { "g++ [options] <source files>" }
+    fn name(&self) -> &'static str {
+        "g++"
+    }
+    fn description(&self) -> &'static str {
+        "GNU C++ Compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "g++ [options] <source files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("g++", args, state.cwd())
@@ -779,9 +996,15 @@ impl CommandTrait for GppCommand {
 pub struct ClangCommand;
 
 impl CommandTrait for ClangCommand {
-    fn name(&self) -> &'static str { "clang" }
-    fn description(&self) -> &'static str { "Clang C/C++ Compiler" }
-    fn usage(&self) -> &'static str { "clang [options] <source files>" }
+    fn name(&self) -> &'static str {
+        "clang"
+    }
+    fn description(&self) -> &'static str {
+        "Clang C/C++ Compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "clang [options] <source files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("clang", args, state.cwd())
@@ -794,9 +1017,15 @@ impl CommandTrait for ClangCommand {
 pub struct CodeCommand;
 
 impl CommandTrait for CodeCommand {
-    fn name(&self) -> &'static str { "code" }
-    fn description(&self) -> &'static str { "Open in VS Code" }
-    fn usage(&self) -> &'static str { "code [path]" }
+    fn name(&self) -> &'static str {
+        "code"
+    }
+    fn description(&self) -> &'static str {
+        "Open in VS Code"
+    }
+    fn usage(&self) -> &'static str {
+        "code [path]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         let args = if args.is_empty() {
@@ -813,9 +1042,15 @@ impl CommandTrait for CodeCommand {
 pub struct CursorCommand;
 
 impl CommandTrait for CursorCommand {
-    fn name(&self) -> &'static str { "cursor" }
-    fn description(&self) -> &'static str { "Open in Cursor" }
-    fn usage(&self) -> &'static str { "cursor [path]" }
+    fn name(&self) -> &'static str {
+        "cursor"
+    }
+    fn description(&self) -> &'static str {
+        "Open in Cursor"
+    }
+    fn usage(&self) -> &'static str {
+        "cursor [path]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         let args = if args.is_empty() {
@@ -832,9 +1067,15 @@ impl CommandTrait for CursorCommand {
 pub struct SublCommand;
 
 impl CommandTrait for SublCommand {
-    fn name(&self) -> &'static str { "subl" }
-    fn description(&self) -> &'static str { "Open in Sublime Text" }
-    fn usage(&self) -> &'static str { "subl [path]" }
+    fn name(&self) -> &'static str {
+        "subl"
+    }
+    fn description(&self) -> &'static str {
+        "Open in Sublime Text"
+    }
+    fn usage(&self) -> &'static str {
+        "subl [path]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("subl", args, state.cwd())?;
@@ -846,9 +1087,15 @@ impl CommandTrait for SublCommand {
 pub struct SshCommand;
 
 impl CommandTrait for SshCommand {
-    fn name(&self) -> &'static str { "ssh" }
-    fn description(&self) -> &'static str { "SSH client" }
-    fn usage(&self) -> &'static str { "ssh [user@]host" }
+    fn name(&self) -> &'static str {
+        "ssh"
+    }
+    fn description(&self) -> &'static str {
+        "SSH client"
+    }
+    fn usage(&self) -> &'static str {
+        "ssh [user@]host"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("ssh", args, state.cwd())
@@ -859,9 +1106,15 @@ impl CommandTrait for SshCommand {
 pub struct ScpCommand;
 
 impl CommandTrait for ScpCommand {
-    fn name(&self) -> &'static str { "scp" }
-    fn description(&self) -> &'static str { "Secure copy" }
-    fn usage(&self) -> &'static str { "scp <source> <dest>" }
+    fn name(&self) -> &'static str {
+        "scp"
+    }
+    fn description(&self) -> &'static str {
+        "Secure copy"
+    }
+    fn usage(&self) -> &'static str {
+        "scp <source> <dest>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("scp", args, state.cwd())
@@ -872,9 +1125,15 @@ impl CommandTrait for ScpCommand {
 pub struct RsyncCommand;
 
 impl CommandTrait for RsyncCommand {
-    fn name(&self) -> &'static str { "rsync" }
-    fn description(&self) -> &'static str { "Remote sync" }
-    fn usage(&self) -> &'static str { "rsync [options] <source> <dest>" }
+    fn name(&self) -> &'static str {
+        "rsync"
+    }
+    fn description(&self) -> &'static str {
+        "Remote sync"
+    }
+    fn usage(&self) -> &'static str {
+        "rsync [options] <source> <dest>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("rsync", args, state.cwd())
@@ -885,9 +1144,15 @@ impl CommandTrait for RsyncCommand {
 pub struct GhCommand;
 
 impl CommandTrait for GhCommand {
-    fn name(&self) -> &'static str { "gh" }
-    fn description(&self) -> &'static str { "GitHub CLI" }
-    fn usage(&self) -> &'static str { "gh <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "gh"
+    }
+    fn description(&self) -> &'static str {
+        "GitHub CLI"
+    }
+    fn usage(&self) -> &'static str {
+        "gh <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("gh", args, state.cwd())
@@ -898,9 +1163,15 @@ impl CommandTrait for GhCommand {
 pub struct AwsCommand;
 
 impl CommandTrait for AwsCommand {
-    fn name(&self) -> &'static str { "aws" }
-    fn description(&self) -> &'static str { "AWS CLI" }
-    fn usage(&self) -> &'static str { "aws <service> <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "aws"
+    }
+    fn description(&self) -> &'static str {
+        "AWS CLI"
+    }
+    fn usage(&self) -> &'static str {
+        "aws <service> <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("aws", args, state.cwd())
@@ -911,9 +1182,15 @@ impl CommandTrait for AwsCommand {
 pub struct AzCommand;
 
 impl CommandTrait for AzCommand {
-    fn name(&self) -> &'static str { "az" }
-    fn description(&self) -> &'static str { "Azure CLI" }
-    fn usage(&self) -> &'static str { "az <group> <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "az"
+    }
+    fn description(&self) -> &'static str {
+        "Azure CLI"
+    }
+    fn usage(&self) -> &'static str {
+        "az <group> <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("az", args, state.cwd())
@@ -924,9 +1201,15 @@ impl CommandTrait for AzCommand {
 pub struct GcloudCommand;
 
 impl CommandTrait for GcloudCommand {
-    fn name(&self) -> &'static str { "gcloud" }
-    fn description(&self) -> &'static str { "Google Cloud CLI" }
-    fn usage(&self) -> &'static str { "gcloud <group> <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "gcloud"
+    }
+    fn description(&self) -> &'static str {
+        "Google Cloud CLI"
+    }
+    fn usage(&self) -> &'static str {
+        "gcloud <group> <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("gcloud", args, state.cwd())
@@ -937,9 +1220,15 @@ impl CommandTrait for GcloudCommand {
 pub struct TerraformCommand;
 
 impl CommandTrait for TerraformCommand {
-    fn name(&self) -> &'static str { "terraform" }
-    fn description(&self) -> &'static str { "Terraform infrastructure as code" }
-    fn usage(&self) -> &'static str { "terraform <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "terraform"
+    }
+    fn description(&self) -> &'static str {
+        "Terraform infrastructure as code"
+    }
+    fn usage(&self) -> &'static str {
+        "terraform <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("terraform", args, state.cwd())
@@ -950,9 +1239,15 @@ impl CommandTrait for TerraformCommand {
 pub struct AnsibleCommand;
 
 impl CommandTrait for AnsibleCommand {
-    fn name(&self) -> &'static str { "ansible" }
-    fn description(&self) -> &'static str { "Ansible automation" }
-    fn usage(&self) -> &'static str { "ansible <host-pattern> [options]" }
+    fn name(&self) -> &'static str {
+        "ansible"
+    }
+    fn description(&self) -> &'static str {
+        "Ansible automation"
+    }
+    fn usage(&self) -> &'static str {
+        "ansible <host-pattern> [options]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("ansible", args, state.cwd())
@@ -963,9 +1258,15 @@ impl CommandTrait for AnsibleCommand {
 pub struct FfmpegCommand;
 
 impl CommandTrait for FfmpegCommand {
-    fn name(&self) -> &'static str { "ffmpeg" }
-    fn description(&self) -> &'static str { "Media converter" }
-    fn usage(&self) -> &'static str { "ffmpeg [options] -i <input> <output>" }
+    fn name(&self) -> &'static str {
+        "ffmpeg"
+    }
+    fn description(&self) -> &'static str {
+        "Media converter"
+    }
+    fn usage(&self) -> &'static str {
+        "ffmpeg [options] -i <input> <output>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("ffmpeg", args, state.cwd())
@@ -976,9 +1277,15 @@ impl CommandTrait for FfmpegCommand {
 pub struct ConvertCommand;
 
 impl CommandTrait for ConvertCommand {
-    fn name(&self) -> &'static str { "convert" }
-    fn description(&self) -> &'static str { "ImageMagick convert" }
-    fn usage(&self) -> &'static str { "convert <input> [options] <output>" }
+    fn name(&self) -> &'static str {
+        "convert"
+    }
+    fn description(&self) -> &'static str {
+        "ImageMagick convert"
+    }
+    fn usage(&self) -> &'static str {
+        "convert <input> [options] <output>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("convert", args, state.cwd())
@@ -991,9 +1298,15 @@ impl CommandTrait for ConvertCommand {
 pub struct ClangppCommand;
 
 impl CommandTrait for ClangppCommand {
-    fn name(&self) -> &'static str { "clang++" }
-    fn description(&self) -> &'static str { "Clang C++ Compiler" }
-    fn usage(&self) -> &'static str { "clang++ [options] <source files>" }
+    fn name(&self) -> &'static str {
+        "clang++"
+    }
+    fn description(&self) -> &'static str {
+        "Clang C++ Compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "clang++ [options] <source files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("clang++", args, state.cwd())
@@ -1004,9 +1317,15 @@ impl CommandTrait for ClangppCommand {
 pub struct LdCommand;
 
 impl CommandTrait for LdCommand {
-    fn name(&self) -> &'static str { "ld" }
-    fn description(&self) -> &'static str { "GNU Linker" }
-    fn usage(&self) -> &'static str { "ld [options] <object files>" }
+    fn name(&self) -> &'static str {
+        "ld"
+    }
+    fn description(&self) -> &'static str {
+        "GNU Linker"
+    }
+    fn usage(&self) -> &'static str {
+        "ld [options] <object files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("ld", args, state.cwd())
@@ -1017,9 +1336,15 @@ impl CommandTrait for LdCommand {
 pub struct ArCommand;
 
 impl CommandTrait for ArCommand {
-    fn name(&self) -> &'static str { "ar" }
-    fn description(&self) -> &'static str { "Create/manage archives" }
-    fn usage(&self) -> &'static str { "ar [options] <archive> <files>" }
+    fn name(&self) -> &'static str {
+        "ar"
+    }
+    fn description(&self) -> &'static str {
+        "Create/manage archives"
+    }
+    fn usage(&self) -> &'static str {
+        "ar [options] <archive> <files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("ar", args, state.cwd())
@@ -1030,9 +1355,15 @@ impl CommandTrait for ArCommand {
 pub struct NmCommand;
 
 impl CommandTrait for NmCommand {
-    fn name(&self) -> &'static str { "nm" }
-    fn description(&self) -> &'static str { "List symbols from object files" }
-    fn usage(&self) -> &'static str { "nm [options] <file>" }
+    fn name(&self) -> &'static str {
+        "nm"
+    }
+    fn description(&self) -> &'static str {
+        "List symbols from object files"
+    }
+    fn usage(&self) -> &'static str {
+        "nm [options] <file>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("nm", args, state.cwd())
@@ -1043,9 +1374,15 @@ impl CommandTrait for NmCommand {
 pub struct ObjdumpCommand;
 
 impl CommandTrait for ObjdumpCommand {
-    fn name(&self) -> &'static str { "objdump" }
-    fn description(&self) -> &'static str { "Display object file info" }
-    fn usage(&self) -> &'static str { "objdump [options] <file>" }
+    fn name(&self) -> &'static str {
+        "objdump"
+    }
+    fn description(&self) -> &'static str {
+        "Display object file info"
+    }
+    fn usage(&self) -> &'static str {
+        "objdump [options] <file>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("objdump", args, state.cwd())
@@ -1056,9 +1393,15 @@ impl CommandTrait for ObjdumpCommand {
 pub struct GdbCommand;
 
 impl CommandTrait for GdbCommand {
-    fn name(&self) -> &'static str { "gdb" }
-    fn description(&self) -> &'static str { "GNU Debugger" }
-    fn usage(&self) -> &'static str { "gdb [options] <program>" }
+    fn name(&self) -> &'static str {
+        "gdb"
+    }
+    fn description(&self) -> &'static str {
+        "GNU Debugger"
+    }
+    fn usage(&self) -> &'static str {
+        "gdb [options] <program>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("gdb", args, state.cwd())
@@ -1069,9 +1412,15 @@ impl CommandTrait for GdbCommand {
 pub struct LldbCommand;
 
 impl CommandTrait for LldbCommand {
-    fn name(&self) -> &'static str { "lldb" }
-    fn description(&self) -> &'static str { "LLVM Debugger" }
-    fn usage(&self) -> &'static str { "lldb [options] <program>" }
+    fn name(&self) -> &'static str {
+        "lldb"
+    }
+    fn description(&self) -> &'static str {
+        "LLVM Debugger"
+    }
+    fn usage(&self) -> &'static str {
+        "lldb [options] <program>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("lldb", args, state.cwd())
@@ -1082,9 +1431,15 @@ impl CommandTrait for LldbCommand {
 pub struct ValgrindCommand;
 
 impl CommandTrait for ValgrindCommand {
-    fn name(&self) -> &'static str { "valgrind" }
-    fn description(&self) -> &'static str { "Memory debugger" }
-    fn usage(&self) -> &'static str { "valgrind [options] <program>" }
+    fn name(&self) -> &'static str {
+        "valgrind"
+    }
+    fn description(&self) -> &'static str {
+        "Memory debugger"
+    }
+    fn usage(&self) -> &'static str {
+        "valgrind [options] <program>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("valgrind", args, state.cwd())
@@ -1097,9 +1452,15 @@ impl CommandTrait for ValgrindCommand {
 pub struct NasmCommand;
 
 impl CommandTrait for NasmCommand {
-    fn name(&self) -> &'static str { "nasm" }
-    fn description(&self) -> &'static str { "Netwide Assembler" }
-    fn usage(&self) -> &'static str { "nasm [options] <source>" }
+    fn name(&self) -> &'static str {
+        "nasm"
+    }
+    fn description(&self) -> &'static str {
+        "Netwide Assembler"
+    }
+    fn usage(&self) -> &'static str {
+        "nasm [options] <source>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("nasm", args, state.cwd())
@@ -1110,9 +1471,15 @@ impl CommandTrait for NasmCommand {
 pub struct AsCommand;
 
 impl CommandTrait for AsCommand {
-    fn name(&self) -> &'static str { "as" }
-    fn description(&self) -> &'static str { "GNU Assembler" }
-    fn usage(&self) -> &'static str { "as [options] <source>" }
+    fn name(&self) -> &'static str {
+        "as"
+    }
+    fn description(&self) -> &'static str {
+        "GNU Assembler"
+    }
+    fn usage(&self) -> &'static str {
+        "as [options] <source>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("as", args, state.cwd())
@@ -1125,9 +1492,15 @@ impl CommandTrait for AsCommand {
 pub struct GhcCommand;
 
 impl CommandTrait for GhcCommand {
-    fn name(&self) -> &'static str { "ghc" }
-    fn description(&self) -> &'static str { "Glasgow Haskell Compiler" }
-    fn usage(&self) -> &'static str { "ghc [options] <source>" }
+    fn name(&self) -> &'static str {
+        "ghc"
+    }
+    fn description(&self) -> &'static str {
+        "Glasgow Haskell Compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "ghc [options] <source>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("ghc", args, state.cwd())
@@ -1138,9 +1511,15 @@ impl CommandTrait for GhcCommand {
 pub struct CabalCommand;
 
 impl CommandTrait for CabalCommand {
-    fn name(&self) -> &'static str { "cabal" }
-    fn description(&self) -> &'static str { "Haskell build tool" }
-    fn usage(&self) -> &'static str { "cabal <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "cabal"
+    }
+    fn description(&self) -> &'static str {
+        "Haskell build tool"
+    }
+    fn usage(&self) -> &'static str {
+        "cabal <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("cabal", args, state.cwd())
@@ -1151,9 +1530,15 @@ impl CommandTrait for CabalCommand {
 pub struct StackCommand;
 
 impl CommandTrait for StackCommand {
-    fn name(&self) -> &'static str { "stack" }
-    fn description(&self) -> &'static str { "Haskell Tool Stack" }
-    fn usage(&self) -> &'static str { "stack <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "stack"
+    }
+    fn description(&self) -> &'static str {
+        "Haskell Tool Stack"
+    }
+    fn usage(&self) -> &'static str {
+        "stack <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("stack", args, state.cwd())
@@ -1166,9 +1551,15 @@ impl CommandTrait for StackCommand {
 pub struct ElixirCommand;
 
 impl CommandTrait for ElixirCommand {
-    fn name(&self) -> &'static str { "elixir" }
-    fn description(&self) -> &'static str { "Elixir language" }
-    fn usage(&self) -> &'static str { "elixir [options] <script>" }
+    fn name(&self) -> &'static str {
+        "elixir"
+    }
+    fn description(&self) -> &'static str {
+        "Elixir language"
+    }
+    fn usage(&self) -> &'static str {
+        "elixir [options] <script>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("elixir", args, state.cwd())
@@ -1179,9 +1570,15 @@ impl CommandTrait for ElixirCommand {
 pub struct MixCommand;
 
 impl CommandTrait for MixCommand {
-    fn name(&self) -> &'static str { "mix" }
-    fn description(&self) -> &'static str { "Elixir build tool" }
-    fn usage(&self) -> &'static str { "mix <task> [args...]" }
+    fn name(&self) -> &'static str {
+        "mix"
+    }
+    fn description(&self) -> &'static str {
+        "Elixir build tool"
+    }
+    fn usage(&self) -> &'static str {
+        "mix <task> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("mix", args, state.cwd())
@@ -1192,9 +1589,15 @@ impl CommandTrait for MixCommand {
 pub struct IexCommand;
 
 impl CommandTrait for IexCommand {
-    fn name(&self) -> &'static str { "iex" }
-    fn description(&self) -> &'static str { "Elixir interactive shell" }
-    fn usage(&self) -> &'static str { "iex [options]" }
+    fn name(&self) -> &'static str {
+        "iex"
+    }
+    fn description(&self) -> &'static str {
+        "Elixir interactive shell"
+    }
+    fn usage(&self) -> &'static str {
+        "iex [options]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("iex", args, state.cwd())
@@ -1205,9 +1608,15 @@ impl CommandTrait for IexCommand {
 pub struct ErlCommand;
 
 impl CommandTrait for ErlCommand {
-    fn name(&self) -> &'static str { "erl" }
-    fn description(&self) -> &'static str { "Erlang shell" }
-    fn usage(&self) -> &'static str { "erl [options]" }
+    fn name(&self) -> &'static str {
+        "erl"
+    }
+    fn description(&self) -> &'static str {
+        "Erlang shell"
+    }
+    fn usage(&self) -> &'static str {
+        "erl [options]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("erl", args, state.cwd())
@@ -1220,9 +1629,15 @@ impl CommandTrait for ErlCommand {
 pub struct ScalaCommand;
 
 impl CommandTrait for ScalaCommand {
-    fn name(&self) -> &'static str { "scala" }
-    fn description(&self) -> &'static str { "Scala language" }
-    fn usage(&self) -> &'static str { "scala [options] <source>" }
+    fn name(&self) -> &'static str {
+        "scala"
+    }
+    fn description(&self) -> &'static str {
+        "Scala language"
+    }
+    fn usage(&self) -> &'static str {
+        "scala [options] <source>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("scala", args, state.cwd())
@@ -1233,9 +1648,15 @@ impl CommandTrait for ScalaCommand {
 pub struct SbtCommand;
 
 impl CommandTrait for SbtCommand {
-    fn name(&self) -> &'static str { "sbt" }
-    fn description(&self) -> &'static str { "Scala build tool" }
-    fn usage(&self) -> &'static str { "sbt [command]" }
+    fn name(&self) -> &'static str {
+        "sbt"
+    }
+    fn description(&self) -> &'static str {
+        "Scala build tool"
+    }
+    fn usage(&self) -> &'static str {
+        "sbt [command]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("sbt", args, state.cwd())
@@ -1246,9 +1667,15 @@ impl CommandTrait for SbtCommand {
 pub struct KotlinCommand;
 
 impl CommandTrait for KotlinCommand {
-    fn name(&self) -> &'static str { "kotlin" }
-    fn description(&self) -> &'static str { "Kotlin compiler" }
-    fn usage(&self) -> &'static str { "kotlin [options] <source>" }
+    fn name(&self) -> &'static str {
+        "kotlin"
+    }
+    fn description(&self) -> &'static str {
+        "Kotlin compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "kotlin [options] <source>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("kotlin", args, state.cwd())
@@ -1259,9 +1686,15 @@ impl CommandTrait for KotlinCommand {
 pub struct KotlincCommand;
 
 impl CommandTrait for KotlincCommand {
-    fn name(&self) -> &'static str { "kotlinc" }
-    fn description(&self) -> &'static str { "Kotlin compiler CLI" }
-    fn usage(&self) -> &'static str { "kotlinc [options] <source>" }
+    fn name(&self) -> &'static str {
+        "kotlinc"
+    }
+    fn description(&self) -> &'static str {
+        "Kotlin compiler CLI"
+    }
+    fn usage(&self) -> &'static str {
+        "kotlinc [options] <source>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("kotlinc", args, state.cwd())
@@ -1274,9 +1707,15 @@ impl CommandTrait for KotlincCommand {
 pub struct LuaCommand;
 
 impl CommandTrait for LuaCommand {
-    fn name(&self) -> &'static str { "lua" }
-    fn description(&self) -> &'static str { "Lua interpreter" }
-    fn usage(&self) -> &'static str { "lua [script.lua]" }
+    fn name(&self) -> &'static str {
+        "lua"
+    }
+    fn description(&self) -> &'static str {
+        "Lua interpreter"
+    }
+    fn usage(&self) -> &'static str {
+        "lua [script.lua]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("lua", args, state.cwd())
@@ -1287,9 +1726,15 @@ impl CommandTrait for LuaCommand {
 pub struct LuarocksCommand;
 
 impl CommandTrait for LuarocksCommand {
-    fn name(&self) -> &'static str { "luarocks" }
-    fn description(&self) -> &'static str { "Lua package manager" }
-    fn usage(&self) -> &'static str { "luarocks <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "luarocks"
+    }
+    fn description(&self) -> &'static str {
+        "Lua package manager"
+    }
+    fn usage(&self) -> &'static str {
+        "luarocks <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("luarocks", args, state.cwd())
@@ -1300,9 +1745,15 @@ impl CommandTrait for LuarocksCommand {
 pub struct PerlCommand;
 
 impl CommandTrait for PerlCommand {
-    fn name(&self) -> &'static str { "perl" }
-    fn description(&self) -> &'static str { "Perl interpreter" }
-    fn usage(&self) -> &'static str { "perl [options] [script]" }
+    fn name(&self) -> &'static str {
+        "perl"
+    }
+    fn description(&self) -> &'static str {
+        "Perl interpreter"
+    }
+    fn usage(&self) -> &'static str {
+        "perl [options] [script]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("perl", args, state.cwd())
@@ -1313,9 +1764,15 @@ impl CommandTrait for PerlCommand {
 pub struct RCommand;
 
 impl CommandTrait for RCommand {
-    fn name(&self) -> &'static str { "R" }
-    fn description(&self) -> &'static str { "R statistical language" }
-    fn usage(&self) -> &'static str { "R [options]" }
+    fn name(&self) -> &'static str {
+        "R"
+    }
+    fn description(&self) -> &'static str {
+        "R statistical language"
+    }
+    fn usage(&self) -> &'static str {
+        "R [options]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("R", args, state.cwd())
@@ -1326,9 +1783,15 @@ impl CommandTrait for RCommand {
 pub struct RscriptCommand;
 
 impl CommandTrait for RscriptCommand {
-    fn name(&self) -> &'static str { "Rscript" }
-    fn description(&self) -> &'static str { "Run R scripts" }
-    fn usage(&self) -> &'static str { "Rscript <script.R>" }
+    fn name(&self) -> &'static str {
+        "Rscript"
+    }
+    fn description(&self) -> &'static str {
+        "Run R scripts"
+    }
+    fn usage(&self) -> &'static str {
+        "Rscript <script.R>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("Rscript", args, state.cwd())
@@ -1339,9 +1802,15 @@ impl CommandTrait for RscriptCommand {
 pub struct JuliaCommand;
 
 impl CommandTrait for JuliaCommand {
-    fn name(&self) -> &'static str { "julia" }
-    fn description(&self) -> &'static str { "Julia language" }
-    fn usage(&self) -> &'static str { "julia [options] [script]" }
+    fn name(&self) -> &'static str {
+        "julia"
+    }
+    fn description(&self) -> &'static str {
+        "Julia language"
+    }
+    fn usage(&self) -> &'static str {
+        "julia [options] [script]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("julia", args, state.cwd())
@@ -1352,9 +1821,15 @@ impl CommandTrait for JuliaCommand {
 pub struct OcamlCommand;
 
 impl CommandTrait for OcamlCommand {
-    fn name(&self) -> &'static str { "ocaml" }
-    fn description(&self) -> &'static str { "OCaml REPL" }
-    fn usage(&self) -> &'static str { "ocaml [options]" }
+    fn name(&self) -> &'static str {
+        "ocaml"
+    }
+    fn description(&self) -> &'static str {
+        "OCaml REPL"
+    }
+    fn usage(&self) -> &'static str {
+        "ocaml [options]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("ocaml", args, state.cwd())
@@ -1365,9 +1840,15 @@ impl CommandTrait for OcamlCommand {
 pub struct OpamCommand;
 
 impl CommandTrait for OpamCommand {
-    fn name(&self) -> &'static str { "opam" }
-    fn description(&self) -> &'static str { "OCaml package manager" }
-    fn usage(&self) -> &'static str { "opam <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "opam"
+    }
+    fn description(&self) -> &'static str {
+        "OCaml package manager"
+    }
+    fn usage(&self) -> &'static str {
+        "opam <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("opam", args, state.cwd())
@@ -1378,9 +1859,15 @@ impl CommandTrait for OpamCommand {
 pub struct DuneCommand;
 
 impl CommandTrait for DuneCommand {
-    fn name(&self) -> &'static str { "dune" }
-    fn description(&self) -> &'static str { "OCaml build system" }
-    fn usage(&self) -> &'static str { "dune <command> [args...]" }
+    fn name(&self) -> &'static str {
+        "dune"
+    }
+    fn description(&self) -> &'static str {
+        "OCaml build system"
+    }
+    fn usage(&self) -> &'static str {
+        "dune <command> [args...]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("dune", args, state.cwd())
@@ -1391,9 +1878,15 @@ impl CommandTrait for DuneCommand {
 pub struct RacketCommand;
 
 impl CommandTrait for RacketCommand {
-    fn name(&self) -> &'static str { "racket" }
-    fn description(&self) -> &'static str { "Racket language" }
-    fn usage(&self) -> &'static str { "racket [options] [script]" }
+    fn name(&self) -> &'static str {
+        "racket"
+    }
+    fn description(&self) -> &'static str {
+        "Racket language"
+    }
+    fn usage(&self) -> &'static str {
+        "racket [options] [script]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("racket", args, state.cwd())
@@ -1404,9 +1897,15 @@ impl CommandTrait for RacketCommand {
 pub struct SbclCommand;
 
 impl CommandTrait for SbclCommand {
-    fn name(&self) -> &'static str { "sbcl" }
-    fn description(&self) -> &'static str { "Steel Bank Common Lisp" }
-    fn usage(&self) -> &'static str { "sbcl [options]" }
+    fn name(&self) -> &'static str {
+        "sbcl"
+    }
+    fn description(&self) -> &'static str {
+        "Steel Bank Common Lisp"
+    }
+    fn usage(&self) -> &'static str {
+        "sbcl [options]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("sbcl", args, state.cwd())
@@ -1417,9 +1916,15 @@ impl CommandTrait for SbclCommand {
 pub struct GfortranCommand;
 
 impl CommandTrait for GfortranCommand {
-    fn name(&self) -> &'static str { "gfortran" }
-    fn description(&self) -> &'static str { "GNU Fortran compiler" }
-    fn usage(&self) -> &'static str { "gfortran [options] <source>" }
+    fn name(&self) -> &'static str {
+        "gfortran"
+    }
+    fn description(&self) -> &'static str {
+        "GNU Fortran compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "gfortran [options] <source>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("gfortran", args, state.cwd())
@@ -1430,9 +1935,15 @@ impl CommandTrait for GfortranCommand {
 pub struct CobolCommand;
 
 impl CommandTrait for CobolCommand {
-    fn name(&self) -> &'static str { "cobc" }
-    fn description(&self) -> &'static str { "GnuCOBOL compiler" }
-    fn usage(&self) -> &'static str { "cobc [options] <source>" }
+    fn name(&self) -> &'static str {
+        "cobc"
+    }
+    fn description(&self) -> &'static str {
+        "GnuCOBOL compiler"
+    }
+    fn usage(&self) -> &'static str {
+        "cobc [options] <source>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("cobc", args, state.cwd())
@@ -1445,9 +1956,15 @@ impl CommandTrait for CobolCommand {
 pub struct PrettierCommand;
 
 impl CommandTrait for PrettierCommand {
-    fn name(&self) -> &'static str { "prettier" }
-    fn description(&self) -> &'static str { "Code formatter" }
-    fn usage(&self) -> &'static str { "prettier [options] <files>" }
+    fn name(&self) -> &'static str {
+        "prettier"
+    }
+    fn description(&self) -> &'static str {
+        "Code formatter"
+    }
+    fn usage(&self) -> &'static str {
+        "prettier [options] <files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("prettier", args, state.cwd())
@@ -1458,9 +1975,15 @@ impl CommandTrait for PrettierCommand {
 pub struct EslintCommand;
 
 impl CommandTrait for EslintCommand {
-    fn name(&self) -> &'static str { "eslint" }
-    fn description(&self) -> &'static str { "JavaScript linter" }
-    fn usage(&self) -> &'static str { "eslint [options] <files>" }
+    fn name(&self) -> &'static str {
+        "eslint"
+    }
+    fn description(&self) -> &'static str {
+        "JavaScript linter"
+    }
+    fn usage(&self) -> &'static str {
+        "eslint [options] <files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("eslint", args, state.cwd())
@@ -1471,9 +1994,15 @@ impl CommandTrait for EslintCommand {
 pub struct BlackCommand;
 
 impl CommandTrait for BlackCommand {
-    fn name(&self) -> &'static str { "black" }
-    fn description(&self) -> &'static str { "Python code formatter" }
-    fn usage(&self) -> &'static str { "black [options] <files>" }
+    fn name(&self) -> &'static str {
+        "black"
+    }
+    fn description(&self) -> &'static str {
+        "Python code formatter"
+    }
+    fn usage(&self) -> &'static str {
+        "black [options] <files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("black", args, state.cwd())
@@ -1484,9 +2013,15 @@ impl CommandTrait for BlackCommand {
 pub struct RuffCommand;
 
 impl CommandTrait for RuffCommand {
-    fn name(&self) -> &'static str { "ruff" }
-    fn description(&self) -> &'static str { "Fast Python linter" }
-    fn usage(&self) -> &'static str { "ruff [command] [options]" }
+    fn name(&self) -> &'static str {
+        "ruff"
+    }
+    fn description(&self) -> &'static str {
+        "Fast Python linter"
+    }
+    fn usage(&self) -> &'static str {
+        "ruff [command] [options]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("ruff", args, state.cwd())
@@ -1497,9 +2032,15 @@ impl CommandTrait for RuffCommand {
 pub struct MypyCommand;
 
 impl CommandTrait for MypyCommand {
-    fn name(&self) -> &'static str { "mypy" }
-    fn description(&self) -> &'static str { "Python type checker" }
-    fn usage(&self) -> &'static str { "mypy [options] <files>" }
+    fn name(&self) -> &'static str {
+        "mypy"
+    }
+    fn description(&self) -> &'static str {
+        "Python type checker"
+    }
+    fn usage(&self) -> &'static str {
+        "mypy [options] <files>"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("mypy", args, state.cwd())
@@ -1510,9 +2051,15 @@ impl CommandTrait for MypyCommand {
 pub struct PytestCommand;
 
 impl CommandTrait for PytestCommand {
-    fn name(&self) -> &'static str { "pytest" }
-    fn description(&self) -> &'static str { "Python testing framework" }
-    fn usage(&self) -> &'static str { "pytest [options] [files]" }
+    fn name(&self) -> &'static str {
+        "pytest"
+    }
+    fn description(&self) -> &'static str {
+        "Python testing framework"
+    }
+    fn usage(&self) -> &'static str {
+        "pytest [options] [files]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("pytest", args, state.cwd())
@@ -1523,9 +2070,15 @@ impl CommandTrait for PytestCommand {
 pub struct JestCommand;
 
 impl CommandTrait for JestCommand {
-    fn name(&self) -> &'static str { "jest" }
-    fn description(&self) -> &'static str { "JavaScript testing framework" }
-    fn usage(&self) -> &'static str { "jest [options] [files]" }
+    fn name(&self) -> &'static str {
+        "jest"
+    }
+    fn description(&self) -> &'static str {
+        "JavaScript testing framework"
+    }
+    fn usage(&self) -> &'static str {
+        "jest [options] [files]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("jest", args, state.cwd())
@@ -1536,9 +2089,15 @@ impl CommandTrait for JestCommand {
 pub struct VitestCommand;
 
 impl CommandTrait for VitestCommand {
-    fn name(&self) -> &'static str { "vitest" }
-    fn description(&self) -> &'static str { "Fast Vite-native testing" }
-    fn usage(&self) -> &'static str { "vitest [command] [options]" }
+    fn name(&self) -> &'static str {
+        "vitest"
+    }
+    fn description(&self) -> &'static str {
+        "Fast Vite-native testing"
+    }
+    fn usage(&self) -> &'static str {
+        "vitest [command] [options]"
+    }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         run_tool("vitest", args, state.cwd())

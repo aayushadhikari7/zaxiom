@@ -35,7 +35,8 @@ impl Command for ManCommand {
                 Examples:\n  \
                   man ls\n  \
                   man grep\n  \
-                  man git".to_string());
+                  man git"
+                .to_string());
         }
 
         let manual = get_manual(&cmd);
@@ -78,7 +79,8 @@ EXAMPLES
               List all files including hidden, in long format
 
        ls -lhS
-              List files sorted by size, human readable"#.to_string(),
+              List files sorted by size, human readable"#
+            .to_string(),
 
         "cd" => r#"CD(1)                           User Commands                          CD(1)
 
@@ -106,7 +108,8 @@ EXAMPLES
               Go back to the previous directory
 
        cd ~/Documents
-              Change to Documents in home directory"#.to_string(),
+              Change to Documents in home directory"#
+            .to_string(),
 
         "grep" => r#"GREP(1)                         User Commands                         GREP(1)
 
@@ -148,7 +151,8 @@ EXAMPLES
               Recursively search for TODO in src/ directory
 
        grep -in "warning" *.log
-              Case-insensitive search with line numbers"#.to_string(),
+              Case-insensitive search with line numbers"#
+            .to_string(),
 
         "find" => r#"FIND(1)                         User Commands                         FIND(1)
 
@@ -185,7 +189,8 @@ EXAMPLES
               Find files larger than 10MB in /tmp
 
        find . -name "*.log" -mtime +7
-              Find log files older than 7 days"#.to_string(),
+              Find log files older than 7 days"#
+            .to_string(),
 
         "cat" => r#"CAT(1)                          User Commands                          CAT(1)
 
@@ -218,7 +223,8 @@ EXAMPLES
               Concatenate and display two files
 
        cat -n file.txt
-              Display with line numbers"#.to_string(),
+              Display with line numbers"#
+            .to_string(),
 
         "git" => r#"GIT(1)                          User Commands                          GIT(1)
 
@@ -261,9 +267,11 @@ EXAMPLES
               Stage all changes
 
        git commit -m "feat: add new feature"
-              Commit with a message"#.to_string(),
+              Commit with a message"#
+            .to_string(),
 
-        "fortune" => r#"FORTUNE(1)                      User Commands                      FORTUNE(1)
+        "fortune" => {
+            r#"FORTUNE(1)                      User Commands                      FORTUNE(1)
 
 NAME
        fortune - display a random programming quote or fortune
@@ -280,9 +288,12 @@ EXAMPLES
               Display a random fortune
 
        fortune | cowsay
-              Pipe fortune to cowsay for extra fun"#.to_string(),
+              Pipe fortune to cowsay for extra fun"#
+                .to_string()
+        }
 
-        "cowsay" => r#"COWSAY(1)                       User Commands                       COWSAY(1)
+        "cowsay" => {
+            r#"COWSAY(1)                       User Commands                       COWSAY(1)
 
 NAME
        cowsay - generate ASCII pictures of a cow with a message
@@ -310,9 +321,12 @@ EXAMPLES
               Have a robot say "Beep boop!"
 
        fortune | cowsay
-              Have the cow tell you a fortune"#.to_string(),
+              Have the cow tell you a fortune"#
+                .to_string()
+        }
 
-        "coffee" => r#"COFFEE(1)                       User Commands                       COFFEE(1)
+        "coffee" => {
+            r#"COFFEE(1)                       User Commands                       COFFEE(1)
 
 NAME
        coffee - brew some ASCII art coffee
@@ -338,9 +352,12 @@ EXAMPLES
               Get a quick espresso shot
 
        coffee --tea
-              For the tea lovers"#.to_string(),
+              For the tea lovers"#
+                .to_string()
+        }
 
-        "matrix" => r#"MATRIX(1)                       User Commands                       MATRIX(1)
+        "matrix" => {
+            r#"MATRIX(1)                       User Commands                       MATRIX(1)
 
 NAME
        matrix - display Matrix-style digital rain
@@ -354,9 +371,12 @@ DESCRIPTION
 
 EXAMPLES
        matrix
-              Enter the Matrix"#.to_string(),
+              Enter the Matrix"#
+                .to_string()
+        }
 
-        "neofetch" => r#"NEOFETCH(1)                     User Commands                     NEOFETCH(1)
+        "neofetch" => {
+            r#"NEOFETCH(1)                     User Commands                     NEOFETCH(1)
 
 NAME
        neofetch - display system information with ASCII art
@@ -380,11 +400,16 @@ DESCRIPTION
 
 EXAMPLES
        neofetch
-              Display system information"#.to_string(),
+              Display system information"#
+                .to_string()
+        }
 
-        _ => format!(r#"No manual entry for {}
+        _ => format!(
+            r#"No manual entry for {}
 
 Try 'help' to see all available commands.
-Or use '{} --help' to see command-specific help."#, cmd, cmd),
+Or use '{} --help' to see command-specific help."#,
+            cmd, cmd
+        ),
     }
 }

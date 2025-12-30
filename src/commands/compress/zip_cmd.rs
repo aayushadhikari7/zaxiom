@@ -1,8 +1,8 @@
 //! zip command - package and compress files
 
+use anyhow::Result;
 use std::fs::File;
 use std::io::{Read, Write};
-use anyhow::Result;
 use walkdir::WalkDir;
 use zip::write::SimpleFileOptions;
 use zip::ZipWriter;
@@ -77,7 +77,8 @@ RELATED COMMANDS:
   unzip    Extract ZIP archives
   tar      TAR archives (Unix standard)
   gzip     Single-file compression
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -90,7 +91,8 @@ RELATED COMMANDS:
                 "-h" | "--help" => {
                     return Ok("Usage: zip [OPTIONS] <archive.zip> <files...>\n\
                         Options:\n  \
-                        -r    Recurse into directories".to_string());
+                        -r    Recurse into directories"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => files.push(arg),
                 _ => {}
@@ -108,8 +110,8 @@ RELATED COMMANDS:
         let file = File::create(&archive_path)?;
         let mut zip = ZipWriter::new(file);
 
-        let options = SimpleFileOptions::default()
-            .compression_method(zip::CompressionMethod::Deflated);
+        let options =
+            SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated);
 
         let mut count = 0;
 
@@ -122,7 +124,8 @@ RELATED COMMANDS:
                     let path = entry.path();
 
                     if path.is_file() {
-                        let name = path.strip_prefix(state.cwd())
+                        let name = path
+                            .strip_prefix(state.cwd())
                             .unwrap_or(path)
                             .to_string_lossy();
 
@@ -136,7 +139,8 @@ RELATED COMMANDS:
                     }
                 }
             } else if source_path.is_file() {
-                let name = source_path.file_name()
+                let name = source_path
+                    .file_name()
                     .map(|n| n.to_string_lossy().to_string())
                     .unwrap_or_else(|| (*source).clone());
 

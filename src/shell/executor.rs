@@ -6,12 +6,12 @@ use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::process::Command;
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 
-use crate::commands::registry::CommandRegistry;
-use crate::ai::handle_ai_chat_with_context;
-use crate::terminal::state::TerminalState;
 use super::parser::{parse_command_line, ParsedCommand, RedirectType};
+use crate::ai::handle_ai_chat_with_context;
+use crate::commands::registry::CommandRegistry;
+use crate::terminal::state::TerminalState;
 
 /// Indicates how a command should be executed
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -48,7 +48,12 @@ impl Executor {
     }
 
     /// Execute a command line with optional command history for AI context
-    pub fn execute_with_history(&self, input: &str, state: &mut TerminalState, history: Option<&[String]>) -> Result<String> {
+    pub fn execute_with_history(
+        &self,
+        input: &str,
+        state: &mut TerminalState,
+        history: Option<&[String]>,
+    ) -> Result<String> {
         let input = input.trim();
         if input.is_empty() {
             return Ok(String::new());
@@ -56,7 +61,7 @@ impl Executor {
 
         // Check for Python mode: ! code !
         if input.starts_with('!') && input.ends_with('!') && input.len() > 2 {
-            let python_code = &input[1..input.len()-1].trim();
+            let python_code = &input[1..input.len() - 1].trim();
             return self.execute_python(python_code);
         }
 
@@ -71,8 +76,7 @@ impl Executor {
         }
 
         // Parse the command line
-        let pipeline = parse_command_line(input)
-            .map_err(|e| anyhow!("{}", e))?;
+        let pipeline = parse_command_line(input).map_err(|e| anyhow!("{}", e))?;
 
         // Handle pipelines
         if !pipeline.is_single() {
@@ -86,12 +90,21 @@ impl Executor {
     }
 
     /// Execute a single command with redirections
-    fn execute_single_command(&self, cmd: &ParsedCommand, stdin_input: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_single_command(
+        &self,
+        cmd: &ParsedCommand,
+        stdin_input: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         // Handle input redirection
-        let stdin = if let Some(input_redir) = cmd.redirections.iter().find(|r| r.redirect_type == RedirectType::Input) {
+        let stdin = if let Some(input_redir) = cmd
+            .redirections
+            .iter()
+            .find(|r| r.redirect_type == RedirectType::Input)
+        {
             let path = state.resolve_path(&input_redir.target);
-            let mut file = File::open(&path)
-                .map_err(|e| anyhow!("{}: {}", input_redir.target, e))?;
+            let mut file =
+                File::open(&path).map_err(|e| anyhow!("{}: {}", input_redir.target, e))?;
             let mut content = String::new();
             file.read_to_string(&mut content)
                 .map_err(|e| anyhow!("{}: {}", input_redir.target, e))?;
@@ -110,7 +123,12 @@ impl Executor {
                 self.registry.get_help(&cmd.command)
             } else {
                 // Built-in command - execute directly (instant!)
-                self.registry.execute_with_stdin(&cmd.command, &cmd.args, stdin.as_deref(), state)?
+                self.registry.execute_with_stdin(
+                    &cmd.command,
+                    &cmd.args,
+                    stdin.as_deref(),
+                    state,
+                )?
             }
         } else if let Some(expanded) = self.expand_git_shortcut(&cmd.command, &cmd.args) {
             // Git shortcut - run git directly
@@ -121,25 +139,31 @@ impl Executor {
         };
 
         // Handle output redirection
-        if let Some(output_redir) = cmd.redirections.iter().find(|r| r.redirect_type == RedirectType::Output) {
+        if let Some(output_redir) = cmd
+            .redirections
+            .iter()
+            .find(|r| r.redirect_type == RedirectType::Output)
+        {
             let path = state.resolve_path(&output_redir.target);
-            let mut file = File::create(&path)
-                .map_err(|e| anyhow!("{}: {}", output_redir.target, e))?;
-            writeln!(file, "{}", output)
-                .map_err(|e| anyhow!("{}: {}", output_redir.target, e))?;
+            let mut file =
+                File::create(&path).map_err(|e| anyhow!("{}: {}", output_redir.target, e))?;
+            writeln!(file, "{}", output).map_err(|e| anyhow!("{}: {}", output_redir.target, e))?;
             return Ok(String::new()); // No output to terminal when redirecting
         }
 
         // Handle append redirection
-        if let Some(append_redir) = cmd.redirections.iter().find(|r| r.redirect_type == RedirectType::Append) {
+        if let Some(append_redir) = cmd
+            .redirections
+            .iter()
+            .find(|r| r.redirect_type == RedirectType::Append)
+        {
             let path = state.resolve_path(&append_redir.target);
             let mut file = OpenOptions::new()
                 .create(true)
                 .append(true)
                 .open(&path)
                 .map_err(|e| anyhow!("{}: {}", append_redir.target, e))?;
-            writeln!(file, "{}", output)
-                .map_err(|e| anyhow!("{}: {}", append_redir.target, e))?;
+            writeln!(file, "{}", output).map_err(|e| anyhow!("{}: {}", append_redir.target, e))?;
             return Ok(String::new()); // No output to terminal when redirecting
         }
 
@@ -147,14 +171,23 @@ impl Executor {
     }
 
     /// Execute a pipeline of native commands
-    fn execute_native_pipeline(&self, pipeline: &super::parser::Pipeline, _original_input: &str, state: &mut TerminalState) -> Result<String> {
+    fn execute_native_pipeline(
+        &self,
+        pipeline: &super::parser::Pipeline,
+        _original_input: &str,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         // Check if all commands in the pipeline are built-in
-        let all_builtin = pipeline.commands.iter()
+        let all_builtin = pipeline
+            .commands
+            .iter()
             .all(|cmd| self.registry.has_command(&cmd.command));
 
         if !all_builtin {
             // Find the first non-builtin command
-            let unknown = pipeline.commands.iter()
+            let unknown = pipeline
+                .commands
+                .iter()
                 .find(|cmd| !self.registry.has_command(&cmd.command))
                 .map(|cmd| cmd.command.as_str())
                 .unwrap_or("unknown");
@@ -257,20 +290,39 @@ impl Executor {
             "sudo" => Some("🔐 Nice try, but I don't do sudo. I trust you already 😎".to_string()),
             "please" => Some("✨ Since you asked nicely... what do you need?".to_string()),
             "thanks" | "thank you" | "thx" => Some("💜 You're welcome! Happy hacking!".to_string()),
-            "vim" => Some("🚪 You can check out any time you like, but you can never leave... jk use :q!".to_string()),
-            "emacs" => Some("🎹 M-x butterfly... just kidding, we don't have 8 fingers".to_string()),
-            "rust" => Some("🦀 Rust is mass! Blazingly fast, fearlessly concurrent! 🚀".to_string()),
-            "coffee" => Some("☕ Here's your mass coffee. Now go build something awesome!".to_string()),
+            "vim" => Some(
+                "🚪 You can check out any time you like, but you can never leave... jk use :q!"
+                    .to_string(),
+            ),
+            "emacs" => {
+                Some("🎹 M-x butterfly... just kidding, we don't have 8 fingers".to_string())
+            }
+            "rust" => {
+                Some("🦀 Rust is mass! Blazingly fast, fearlessly concurrent! 🚀".to_string())
+            }
+            "coffee" => {
+                Some("☕ Here's your mass coffee. Now go build something awesome!".to_string())
+            }
             "mass" => Some("🔥 MASSSSS! You get it! 💪".to_string()),
             "lol" | "lmao" | "haha" => Some("😂 Glad you're having fun!".to_string()),
-            "matrix" => Some("💊 Red pill or blue pill? ...we only have purple here 💜".to_string()),
+            "matrix" => {
+                Some("💊 Red pill or blue pill? ...we only have purple here 💜".to_string())
+            }
             "hack" | "hacker" => Some("👨‍💻 *types furiously* I'm in. 😎".to_string()),
-            "windows" => Some("🪟 We're making Windows bearable, one command at a time!".to_string()),
+            "windows" => {
+                Some("🪟 We're making Windows bearable, one command at a time!".to_string())
+            }
             "linux" => Some("🐧 Linux vibes on Windows! Best of both worlds 🌍".to_string()),
-            "mac" | "macos" => Some("🍎 No Mac needed here! Zaxiom's got you covered 😏".to_string()),
-            "help me" => Some("🦸 I'm here to help! Try 'help' for commands, or just ask!".to_string()),
+            "mac" | "macos" => {
+                Some("🍎 No Mac needed here! Zaxiom's got you covered 😏".to_string())
+            }
+            "help me" => {
+                Some("🦸 I'm here to help! Try 'help' for commands, or just ask!".to_string())
+            }
             "i love you" => Some("💜 Aww! I love helping you code! 🥰".to_string()),
-            "bye" | "goodbye" | "exit" | "quit" => Some("👋 See ya! (but you're still here... type 'exit' to actually leave)".to_string()),
+            "bye" | "goodbye" | "exit" | "quit" => Some(
+                "👋 See ya! (but you're still here... type 'exit' to actually leave)".to_string(),
+            ),
             "fortune" => {
                 let fortunes = [
                     "🔮 A bug in the code is worth two in the documentation.",
@@ -288,7 +340,7 @@ impl Executor {
                     .map(|d| d.as_secs() as usize % fortunes.len())
                     .unwrap_or(0);
                 Some(fortunes[idx].to_string())
-            },
+            }
             "party" => Some("🎉🎊🥳 PARTY MODE ACTIVATED! 🪩✨🎈".to_string()),
             "gg" => Some("🎮 GG! Well played! 🏆".to_string()),
             "bruh" => Some("😐 bruh moment detected".to_string()),
@@ -297,14 +349,17 @@ impl Executor {
             "nice" => Some("😏 nice.".to_string()),
             "69" => Some("😏 nice.".to_string()),
             "420" => Some("🌿 blazingly fast terminal, you might say".to_string()),
-            "axolotl" | "zaxiom" | "axiom" => Some("🦎 That's me! Your friendly neighborhood terminal! 💜".to_string()),
+            "axolotl" | "zaxiom" | "axiom" => {
+                Some("🦎 That's me! Your friendly neighborhood terminal! 💜".to_string())
+            }
             _ => None,
         }
     }
 
     /// Check if a command is interactive (requires raw PTY mode)
     pub fn is_interactive(&self, cmd: &str) -> bool {
-        matches!(cmd,
+        matches!(
+            cmd,
             // Editors
             "vim" | "vi" | "nvim" | "neovim" | "emacs" | "nano" | "pico" | "joe" |
             // Pagers
@@ -350,7 +405,9 @@ impl Executor {
 
         // For pipelines, check if all commands are built-in
         if !pipeline.is_single() {
-            let all_builtin = pipeline.commands.iter()
+            let all_builtin = pipeline
+                .commands
+                .iter()
                 .all(|cmd| self.registry.has_command(&cmd.command));
             if all_builtin {
                 return ExecutionTarget::Native;

@@ -2,6 +2,7 @@
 //!
 //! All built-in commands that Zaxiom handles natively in Rust.
 
+pub mod ai;
 pub mod compress;
 pub mod files;
 pub mod fun;
@@ -15,4 +16,3 @@ pub mod system;
 pub mod text;
 pub mod tools;
 pub mod traits;
-pub mod ai;

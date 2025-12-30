@@ -4,8 +4,8 @@
 
 #![allow(dead_code)]
 
-use std::path::Path;
 use eframe::egui;
+use std::path::Path;
 
 /// Supported image formats
 const IMAGE_EXTENSIONS: &[&str] = &["png", "jpg", "jpeg", "gif", "bmp", "webp", "ico"];
@@ -65,15 +65,16 @@ impl ImageDisplay {
             // Calculate scaled size maintaining aspect ratio
             let aspect = self.size.0 as f32 / self.size.1 as f32;
 
-            let (width, height) = if self.size.0 as f32 > max_width || self.size.1 as f32 > max_height {
-                if max_width / aspect <= max_height {
-                    (max_width, max_width / aspect)
+            let (width, height) =
+                if self.size.0 as f32 > max_width || self.size.1 as f32 > max_height {
+                    if max_width / aspect <= max_height {
+                        (max_width, max_width / aspect)
+                    } else {
+                        (max_height * aspect, max_height)
+                    }
                 } else {
-                    (max_height * aspect, max_height)
-                }
-            } else {
-                (self.size.0 as f32, self.size.1 as f32)
-            };
+                    (self.size.0 as f32, self.size.1 as f32)
+                };
 
             ui.image((texture.id(), egui::vec2(width, height)));
         }

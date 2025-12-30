@@ -2,8 +2,8 @@
 //!
 //! Search-augmented AI with real-time information.
 
-use anyhow::{anyhow, Result};
 use super::provider::AiProvider;
+use anyhow::{anyhow, Result};
 
 const PERPLEXITY_API_URL: &str = "https://api.perplexity.ai/chat/completions";
 const ENV_KEY: &str = "PERPLEXITY_API_KEY";
@@ -57,7 +57,8 @@ impl AiProvider for PerplexityProvider {
     }
 
     fn chat(&self, prompt: &str, model: Option<&str>) -> Result<String> {
-        let api_key = self.get_or_prompt_api_key()
+        let api_key = self
+            .get_or_prompt_api_key()
             .ok_or_else(|| anyhow!("{}", self.get_setup_instructions()))?;
 
         let model = model.unwrap_or(DEFAULT_MODEL);
@@ -84,7 +85,8 @@ impl AiProvider for PerplexityProvider {
             return Err(anyhow!("Perplexity API error ({}): {}", status, body));
         }
 
-        let json: serde_json::Value = response.json()
+        let json: serde_json::Value = response
+            .json()
             .map_err(|e| anyhow!("Failed to parse Perplexity response: {}", e))?;
 
         json["choices"][0]["message"]["content"]

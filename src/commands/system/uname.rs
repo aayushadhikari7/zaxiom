@@ -69,7 +69,8 @@ RELATED COMMANDS:
   hostname   Just the computer name
   neofetch   Detailed system info
   uptime     System uptime
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -93,7 +94,8 @@ RELATED COMMANDS:
                         -s    Print kernel name\n  \
                         -n    Print network node hostname\n  \
                         -r    Print kernel release\n  \
-                        -m    Print machine hardware name".to_string());
+                        -m    Print machine hardware name"
+                        .to_string());
                 }
                 _ => {}
             }
@@ -132,13 +134,15 @@ RELATED COMMANDS:
 
 fn get_windows_version() -> String {
     let output = std::process::Command::new("powershell")
-        .args(["-NoProfile", "-Command", "(Get-CimInstance Win32_OperatingSystem).Version"])
+        .args([
+            "-NoProfile",
+            "-Command",
+            "(Get-CimInstance Win32_OperatingSystem).Version",
+        ])
         .output();
 
     match output {
-        Ok(out) if out.status.success() => {
-            String::from_utf8_lossy(&out.stdout).trim().to_string()
-        }
-        _ => "10.0".to_string()
+        Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout).trim().to_string(),
+        _ => "10.0".to_string(),
     }
 }

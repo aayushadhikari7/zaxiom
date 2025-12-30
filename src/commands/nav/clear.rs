@@ -50,7 +50,8 @@ COMMAND HISTORY:
 RELATED COMMANDS:
   reset    Reset terminal (more thorough)
   history  View command history
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, _args: &[String], _state: &mut TerminalState) -> Result<String> {

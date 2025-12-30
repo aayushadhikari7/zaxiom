@@ -33,10 +33,23 @@ impl Command for CommCommand {
                 "-1" => suppress1 = true,
                 "-2" => suppress2 = true,
                 "-3" => suppress3 = true,
-                "-12" => { suppress1 = true; suppress2 = true; }
-                "-23" => { suppress2 = true; suppress3 = true; }
-                "-13" => { suppress1 = true; suppress3 = true; }
-                "-123" => { suppress1 = true; suppress2 = true; suppress3 = true; }
+                "-12" => {
+                    suppress1 = true;
+                    suppress2 = true;
+                }
+                "-23" => {
+                    suppress2 = true;
+                    suppress3 = true;
+                }
+                "-13" => {
+                    suppress1 = true;
+                    suppress3 = true;
+                }
+                "-123" => {
+                    suppress1 = true;
+                    suppress2 = true;
+                    suppress3 = true;
+                }
                 arg if !arg.starts_with('-') => files.push(arg),
                 _ => {}
             }

@@ -3,7 +3,7 @@
 //! Handles loading, prompting, and saving API keys securely.
 
 use std::fs::{self, OpenOptions};
-use std::io::{Write, BufRead, BufReader};
+use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
 /// Get the path to the .env file in the project/user directory
@@ -117,10 +117,7 @@ pub fn save_key_to_env(key_name: &str, key_value: &str) -> bool {
             Ok(f) => f,
             Err(_) => return false,
         };
-        BufReader::new(file)
-            .lines()
-            .map_while(Result::ok)
-            .collect()
+        BufReader::new(file).lines().map_while(Result::ok).collect()
     } else {
         vec!["# Zaxiom AI Configuration".to_string(), "".to_string()]
     };
@@ -170,11 +167,7 @@ pub fn has_key(env_var: &str) -> bool {
 }
 
 /// Get a key, prompting if not available
-pub fn get_or_prompt_key(
-    provider_name: &str,
-    env_var: &str,
-    signup_url: &str,
-) -> Option<String> {
+pub fn get_or_prompt_key(provider_name: &str, env_var: &str, signup_url: &str) -> Option<String> {
     // Check if already set
     if let Ok(key) = std::env::var(env_var) {
         if !key.is_empty() {

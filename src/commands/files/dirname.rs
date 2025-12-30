@@ -1,7 +1,7 @@
 //! dirname command - strip last component from file name
 
-use std::path::Path;
 use anyhow::Result;
+use std::path::Path;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -28,12 +28,14 @@ impl Command for DirnameCommand {
 
         if args[0] == "-h" || args[0] == "--help" {
             return Ok("Usage: dirname NAME\n\
-                Output NAME with its last component removed.".to_string());
+                Output NAME with its last component removed."
+                .to_string());
         }
 
         let path = Path::new(&args[0]);
 
-        let parent = path.parent()
+        let parent = path
+            .parent()
             .map(|p| p.to_string_lossy().to_string())
             .unwrap_or_else(|| ".".to_string());
 

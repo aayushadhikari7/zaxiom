@@ -66,7 +66,12 @@ impl Command for StringsCommand {
         Ok(output.join("\n"))
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         if let Some(input) = stdin {
             let mut min_length = 4usize;
             for i in 0..args.len() {

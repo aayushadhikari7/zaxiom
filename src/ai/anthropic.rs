@@ -2,8 +2,8 @@
 //!
 //! Access to Claude models via Anthropic's API.
 
-use anyhow::{anyhow, Result};
 use super::provider::AiProvider;
+use anyhow::{anyhow, Result};
 
 const ANTHROPIC_API_URL: &str = "https://api.anthropic.com/v1/messages";
 const ENV_KEY: &str = "ANTHROPIC_API_KEY";
@@ -59,7 +59,8 @@ impl AiProvider for AnthropicProvider {
     }
 
     fn chat(&self, prompt: &str, model: Option<&str>) -> Result<String> {
-        let api_key = self.get_or_prompt_api_key()
+        let api_key = self
+            .get_or_prompt_api_key()
             .ok_or_else(|| anyhow!("{}", self.get_setup_instructions()))?;
 
         let model = model.unwrap_or(DEFAULT_MODEL);
@@ -87,7 +88,8 @@ impl AiProvider for AnthropicProvider {
             return Err(anyhow!("Anthropic API error ({}): {}", status, body));
         }
 
-        let json: serde_json::Value = response.json()
+        let json: serde_json::Value = response
+            .json()
             .map_err(|e| anyhow!("Failed to parse Anthropic response: {}", e))?;
 
         // Anthropic returns content as an array of content blocks

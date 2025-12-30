@@ -54,7 +54,8 @@ impl Command for FortuneCommand {
         for arg in args {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: fortune\n\
-                    Display a random programming fortune or quote.".to_string());
+                    Display a random programming fortune or quote."
+                    .to_string());
             }
         }
 

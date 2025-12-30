@@ -64,7 +64,8 @@ NOTE:
 RELATED COMMANDS:
   ps       List processes
   taskkill Windows native kill command
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -77,7 +78,8 @@ RELATED COMMANDS:
                 "-h" | "--help" => {
                     return Ok("Usage: kill [OPTIONS] <pid> [pid2...]\n\
                         Options:\n  \
-                        -9    Force kill (SIGKILL)".to_string());
+                        -9    Force kill (SIGKILL)"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => pids.push(arg),
                 _ => {}

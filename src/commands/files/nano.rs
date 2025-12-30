@@ -126,7 +126,8 @@ impl EditorState {
         let line_count = self.content.lines().count();
         let jump = self.visible_lines.saturating_sub(2);
         self.cursor_line = (self.cursor_line + jump).min(line_count.saturating_sub(1));
-        self.scroll_offset = (self.scroll_offset + jump).min(line_count.saturating_sub(self.visible_lines));
+        self.scroll_offset =
+            (self.scroll_offset + jump).min(line_count.saturating_sub(self.visible_lines));
         let lines: Vec<&str> = self.content.lines().collect();
         if let Some(line) = lines.get(self.cursor_line) {
             self.cursor_col = self.cursor_col.min(line.len());

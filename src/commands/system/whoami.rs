@@ -52,14 +52,16 @@ RELATED COMMANDS:
   id         User and group IDs
   hostname   Computer name
   users      List logged in users (not available)
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
         for arg in args {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: whoami\n\
-                    Print the current user name.".to_string());
+                    Print the current user name."
+                    .to_string());
             }
         }
 

@@ -55,11 +55,13 @@ RELATED COMMANDS:
   cp       Copy files
   rm       Remove files
   rename   Batch rename (not available)
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
-        let mut paths: Vec<&str> = args.iter()
+        let mut paths: Vec<&str> = args
+            .iter()
             .filter(|a| !a.starts_with('-'))
             .map(|s| s.as_str())
             .collect();
@@ -72,14 +74,18 @@ RELATED COMMANDS:
         let sources: Vec<_> = paths.iter().map(|p| state.resolve_path(p)).collect();
 
         // Multiple sources -> dest must be a directory
-        if sources.len() > 1
-            && !dest.is_dir() {
-                return Err(anyhow::anyhow!("Target must be a directory when moving multiple files"));
-            }
+        if sources.len() > 1 && !dest.is_dir() {
+            return Err(anyhow::anyhow!(
+                "Target must be a directory when moving multiple files"
+            ));
+        }
 
         for source in sources {
             if !source.exists() {
-                return Err(anyhow::anyhow!("No such file or directory: {}", source.display()));
+                return Err(anyhow::anyhow!(
+                    "No such file or directory: {}",
+                    source.display()
+                ));
             }
 
             let target = if dest.is_dir() {
@@ -88,8 +94,7 @@ RELATED COMMANDS:
                 dest.clone()
             };
 
-            fs::rename(&source, &target)
-                .map_err(|e| anyhow::anyhow!("Cannot move: {}", e))?;
+            fs::rename(&source, &target).map_err(|e| anyhow::anyhow!("Cannot move: {}", e))?;
         }
 
         Ok(String::new())

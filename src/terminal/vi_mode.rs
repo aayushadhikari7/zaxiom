@@ -569,15 +569,10 @@ impl ViMode {
             ViState::SearchBackward => "SEARCH?",
         };
 
-        let count = self
-            .count
-            .map_or(String::new(), |c| format!("{}", c));
+        let count = self.count.map_or(String::new(), |c| format!("{}", c));
         let op = self.pending_op.map_or(String::new(), |o| format!("{}", o));
 
-        if matches!(
-            self.state,
-            ViState::SearchForward | ViState::SearchBackward
-        ) {
+        if matches!(self.state, ViState::SearchForward | ViState::SearchBackward) {
             let prefix = if self.state == ViState::SearchForward {
                 "/"
             } else {
@@ -585,7 +580,10 @@ impl ViMode {
             };
             format!("-- {} -- {}{}", mode, prefix, self.search_query)
         } else {
-            format!("-- {} -- {}{}  {}:{}", mode, count, op, self.cursor.line, self.cursor.col)
+            format!(
+                "-- {} -- {}{}  {}:{}",
+                mode, count, op, self.cursor.line, self.cursor.col
+            )
         }
     }
 }

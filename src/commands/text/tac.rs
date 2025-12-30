@@ -1,7 +1,7 @@
 //! tac command - concatenate and print files in reverse
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -31,7 +31,8 @@ impl Command for TacCommand {
         for arg in args {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: tac <file> [file2...]\n\
-                    Print files in reverse order, line by line.".to_string());
+                    Print files in reverse order, line by line."
+                    .to_string());
             }
 
             if arg.starts_with('-') {
@@ -39,8 +40,8 @@ impl Command for TacCommand {
             }
 
             let path = state.resolve_path(arg);
-            let content = fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("tac: {}: {}", arg, e))?;
+            let content =
+                fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("tac: {}: {}", arg, e))?;
 
             all_lines.extend(content.lines().map(|s| s.to_string()));
         }

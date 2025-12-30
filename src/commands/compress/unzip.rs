@@ -1,8 +1,8 @@
 //! unzip command - extract files from zip archive
 
+use anyhow::Result;
 use std::fs::{self, File};
 use std::io::Read;
-use anyhow::Result;
 use zip::ZipArchive;
 
 use crate::commands::traits::Command;
@@ -36,14 +36,16 @@ impl Command for UnzipCommand {
                     return Ok("Usage: unzip [OPTIONS] <archive.zip>\n\
                         Options:\n  \
                         -l    List archive contents\n  \
-                        -o    Overwrite files without prompting".to_string());
+                        -o    Overwrite files without prompting"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => archive_file = Some(arg),
                 _ => {}
             }
         }
 
-        let archive_file = archive_file.ok_or_else(|| anyhow::anyhow!("unzip: no archive specified"))?;
+        let archive_file =
+            archive_file.ok_or_else(|| anyhow::anyhow!("unzip: no archive specified"))?;
         let archive_path = state.resolve_path(archive_file);
 
         let file = File::open(&archive_path)
@@ -64,9 +66,14 @@ impl Command for UnzipCommand {
                 total_size += size;
 
                 let date_str = if let Some(datetime) = file.last_modified() {
-                    format!("{:04}-{:02}-{:02} {:02}:{:02}",
-                        datetime.year(), datetime.month(), datetime.day(),
-                        datetime.hour(), datetime.minute())
+                    format!(
+                        "{:04}-{:02}-{:02} {:02}:{:02}",
+                        datetime.year(),
+                        datetime.month(),
+                        datetime.day(),
+                        datetime.hour(),
+                        datetime.minute()
+                    )
                 } else {
                     "----.--.-- --:--".to_string()
                 };

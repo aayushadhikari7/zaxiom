@@ -28,7 +28,8 @@ impl Command for BasenameCommand {
         if args[0] == "-h" || args[0] == "--help" {
             return Ok("Usage: basename NAME [SUFFIX]\n\
                 Print NAME with any leading directory components removed.\n\
-                If SUFFIX is specified, also remove trailing SUFFIX.".to_string());
+                If SUFFIX is specified, also remove trailing SUFFIX."
+                .to_string());
         }
 
         let path = &args[0];

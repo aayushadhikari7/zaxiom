@@ -58,7 +58,8 @@ RELATED COMMANDS:
   tree     Show directory tree
   cd       Change directory
   pwd      Print working directory
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -86,16 +87,17 @@ RELATED COMMANDS:
         };
 
         if !target_path.exists() {
-            return Err(anyhow::anyhow!("No such file or directory: {}", target_path.display()));
+            return Err(anyhow::anyhow!(
+                "No such file or directory: {}",
+                target_path.display()
+            ));
         }
 
         if target_path.is_file() {
             return Ok(format_entry(&target_path, long_format));
         }
 
-        let mut entries: Vec<_> = fs::read_dir(&target_path)?
-            .filter_map(|e| e.ok())
-            .collect();
+        let mut entries: Vec<_> = fs::read_dir(&target_path)?.filter_map(|e| e.ok()).collect();
 
         // Sort entries: directories first, then alphabetically
         entries.sort_by(|a, b| {
@@ -136,7 +138,8 @@ RELATED COMMANDS:
 
 /// Format a single directory entry
 fn format_entry(path: &Path, long_format: bool) -> String {
-    let name = path.file_name()
+    let name = path
+        .file_name()
         .map(|n| n.to_string_lossy().to_string())
         .unwrap_or_else(|| path.display().to_string());
 
@@ -146,11 +149,13 @@ fn format_entry(path: &Path, long_format: bool) -> String {
     if long_format {
         let metadata = path.metadata().ok();
 
-        let size = metadata.as_ref()
+        let size = metadata
+            .as_ref()
             .map(|m| format_size(m.len()))
             .unwrap_or_else(|| "    -".to_string());
 
-        let modified = metadata.as_ref()
+        let modified = metadata
+            .as_ref()
             .and_then(|m| m.modified().ok())
             .map(|t| {
                 let dt: DateTime<Local> = t.into();
@@ -174,60 +179,56 @@ fn get_icon(path: &Path) -> &'static str {
         return "\u{f07b}"; //  folder
     }
 
-    let name = path.file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("");
+    let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
-    let extension = path.extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("");
+    let extension = path.extension().and_then(|e| e.to_str()).unwrap_or("");
 
     // Special files
     match name {
         "Cargo.toml" | "Cargo.lock" => return "\u{e7a8}", //  Rust
         "package.json" | "package-lock.json" => return "\u{e718}", //  npm
         ".gitignore" | ".gitattributes" => return "\u{f1d3}", //  git
-        "Dockerfile" => return "\u{f308}", //  docker
-        "Makefile" => return "\u{f489}", //  terminal
-        "README.md" | "README" => return "\u{f48a}", //  book
-        "LICENSE" => return "\u{f718}", //  certificate
+        "Dockerfile" => return "\u{f308}",                //  docker
+        "Makefile" => return "\u{f489}",                  //  terminal
+        "README.md" | "README" => return "\u{f48a}",      //  book
+        "LICENSE" => return "\u{f718}",                   //  certificate
         _ => {}
     }
 
     // By extension
     match extension.to_lowercase().as_str() {
-        "rs" => "\u{e7a8}",      //  Rust
-        "js" => "\u{e74e}",      //  JavaScript
-        "ts" => "\u{e628}",      //  TypeScript
-        "jsx" | "tsx" => "\u{e7ba}", //  React
-        "py" => "\u{e73c}",      //  Python
-        "go" => "\u{e627}",      //  Go
-        "java" => "\u{e738}",    //  Java
-        "c" | "h" => "\u{e61e}", //  C
-        "cpp" | "hpp" | "cc" => "\u{e61d}", //  C++
-        "cs" => "\u{f81a}",      //  C#
-        "rb" => "\u{e791}",      //  Ruby
-        "php" => "\u{e73d}",     //  PHP
-        "swift" => "\u{e755}",   //  Swift
-        "kt" => "\u{e634}",      //  Kotlin
-        "json" => "\u{e60b}",    //  JSON
-        "toml" => "\u{e60b}",    //  config
-        "yaml" | "yml" => "\u{e60b}", //  config
-        "xml" => "\u{e619}",     //  XML
-        "html" | "htm" => "\u{e736}", //  HTML
-        "css" => "\u{e749}",     //  CSS
-        "scss" | "sass" => "\u{e74b}", //  Sass
-        "md" => "\u{e73e}",      //  Markdown
-        "txt" => "\u{f15c}",     //  text
-        "pdf" => "\u{f1c1}",     //  PDF
-        "zip" | "tar" | "gz" | "rar" | "7z" => "\u{f1c6}", //  archive
+        "rs" => "\u{e7a8}",                                            //  Rust
+        "js" => "\u{e74e}",                                            //  JavaScript
+        "ts" => "\u{e628}",                                            //  TypeScript
+        "jsx" | "tsx" => "\u{e7ba}",                                   //  React
+        "py" => "\u{e73c}",                                            //  Python
+        "go" => "\u{e627}",                                            //  Go
+        "java" => "\u{e738}",                                          //  Java
+        "c" | "h" => "\u{e61e}",                                       //  C
+        "cpp" | "hpp" | "cc" => "\u{e61d}",                            //  C++
+        "cs" => "\u{f81a}",                                            //  C#
+        "rb" => "\u{e791}",                                            //  Ruby
+        "php" => "\u{e73d}",                                           //  PHP
+        "swift" => "\u{e755}",                                         //  Swift
+        "kt" => "\u{e634}",                                            //  Kotlin
+        "json" => "\u{e60b}",                                          //  JSON
+        "toml" => "\u{e60b}",                                          //  config
+        "yaml" | "yml" => "\u{e60b}",                                  //  config
+        "xml" => "\u{e619}",                                           //  XML
+        "html" | "htm" => "\u{e736}",                                  //  HTML
+        "css" => "\u{e749}",                                           //  CSS
+        "scss" | "sass" => "\u{e74b}",                                 //  Sass
+        "md" => "\u{e73e}",                                            //  Markdown
+        "txt" => "\u{f15c}",                                           //  text
+        "pdf" => "\u{f1c1}",                                           //  PDF
+        "zip" | "tar" | "gz" | "rar" | "7z" => "\u{f1c6}",             //  archive
         "png" | "jpg" | "jpeg" | "gif" | "svg" | "webp" => "\u{f1c5}", //  image
-        "mp3" | "wav" | "flac" | "ogg" => "\u{f1c7}", //  audio
-        "mp4" | "mkv" | "avi" | "mov" => "\u{f1c8}", //  video
-        "exe" | "msi" => "\u{f17a}", //  Windows
-        "sh" | "bash" | "zsh" => "\u{f489}", //  terminal
-        "ps1" => "\u{e70f}",     //  PowerShell
-        _ => "\u{f15b}",         //  generic file
+        "mp3" | "wav" | "flac" | "ogg" => "\u{f1c7}",                  //  audio
+        "mp4" | "mkv" | "avi" | "mov" => "\u{f1c8}",                   //  video
+        "exe" | "msi" => "\u{f17a}",                                   //  Windows
+        "sh" | "bash" | "zsh" => "\u{f489}",                           //  terminal
+        "ps1" => "\u{e70f}",                                           //  PowerShell
+        _ => "\u{f15b}",                                               //  generic file
     }
 }
 

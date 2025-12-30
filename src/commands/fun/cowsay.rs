@@ -61,7 +61,8 @@ impl Command for CowsayCommand {
                       -f <creature>  Use specified creature (cow, robot, tux)\n\n\
                     Example:\n  \
                       cowsay Hello World!\n  \
-                      cowsay -f robot Beep boop!".to_string());
+                      cowsay -f robot Beep boop!"
+                    .to_string());
             }
 
             if arg == "-f" {
@@ -104,7 +105,12 @@ impl Command for CowsayCommand {
         true
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         if let Some(input) = stdin {
             let mut new_args = args.to_vec();
             new_args.push(input.trim().to_string());

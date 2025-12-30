@@ -1,7 +1,7 @@
 //! uniq command - report or omit repeated lines
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -87,14 +87,20 @@ RELATED COMMANDS:
   sort     Sort lines (use before uniq!)
   wc       Count lines/words
   awk      More flexible deduplication
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut count = false;
         let mut only_duplicates = false;
         let mut only_unique = false;
@@ -110,7 +116,8 @@ RELATED COMMANDS:
                         Options:\n  \
                         -c    Prefix lines with occurrence count\n  \
                         -d    Only print duplicate lines\n  \
-                        -u    Only print unique lines".to_string());
+                        -u    Only print unique lines"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => file = Some(arg),
                 _ => {}
@@ -119,8 +126,7 @@ RELATED COMMANDS:
 
         let content = if let Some(file) = file {
             let path = state.resolve_path(file);
-            fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("uniq: {}: {}", file, e))?
+            fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("uniq: {}: {}", file, e))?
         } else if let Some(input) = stdin {
             input.to_string()
         } else {

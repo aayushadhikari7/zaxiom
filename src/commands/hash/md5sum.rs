@@ -1,8 +1,8 @@
 //! md5sum command - compute MD5 message digest
 
-use std::fs;
 use anyhow::Result;
-use md5::{Md5, Digest};
+use md5::{Digest, Md5};
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -49,7 +49,8 @@ RELATED COMMANDS:
   sha512sum   SHA-512 hash
   blake3sum   BLAKE3 hash (fastest, modern)
   base64      Base64 encoding
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -62,7 +63,8 @@ RELATED COMMANDS:
         for arg in args {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: md5sum <file> [file2...]\n\
-                    Compute MD5 message digest for files.".to_string());
+                    Compute MD5 message digest for files."
+                    .to_string());
             }
 
             if arg.starts_with('-') {
@@ -70,8 +72,7 @@ RELATED COMMANDS:
             }
 
             let path = state.resolve_path(arg);
-            let content = fs::read(&path)
-                .map_err(|e| anyhow::anyhow!("md5sum: {}: {}", arg, e))?;
+            let content = fs::read(&path).map_err(|e| anyhow::anyhow!("md5sum: {}: {}", arg, e))?;
 
             let mut hasher = Md5::new();
             hasher.update(&content);

@@ -1,9 +1,9 @@
 //! watch command - execute a program periodically
 
+use anyhow::Result;
 use std::process::Command as ProcessCommand;
 use std::thread;
 use std::time::Duration;
-use anyhow::Result;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -51,7 +51,8 @@ impl Command for WatchCommand {
                         -n <secs>    Seconds between updates (default: 2)\n  \
                         -c <count>   Number of iterations (default: infinite)\n\n\
                         Note: In this terminal, watch runs for limited iterations.\n\
-                        Use -c to specify how many times to run.".to_string());
+                        Use -c to specify how many times to run."
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => {
                     command_start = i;

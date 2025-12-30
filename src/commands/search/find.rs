@@ -52,7 +52,8 @@ RELATED COMMANDS:
   grep     Search file contents
   ls       List directory
   tree     Show directory tree
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -82,7 +83,10 @@ RELATED COMMANDS:
         };
 
         if !base_path.exists() {
-            return Err(anyhow::anyhow!("No such directory: {}", base_path.display()));
+            return Err(anyhow::anyhow!(
+                "No such directory: {}",
+                base_path.display()
+            ));
         }
 
         let mut results = Vec::new();
@@ -104,9 +108,7 @@ RELATED COMMANDS:
 
             // Check name pattern
             if let Some(pattern) = name_pattern {
-                let name = path.file_name()
-                    .and_then(|n| n.to_str())
-                    .unwrap_or("");
+                let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
                 if !matches_glob(name, pattern) {
                     continue;
@@ -114,7 +116,8 @@ RELATED COMMANDS:
             }
 
             // Format path with forward slashes
-            let display_path = path.strip_prefix(&base_path)
+            let display_path = path
+                .strip_prefix(&base_path)
                 .unwrap_or(path)
                 .display()
                 .to_string()

@@ -1,8 +1,8 @@
 //! tee command - read from stdin and write to stdout and files
 
+use anyhow::Result;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
-use anyhow::Result;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -26,7 +26,12 @@ impl Command for TeeCommand {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut append = false;
         let mut files: Vec<&String> = Vec::new();
 
@@ -37,7 +42,8 @@ impl Command for TeeCommand {
                     return Ok("Usage: tee [OPTIONS] FILE...\n\
                         Copy stdin to each FILE and also to stdout.\n\n\
                         Options:\n  \
-                        -a    Append to files instead of overwriting".to_string());
+                        -a    Append to files instead of overwriting"
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => files.push(arg),
                 _ => {}
@@ -56,12 +62,10 @@ impl Command for TeeCommand {
                     .open(&path)
                     .map_err(|e| anyhow::anyhow!("tee: {}: {}", file, e))?
             } else {
-                File::create(&path)
-                    .map_err(|e| anyhow::anyhow!("tee: {}: {}", file, e))?
+                File::create(&path).map_err(|e| anyhow::anyhow!("tee: {}: {}", file, e))?
             };
 
-            writeln!(handle, "{}", input)
-                .map_err(|e| anyhow::anyhow!("tee: {}: {}", file, e))?;
+            writeln!(handle, "{}", input).map_err(|e| anyhow::anyhow!("tee: {}: {}", file, e))?;
         }
 
         // Also output to stdout

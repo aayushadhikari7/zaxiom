@@ -60,7 +60,8 @@ RELATED COMMANDS:
   rm       Remove files
   ln       Create links
   rsync    Advanced sync (not available)
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -83,14 +84,18 @@ RELATED COMMANDS:
         let sources: Vec<_> = paths.iter().map(|p| state.resolve_path(p)).collect();
 
         // Multiple sources -> dest must be a directory
-        if sources.len() > 1
-            && !dest.is_dir() {
-                return Err(anyhow::anyhow!("Target must be a directory when copying multiple files"));
-            }
+        if sources.len() > 1 && !dest.is_dir() {
+            return Err(anyhow::anyhow!(
+                "Target must be a directory when copying multiple files"
+            ));
+        }
 
         for source in sources {
             if !source.exists() {
-                return Err(anyhow::anyhow!("No such file or directory: {}", source.display()));
+                return Err(anyhow::anyhow!(
+                    "No such file or directory: {}",
+                    source.display()
+                ));
             }
 
             let target = if dest.is_dir() {
@@ -101,12 +106,14 @@ RELATED COMMANDS:
 
             if source.is_dir() {
                 if !recursive {
-                    return Err(anyhow::anyhow!("Cannot copy directory (use -r): {}", source.display()));
+                    return Err(anyhow::anyhow!(
+                        "Cannot copy directory (use -r): {}",
+                        source.display()
+                    ));
                 }
                 copy_dir_all(&source, &target)?;
             } else {
-                fs::copy(&source, &target)
-                    .map_err(|e| anyhow::anyhow!("Cannot copy: {}", e))?;
+                fs::copy(&source, &target).map_err(|e| anyhow::anyhow!("Cannot copy: {}", e))?;
             }
         }
 

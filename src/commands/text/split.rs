@@ -56,7 +56,8 @@ impl Command for SplitCommand {
             i += 1;
         }
 
-        let input_file = input_file.ok_or_else(|| anyhow::anyhow!("split: missing file operand"))?;
+        let input_file =
+            input_file.ok_or_else(|| anyhow::anyhow!("split: missing file operand"))?;
         let path = state.resolve_path(input_file);
         let file = File::open(&path)?;
         let reader = BufReader::new(file);
@@ -104,11 +105,11 @@ fn parse_size(s: &str) -> Option<usize> {
     }
 
     let (num_str, multiplier) = if s.ends_with('K') || s.ends_with('k') {
-        (&s[..s.len()-1], 1024)
+        (&s[..s.len() - 1], 1024)
     } else if s.ends_with('M') || s.ends_with('m') {
-        (&s[..s.len()-1], 1024 * 1024)
+        (&s[..s.len() - 1], 1024 * 1024)
     } else if s.ends_with('G') || s.ends_with('g') {
-        (&s[..s.len()-1], 1024 * 1024 * 1024)
+        (&s[..s.len() - 1], 1024 * 1024 * 1024)
     } else {
         (s, 1)
     };

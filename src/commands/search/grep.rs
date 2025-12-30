@@ -66,14 +66,20 @@ RELATED COMMANDS:
   find     Find files by name
   cat      Display file contents
   sed      Stream editor
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut case_insensitive = false;
         let mut show_line_numbers = false;
         let mut invert_match = false;
@@ -90,7 +96,8 @@ RELATED COMMANDS:
                         Options:\n  \
                         -i    Ignore case\n  \
                         -n    Show line numbers\n  \
-                        -v    Invert match (show non-matching lines)".to_string());
+                        -v    Invert match (show non-matching lines)"
+                        .to_string());
                 }
                 "-in" | "-ni" => {
                     case_insensitive = true;

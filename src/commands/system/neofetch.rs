@@ -1,7 +1,7 @@
 //! neofetch command - display system info with style
 
-use std::env;
 use anyhow::Result;
+use std::env;
 use sysinfo::System;
 
 use crate::commands::traits::Command;
@@ -55,7 +55,8 @@ RELATED COMMANDS:
   hostname   Computer name
   free       Memory usage
   lscpu      CPU info
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, _args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -70,7 +71,9 @@ RELATED COMMANDS:
         let os = System::name().unwrap_or_else(|| "Unknown".to_string());
         let os_version = System::os_version().unwrap_or_default();
         let kernel = System::kernel_version().unwrap_or_else(|| "Unknown".to_string());
-        let cpu = sys.cpus().first()
+        let cpu = sys
+            .cpus()
+            .first()
             .map(|c: &sysinfo::Cpu| c.brand().to_string())
             .unwrap_or_else(|| "Unknown".to_string());
         let cpu_cores = sys.cpus().len();

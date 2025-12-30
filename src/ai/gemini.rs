@@ -2,8 +2,8 @@
 //!
 //! Access to Gemini models via Google's Generative AI API.
 
-use anyhow::{anyhow, Result};
 use super::provider::AiProvider;
+use anyhow::{anyhow, Result};
 
 const ENV_KEY: &str = "GEMINI_API_KEY";
 const DEFAULT_MODEL: &str = "gemini-2.5-flash";
@@ -64,7 +64,8 @@ impl AiProvider for GeminiProvider {
     }
 
     fn chat(&self, prompt: &str, model: Option<&str>) -> Result<String> {
-        let api_key = self.get_or_prompt_api_key()
+        let api_key = self
+            .get_or_prompt_api_key()
             .ok_or_else(|| anyhow!("{}", self.get_setup_instructions()))?;
 
         let model = model.unwrap_or(DEFAULT_MODEL);
@@ -91,7 +92,8 @@ impl AiProvider for GeminiProvider {
             return Err(anyhow!("Gemini API error ({}): {}", status, body));
         }
 
-        let json: serde_json::Value = response.json()
+        let json: serde_json::Value = response
+            .json()
             .map_err(|e| anyhow!("Failed to parse Gemini response: {}", e))?;
 
         // Gemini returns candidates[0].content.parts[0].text

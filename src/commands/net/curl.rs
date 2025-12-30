@@ -59,7 +59,8 @@ COMMON STATUS CODES:
 RELATED COMMANDS:
   wget     Download files
   ping     Check host connectivity
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -125,20 +126,26 @@ RELATED COMMANDS:
         }
 
         // Execute request
-        let response = request.send()
+        let response = request
+            .send()
             .map_err(|e| anyhow::anyhow!("Request failed: {}", e))?;
 
         let mut output = String::new();
 
         if show_headers {
-            output.push_str(&format!("HTTP/1.1 {} {}\n", response.status().as_u16(), response.status().as_str()));
+            output.push_str(&format!(
+                "HTTP/1.1 {} {}\n",
+                response.status().as_u16(),
+                response.status().as_str()
+            ));
             for (key, value) in response.headers() {
                 output.push_str(&format!("{}: {}\n", key, value.to_str().unwrap_or("")));
             }
             output.push('\n');
         }
 
-        let body = response.text()
+        let body = response
+            .text()
             .map_err(|e| anyhow::anyhow!("Failed to read response: {}", e))?;
 
         output.push_str(&body);

@@ -3,8 +3,8 @@
 //! BLAKE3 is a modern cryptographic hash function that is faster than
 //! MD5, SHA-1, SHA-2, and SHA-3, while being more secure.
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -63,7 +63,8 @@ RELATED COMMANDS:
   sha256sum   SHA-256 (widely supported)
   md5sum      MD5 (legacy, insecure)
   sha512sum   SHA-512
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn supports_stdin(&self) -> bool {
@@ -81,7 +82,8 @@ RELATED COMMANDS:
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: blake3sum <file> [file2...]\n\
                     Compute BLAKE3 cryptographic hash for files.\n\
-                    BLAKE3 is fast and secure - recommended for new applications.".to_string());
+                    BLAKE3 is fast and secure - recommended for new applications."
+                    .to_string());
             }
 
             if arg.starts_with('-') {
@@ -89,8 +91,8 @@ RELATED COMMANDS:
             }
 
             let path = state.resolve_path(arg);
-            let content = fs::read(&path)
-                .map_err(|e| anyhow::anyhow!("blake3sum: {}: {}", arg, e))?;
+            let content =
+                fs::read(&path).map_err(|e| anyhow::anyhow!("blake3sum: {}: {}", arg, e))?;
 
             let hash = blake3::hash(&content);
             output.push(format!("{}  {}", hash.to_hex(), arg));
@@ -99,7 +101,12 @@ RELATED COMMANDS:
         Ok(output.join("\n"))
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         if let Some(input) = stdin {
             let hash = blake3::hash(input.as_bytes());
             Ok(format!("{}  -", hash.to_hex()))

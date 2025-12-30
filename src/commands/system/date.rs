@@ -1,7 +1,7 @@
 //! date command - display or set the system date and time
 
-use chrono::{Local, Utc};
 use anyhow::Result;
+use chrono::{Local, Utc};
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -72,7 +72,8 @@ USE CASES:
 RELATED COMMANDS:
   cal      Calendar
   uptime   System uptime
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -95,7 +96,8 @@ RELATED COMMANDS:
                         %S    Second (00-59)\n  \
                         %A    Weekday name\n  \
                         %B    Month name\n  \
-                        %Z    Timezone".to_string());
+                        %Z    Timezone"
+                        .to_string());
                 }
                 _ if arg.starts_with('+') => format = Some(&arg[1..]),
                 _ => {}

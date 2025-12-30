@@ -1,7 +1,7 @@
 //! traceroute command - trace packet route to host
 
-use std::process::Command as ProcessCommand;
 use anyhow::Result;
+use std::process::Command as ProcessCommand;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -37,7 +37,8 @@ impl Command for TracerouteCommand {
                 "-h" | "--help" => {
                     return Ok("Usage: traceroute [OPTIONS] <host>\n\
                         Options:\n  \
-                        -m <hops>    Maximum number of hops (default: 30)".to_string());
+                        -m <hops>    Maximum number of hops (default: 30)"
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => host = Some(&args[i]),
                 _ => {}
@@ -56,7 +57,8 @@ impl Command for TracerouteCommand {
 
         cmd.arg(host);
 
-        let output = cmd.output()
+        let output = cmd
+            .output()
             .map_err(|e| anyhow::anyhow!("traceroute: {}", e))?;
 
         let stdout = String::from_utf8_lossy(&output.stdout);

@@ -62,7 +62,8 @@ RELATED COMMANDS:
   kill     Terminate processes
   top      Real-time process viewer (not available)
   htop     Interactive process viewer (not available)
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -74,7 +75,8 @@ RELATED COMMANDS:
                 "-h" | "--help" => {
                     return Ok("Usage: ps [OPTIONS]\n\
                         Options:\n  \
-                        -a, -e    Show all processes".to_string());
+                        -a, -e    Show all processes"
+                        .to_string());
                 }
                 _ => {}
             }
@@ -96,9 +98,13 @@ RELATED COMMANDS:
 
             // Format output to look more Unix-like
             let mut lines: Vec<String> = Vec::new();
-            lines.push(format!("{:>8} {:>8} {:>8} {}", "PID", "CPU", "MEM(MB)", "COMMAND"));
+            lines.push(format!(
+                "{:>8} {:>8} {:>8} {}",
+                "PID", "CPU", "MEM(MB)", "COMMAND"
+            ));
 
-            for line in stdout.lines().skip(3) { // Skip PowerShell headers
+            for line in stdout.lines().skip(3) {
+                // Skip PowerShell headers
                 let parts: Vec<&str> = line.split_whitespace().collect();
                 if parts.len() >= 2 {
                     let pid = parts.first().unwrap_or(&"");

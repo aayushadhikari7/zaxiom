@@ -2,9 +2,9 @@
 
 use anyhow::Result;
 
+use super::pushd::DIR_STACK;
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
-use super::pushd::DIR_STACK;
 
 pub struct DirsCommand;
 
@@ -46,22 +46,32 @@ impl Command for DirsCommand {
 
         // Current directory is always at "top" of displayed stack
         let mut dirs: Vec<String> = vec![state.cwd().display().to_string()];
-        dirs.extend(stack.iter().rev().map(|p: &std::path::PathBuf| p.display().to_string()));
+        dirs.extend(
+            stack
+                .iter()
+                .rev()
+                .map(|p: &std::path::PathBuf| p.display().to_string()),
+        );
 
         // Format paths
-        let formatted: Vec<String> = dirs.iter().enumerate().map(|(i, d)| {
-            let display = if !long_format && d.starts_with(&home.display().to_string()) {
-                format!("~{}", &d[home.display().to_string().len()..])
-            } else {
-                d.clone()
-            }.replace('\\', "/");
+        let formatted: Vec<String> = dirs
+            .iter()
+            .enumerate()
+            .map(|(i, d)| {
+                let display = if !long_format && d.starts_with(&home.display().to_string()) {
+                    format!("~{}", &d[home.display().to_string().len()..])
+                } else {
+                    d.clone()
+                }
+                .replace('\\', "/");
 
-            if vertical {
-                format!(" {} {}", i, display)
-            } else {
-                display
-            }
-        }).collect();
+                if vertical {
+                    format!(" {} {}", i, display)
+                } else {
+                    display
+                }
+            })
+            .collect();
 
         if vertical {
             Ok(formatted.join("\n"))

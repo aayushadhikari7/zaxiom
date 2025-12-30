@@ -1,7 +1,7 @@
 //! ping command - send ICMP echo requests
 
-use std::process::Command as ProcessCommand;
 use anyhow::Result;
+use std::process::Command as ProcessCommand;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -58,7 +58,8 @@ RELATED COMMANDS:
   netstat      Network statistics
   nslookup     DNS lookup
   curl         HTTP requests
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -80,7 +81,8 @@ RELATED COMMANDS:
                     return Ok("Usage: ping [OPTIONS] <host>\n\
                         Options:\n  \
                         -c <count>   Number of pings to send (default: 4)\n  \
-                        -t           Ping continuously until stopped".to_string());
+                        -t           Ping continuously until stopped"
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => host = Some(&args[i]),
                 _ => {}
@@ -102,8 +104,7 @@ RELATED COMMANDS:
 
         cmd.arg(host);
 
-        let output = cmd.output()
-            .map_err(|e| anyhow::anyhow!("ping: {}", e))?;
+        let output = cmd.output().map_err(|e| anyhow::anyhow!("ping: {}", e))?;
 
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);

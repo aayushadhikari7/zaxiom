@@ -28,7 +28,12 @@ impl Command for ColumnCommand {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut table_mode = false;
         let mut separator = "\t";
         let mut files: Vec<&str> = Vec::new();
@@ -90,7 +95,13 @@ impl Command for ColumnCommand {
                 let formatted: Vec<String> = row
                     .iter()
                     .enumerate()
-                    .map(|(i, cell)| format!("{:width$}", cell, width = widths.get(i).copied().unwrap_or(0)))
+                    .map(|(i, cell)| {
+                        format!(
+                            "{:width$}",
+                            cell,
+                            width = widths.get(i).copied().unwrap_or(0)
+                        )
+                    })
                     .collect();
                 output.push_str(&formatted.join("  "));
                 output.push('\n');

@@ -2,8 +2,8 @@
 //!
 //! Access to GPT models via OpenAI's API.
 
-use anyhow::{anyhow, Result};
 use super::provider::AiProvider;
+use anyhow::{anyhow, Result};
 
 const OPENAI_API_URL: &str = "https://api.openai.com/v1/chat/completions";
 const ENV_KEY: &str = "OPENAI_API_KEY";
@@ -61,7 +61,8 @@ impl AiProvider for OpenAIProvider {
     }
 
     fn chat(&self, prompt: &str, model: Option<&str>) -> Result<String> {
-        let api_key = self.get_or_prompt_api_key()
+        let api_key = self
+            .get_or_prompt_api_key()
             .ok_or_else(|| anyhow!("{}", self.get_setup_instructions()))?;
 
         let model = model.unwrap_or(DEFAULT_MODEL);
@@ -88,7 +89,8 @@ impl AiProvider for OpenAIProvider {
             return Err(anyhow!("OpenAI API error ({}): {}", status, body));
         }
 
-        let json: serde_json::Value = response.json()
+        let json: serde_json::Value = response
+            .json()
             .map_err(|e| anyhow!("Failed to parse OpenAI response: {}", e))?;
 
         json["choices"][0]["message"]["content"]

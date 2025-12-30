@@ -2,8 +2,8 @@
 //!
 //! grep, find
 
-mod grep;
 mod find;
+mod grep;
 
-pub use grep::GrepCommand;
 pub use find::FindCommand;
+pub use grep::GrepCommand;

@@ -103,25 +103,24 @@ static IP_V4_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b").unwrap()
 });
 
-static IP_V6_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b").unwrap()
-});
+static IP_V6_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b").unwrap());
 
-static EMAIL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b").unwrap()
-});
+static EMAIL_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b").unwrap());
 
 static LINE_REF_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     // Match file:line or file:line:column patterns
-    Regex::new(r"[a-zA-Z0-9_./\\-]+\.(rs|py|js|ts|go|c|cpp|h|java|rb|php|swift|kt):\d+(?::\d+)?").unwrap()
+    Regex::new(r"[a-zA-Z0-9_./\\-]+\.(rs|py|js|ts|go|c|cpp|h|java|rb|php|swift|kt):\d+(?::\d+)?")
+        .unwrap()
 });
 
-static HEX_COLOR_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b").unwrap()
-});
+static HEX_COLOR_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b").unwrap());
 
 static UUID_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b").unwrap()
+    Regex::new(r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b")
+        .unwrap()
 });
 
 static DOCKER_ID_REGEX: LazyLock<Regex> = LazyLock::new(|| {
@@ -292,7 +291,6 @@ pub struct HintsMode {
     pub type_filter: Option<HintType>,
 }
 
-
 impl HintsMode {
     /// Create new hints mode
     pub fn new() -> Self {
@@ -364,10 +362,7 @@ impl HintsMode {
         self.hints
             .iter()
             .filter(|h| {
-                let type_ok = self
-                    .type_filter
-                    .as_ref()
-                    .is_none_or(|t| &h.hint_type == t);
+                let type_ok = self.type_filter.as_ref().is_none_or(|t| &h.hint_type == t);
                 let label_ok = self.filter.is_empty() || h.label.starts_with(&self.filter);
                 type_ok && label_ok
             })

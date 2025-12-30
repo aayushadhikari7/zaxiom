@@ -1,7 +1,7 @@
 //! crc32 command - compute CRC32 checksum
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -67,7 +67,8 @@ RELATED COMMANDS:
   md5sum      Faster than SHA, insecure
   sha256sum   Secure hash
   blake3sum   Fast + secure
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn supports_stdin(&self) -> bool {
@@ -84,7 +85,8 @@ RELATED COMMANDS:
         for arg in args {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: crc32 <file> [file2...]\n\
-                    Compute CRC32 checksum for files.".to_string());
+                    Compute CRC32 checksum for files."
+                    .to_string());
             }
 
             if arg.starts_with('-') {
@@ -92,8 +94,7 @@ RELATED COMMANDS:
             }
 
             let path = state.resolve_path(arg);
-            let content = fs::read(&path)
-                .map_err(|e| anyhow::anyhow!("crc32: {}: {}", arg, e))?;
+            let content = fs::read(&path).map_err(|e| anyhow::anyhow!("crc32: {}: {}", arg, e))?;
 
             let checksum = crc32_compute(&content);
             output.push(format!("{:08x}  {}", checksum, arg));
@@ -102,7 +103,12 @@ RELATED COMMANDS:
         Ok(output.join("\n"))
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         if let Some(input) = stdin {
             let checksum = crc32_compute(input.as_bytes());
             Ok(format!("{:08x}  -", checksum))

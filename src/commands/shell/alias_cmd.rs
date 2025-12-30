@@ -72,7 +72,8 @@ RELATED COMMANDS:
   unalias   Remove aliases
   type      Check if name is alias
   which     Find command location
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
@@ -94,7 +95,8 @@ RELATED COMMANDS:
                 return Ok("Usage: alias [name[=value] ...]\n\
                     Without arguments, prints all defined aliases.\n\
                     With name=value, defines an alias.\n\
-                    With name only, prints that alias.".to_string());
+                    With name only, prints that alias."
+                    .to_string());
             }
 
             if let Some(eq_pos) = arg.find('=') {

@@ -5,13 +5,12 @@
 #![allow(dead_code)]
 
 use nom::{
-    IResult,
-    Parser,
     branch::alt,
     bytes::complete::{tag, take_while, take_while1},
     character::complete::{char, multispace0, space0},
     multi::{many0, separated_list0},
     sequence::{delimited, preceded},
+    IResult, Parser,
 };
 
 /// Redirection type
@@ -148,7 +147,14 @@ fn single_command(input: &str) -> IResult<&str, ParsedCommand> {
     let command = args[0].clone();
     let args = args[1..].to_vec();
 
-    Ok((input, ParsedCommand { command, args, redirections }))
+    Ok((
+        input,
+        ParsedCommand {
+            command,
+            args,
+            redirections,
+        },
+    ))
 }
 
 /// Parse a single token (redirection operator, quoted string, or word)
@@ -158,7 +164,8 @@ fn token(input: &str) -> IResult<&str, String> {
         double_quoted_string,
         single_quoted_string,
         unquoted_word,
-    )).parse(input)
+    ))
+    .parse(input)
 }
 
 /// Parse redirection operators
@@ -167,16 +174,13 @@ fn redirection_operator(input: &str) -> IResult<&str, String> {
         tag(">>").map(|s: &str| s.to_string()),
         tag(">").map(|s: &str| s.to_string()),
         tag("<").map(|s: &str| s.to_string()),
-    )).parse(input)
+    ))
+    .parse(input)
 }
 
 /// Parse a single argument (quoted or unquoted) - kept for compatibility
 fn argument(input: &str) -> IResult<&str, String> {
-    alt((
-        double_quoted_string,
-        single_quoted_string,
-        unquoted_word,
-    )).parse(input)
+    alt((double_quoted_string, single_quoted_string, unquoted_word)).parse(input)
 }
 
 /// Parse a double-quoted string
@@ -207,7 +211,8 @@ fn single_quoted_string(input: &str) -> IResult<&str, String> {
 fn unquoted_word(input: &str) -> IResult<&str, String> {
     let (input, s) = take_while1(|c: char| {
         !c.is_whitespace() && c != '|' && c != '"' && c != '\'' && c != '>' && c != '<'
-    }).parse(input)?;
+    })
+    .parse(input)?;
 
     Ok((input, s.to_string()))
 }
@@ -245,7 +250,10 @@ mod tests {
         assert_eq!(result.commands.len(), 1);
         assert_eq!(result.commands[0].command, "ls");
         assert_eq!(result.commands[0].redirections.len(), 1);
-        assert_eq!(result.commands[0].redirections[0].redirect_type, RedirectType::Output);
+        assert_eq!(
+            result.commands[0].redirections[0].redirect_type,
+            RedirectType::Output
+        );
         assert_eq!(result.commands[0].redirections[0].target, "output.txt");
     }
 
@@ -254,14 +262,20 @@ mod tests {
         let result = parse_command_line("echo hello >> log.txt").unwrap();
         assert_eq!(result.commands[0].command, "echo");
         assert_eq!(result.commands[0].args, vec!["hello"]);
-        assert_eq!(result.commands[0].redirections[0].redirect_type, RedirectType::Append);
+        assert_eq!(
+            result.commands[0].redirections[0].redirect_type,
+            RedirectType::Append
+        );
     }
 
     #[test]
     fn test_input_redirect() {
         let result = parse_command_line("sort < data.txt").unwrap();
         assert_eq!(result.commands[0].command, "sort");
-        assert_eq!(result.commands[0].redirections[0].redirect_type, RedirectType::Input);
+        assert_eq!(
+            result.commands[0].redirections[0].redirect_type,
+            RedirectType::Input
+        );
         assert_eq!(result.commands[0].redirections[0].target, "data.txt");
     }
 }

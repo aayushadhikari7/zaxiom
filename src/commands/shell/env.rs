@@ -1,7 +1,7 @@
 //! env command - display environment variables
 
-use std::env;
 use anyhow::Result;
+use std::env;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -70,7 +70,8 @@ RELATED COMMANDS:
   export     Set environment variables
   printenv   Print environment (alias for env)
   echo $VAR  Print specific variable
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -84,7 +85,8 @@ RELATED COMMANDS:
                     return Ok("Usage: env [OPTIONS] [name]\n\
                         Options:\n  \
                         -0    Use null separators\n\
-                        Without arguments, prints all environment variables.".to_string());
+                        Without arguments, prints all environment variables."
+                        .to_string());
                 }
                 _ if !arg.starts_with('-') => name_filter = Some(arg),
                 _ => {}

@@ -28,7 +28,11 @@ impl Command for LscpuCommand {
         let mut output = Vec::new();
 
         // Architecture
-        output.push(format!("{:<20} {}", "Architecture:", std::env::consts::ARCH));
+        output.push(format!(
+            "{:<20} {}",
+            "Architecture:",
+            std::env::consts::ARCH
+        ));
 
         // CPU count
         let cpu_count = sys.cpus().len();
@@ -44,10 +48,15 @@ impl Command for LscpuCommand {
         // Physical vs logical cores
         let physical_cores = sys.physical_core_count().unwrap_or(cpu_count);
         output.push(format!("{:<20} {}", "Core(s):", physical_cores));
-        output.push(format!("{:<20} {}", "Thread(s) per core:", cpu_count / physical_cores.max(1)));
+        output.push(format!(
+            "{:<20} {}",
+            "Thread(s) per core:",
+            cpu_count / physical_cores.max(1)
+        ));
 
         // CPU usage
-        let total_usage: f32 = sys.cpus().iter().map(|c| c.cpu_usage()).sum::<f32>() / cpu_count as f32;
+        let total_usage: f32 =
+            sys.cpus().iter().map(|c| c.cpu_usage()).sum::<f32>() / cpu_count as f32;
         output.push(format!("{:<20} {:.1}%", "CPU Usage:", total_usage));
 
         Ok(output.join("\n"))

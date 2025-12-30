@@ -27,7 +27,8 @@ impl Command for MatrixCommand {
             if arg == "-h" || arg == "--help" {
                 return Ok("Usage: matrix\n\
                     Display Matrix-style digital rain ASCII art.\n\
-                    Wake up, Neo...".to_string());
+                    Wake up, Neo..."
+                    .to_string());
             }
         }
 
@@ -41,11 +42,10 @@ impl Command for MatrixCommand {
 fn generate_matrix_frame() -> String {
     // Matrix-style characters (katakana-like symbols + numbers)
     let chars: &[char] = &[
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        'ア', 'イ', 'ウ', 'エ', 'オ', 'カ', 'キ', 'ク', 'ケ', 'コ',
-        'サ', 'シ', 'ス', 'セ', 'ソ', 'タ', 'チ', 'ツ', 'テ', 'ト',
-        'ナ', 'ニ', 'ヌ', 'ネ', 'ノ', 'ハ', 'ヒ', 'フ', 'ヘ', 'ホ',
-        '@', '#', '$', '%', '&', '*', '!', '?', '+', '=',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'ア', 'イ', 'ウ', 'エ', 'オ', 'カ', 'キ',
+        'ク', 'ケ', 'コ', 'サ', 'シ', 'ス', 'セ', 'ソ', 'タ', 'チ', 'ツ', 'テ', 'ト', 'ナ', 'ニ',
+        'ヌ', 'ネ', 'ノ', 'ハ', 'ヒ', 'フ', 'ヘ', 'ホ', '@', '#', '$', '%', '&', '*', '!', '?',
+        '+', '=',
     ];
 
     let width = 60;

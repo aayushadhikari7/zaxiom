@@ -4,13 +4,11 @@
 
 #![allow(dead_code)]
 
-use regex::Regex;
 use once_cell::sync::Lazy;
+use regex::Regex;
 
 /// Regex to match ANSI SGR (color/style) escape codes
-static ANSI_SGR_REGEX: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"\x1b\[([0-9;]*)m").unwrap()
-});
+static ANSI_SGR_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\x1b\[([0-9;]*)m").unwrap());
 
 /// Regex to match ALL ANSI escape sequences (CSI, OSC, etc.)
 static ANSI_ALL_REGEX: Lazy<Regex> = Lazy::new(|| {
@@ -20,19 +18,19 @@ static ANSI_ALL_REGEX: Lazy<Regex> = Lazy::new(|| {
     // - Simple escapes: \x1b followed by single char
     // - DCS/PM/APC: \x1b P/^/_ ... ST
     Regex::new(concat!(
-        r"\x1b\[[0-9;?]*[A-Za-z~]",   // CSI sequences (cursor, erase, etc.)
-        r"|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)?",  // OSC sequences
-        r"|\x1b[PX^_][^\x1b]*\x1b\\",  // DCS/PM/APC sequences
-        r"|\x1b[NO].",                 // SS2/SS3
-        r"|\x1b[78]",                  // Save/restore cursor
-        r"|\x1b[=>c]",                 // Keypad/charset modes
-        r"|\x1b[A-Za-z]",              // Simple escape sequences
-    )).unwrap()
+        r"\x1b\[[0-9;?]*[A-Za-z~]", // CSI sequences (cursor, erase, etc.)
+        r"|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)?", // OSC sequences
+        r"|\x1b[PX^_][^\x1b]*\x1b\\", // DCS/PM/APC sequences
+        r"|\x1b[NO].",              // SS2/SS3
+        r"|\x1b[78]",               // Save/restore cursor
+        r"|\x1b[=>c]",              // Keypad/charset modes
+        r"|\x1b[A-Za-z]",           // Simple escape sequences
+    ))
+    .unwrap()
 });
 
 /// A text segment with optional ANSI styling
-#[derive(Clone, Debug)]
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct StyledSegment {
     /// The text content
     pub text: String,
@@ -47,7 +45,6 @@ pub struct StyledSegment {
     /// Whether the text is underlined
     pub underline: bool,
 }
-
 
 /// Current styling state while parsing
 #[derive(Clone, Debug, Default)]
@@ -125,10 +122,7 @@ fn parse_codes(codes: &str, state: &mut StyleState) {
         return;
     }
 
-    let parts: Vec<u8> = codes
-        .split(';')
-        .filter_map(|s| s.parse().ok())
-        .collect();
+    let parts: Vec<u8> = codes.split(';').filter_map(|s| s.parse().ok()).collect();
 
     let mut i = 0;
     while i < parts.len() {
@@ -142,15 +136,15 @@ fn parse_codes(codes: &str, state: &mut StyleState) {
             24 => state.underline = false,
 
             // Standard foreground colors (30-37)
-            30 => state.fg_color = Some((0, 0, 0)),       // Black
-            31 => state.fg_color = Some((205, 49, 49)),   // Red
-            32 => state.fg_color = Some((13, 188, 121)),  // Green
-            33 => state.fg_color = Some((229, 229, 16)),  // Yellow
-            34 => state.fg_color = Some((36, 114, 200)),  // Blue
-            35 => state.fg_color = Some((188, 63, 188)),  // Magenta
-            36 => state.fg_color = Some((17, 168, 205)),  // Cyan
+            30 => state.fg_color = Some((0, 0, 0)), // Black
+            31 => state.fg_color = Some((205, 49, 49)), // Red
+            32 => state.fg_color = Some((13, 188, 121)), // Green
+            33 => state.fg_color = Some((229, 229, 16)), // Yellow
+            34 => state.fg_color = Some((36, 114, 200)), // Blue
+            35 => state.fg_color = Some((188, 63, 188)), // Magenta
+            36 => state.fg_color = Some((17, 168, 205)), // Cyan
             37 => state.fg_color = Some((229, 229, 229)), // White
-            39 => state.fg_color = None,                  // Default
+            39 => state.fg_color = None,            // Default
 
             // Bright foreground colors (90-97)
             90 => state.fg_color = Some((102, 102, 102)), // Bright Black

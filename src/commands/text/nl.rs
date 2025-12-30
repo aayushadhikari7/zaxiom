@@ -1,7 +1,7 @@
 //! nl command - number lines of files
 
-use std::fs;
 use anyhow::Result;
+use std::fs;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -25,7 +25,12 @@ impl Command for NlCommand {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut number_all = true; // -b a (number all lines)
         let mut file: Option<&String> = None;
 
@@ -46,7 +51,8 @@ impl Command for NlCommand {
                         Options:\n  \
                         -b a    Number all lines\n  \
                         -b t    Number only non-empty lines\n  \
-                        -b n    No line numbering".to_string());
+                        -b n    No line numbering"
+                        .to_string());
                 }
                 _ if !args[i].starts_with('-') => file = Some(&args[i]),
                 _ => {}
@@ -56,8 +62,7 @@ impl Command for NlCommand {
 
         let content = if let Some(f) = file {
             let path = state.resolve_path(f);
-            fs::read_to_string(&path)
-                .map_err(|e| anyhow::anyhow!("nl: {}: {}", f, e))?
+            fs::read_to_string(&path).map_err(|e| anyhow::anyhow!("nl: {}: {}", f, e))?
         } else if let Some(input) = stdin {
             input.to_string()
         } else {

@@ -1,8 +1,8 @@
 //! timeout command - run a command with a time limit
 
+use anyhow::Result;
 use std::process::Command as ProcessCommand;
 use std::time::Duration;
-use anyhow::Result;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -34,7 +34,8 @@ impl Command for TimeoutCommand {
                 N      N seconds\n  \
                 Ns     N seconds\n  \
                 Nm     N minutes\n  \
-                Nh     N hours".to_string());
+                Nh     N hours"
+                .to_string());
         }
 
         let duration_str = &args[0];
@@ -68,7 +69,10 @@ impl Command for TimeoutCommand {
         let stderr = String::from_utf8_lossy(&output.stderr);
 
         if stderr.contains("timed out") {
-            return Err(anyhow::anyhow!("timeout: command timed out after {}", duration_str));
+            return Err(anyhow::anyhow!(
+                "timeout: command timed out after {}",
+                duration_str
+            ));
         }
 
         Ok(format!("{}{}", stdout.trim(), stderr.trim()))
@@ -79,25 +83,29 @@ fn parse_duration(s: &str) -> Result<Duration> {
     let s = s.trim();
 
     if let Some(n) = s.strip_suffix('s') {
-        let n: f64 = n.parse()
+        let n: f64 = n
+            .parse()
             .map_err(|_| anyhow::anyhow!("timeout: invalid duration"))?;
         return Ok(Duration::from_secs_f64(n));
     }
 
     if let Some(n) = s.strip_suffix('m') {
-        let n: f64 = n.parse()
+        let n: f64 = n
+            .parse()
             .map_err(|_| anyhow::anyhow!("timeout: invalid duration"))?;
         return Ok(Duration::from_secs_f64(n * 60.0));
     }
 
     if let Some(n) = s.strip_suffix('h') {
-        let n: f64 = n.parse()
+        let n: f64 = n
+            .parse()
             .map_err(|_| anyhow::anyhow!("timeout: invalid duration"))?;
         return Ok(Duration::from_secs_f64(n * 3600.0));
     }
 
     // Default: seconds
-    let n: f64 = s.parse()
+    let n: f64 = s
+        .parse()
         .map_err(|_| anyhow::anyhow!("timeout: invalid duration"))?;
     Ok(Duration::from_secs_f64(n))
 }

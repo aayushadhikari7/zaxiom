@@ -1,8 +1,8 @@
 //! Pet command - interact with your kawaii robot companion!
 
-use anyhow::Result;
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
+use anyhow::Result;
 
 pub struct PetCommand;
 
@@ -66,15 +66,9 @@ impl Command for PetCommand {
             .unwrap_or(0);
 
         let response = match action {
-            "hug" | "cuddle" | "embrace" => {
-                HUG_RESPONSES[idx % HUG_RESPONSES.len()]
-            }
-            "boop" | "poke" | "tap" => {
-                BOOP_RESPONSES[idx % BOOP_RESPONSES.len()]
-            }
-            "feed" | "charge" | "battery" => {
-                FEED_RESPONSES[idx % FEED_RESPONSES.len()]
-            }
+            "hug" | "cuddle" | "embrace" => HUG_RESPONSES[idx % HUG_RESPONSES.len()],
+            "boop" | "poke" | "tap" => BOOP_RESPONSES[idx % BOOP_RESPONSES.len()],
+            "feed" | "charge" | "battery" => FEED_RESPONSES[idx % FEED_RESPONSES.len()],
             "love" | "heart" | "❤" | "💕" => {
                 "💕✨ I LOVE YOU TOO!! (ノ◕ヮ◕)ノ*:・゚✧ *maximum happiness achieved*"
             }
@@ -90,11 +84,10 @@ impl Command for PetCommand {
 
 Your robot companion reacts to your commands too!
 Try: fortune, cowsay, neofetch, coffee ♪(´ε` )
-"#.to_string());
+"#
+                .to_string());
             }
-            _ => {
-                PET_RESPONSES[idx % PET_RESPONSES.len()]
-            }
+            _ => PET_RESPONSES[idx % PET_RESPONSES.len()],
         };
 
         // Build cute output

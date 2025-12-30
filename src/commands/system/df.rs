@@ -1,7 +1,7 @@
 //! df command - report file system disk space usage
 
-use std::path::Path;
 use anyhow::Result;
+use std::path::Path;
 
 use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
@@ -65,7 +65,8 @@ LOW DISK WARNING:
 RELATED COMMANDS:
   du       Estimate file/directory space usage
   ls -l    List files with sizes
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
@@ -77,7 +78,8 @@ RELATED COMMANDS:
                 "--help" => {
                     return Ok("Usage: df [OPTIONS]\n\
                         Options:\n  \
-                        -h    Human-readable sizes".to_string());
+                        -h    Human-readable sizes"
+                        .to_string());
                 }
                 _ => {}
             }
@@ -98,10 +100,13 @@ RELATED COMMANDS:
             if human_readable {
                 // Parse and reformat with human-readable sizes
                 let mut lines: Vec<String> = Vec::new();
-                lines.push(format!("{:<12} {:>10} {:>10} {:>10} {:>6}",
-                    "Filesystem", "Size", "Used", "Avail", "Use%"));
+                lines.push(format!(
+                    "{:<12} {:>10} {:>10} {:>10} {:>6}",
+                    "Filesystem", "Size", "Used", "Avail", "Use%"
+                ));
 
-                for line in raw.lines().skip(3) { // Skip headers
+                for line in raw.lines().skip(3) {
+                    // Skip headers
                     let parts: Vec<&str> = line.split_whitespace().collect();
                     if parts.len() >= 4 {
                         let name = parts[0];
@@ -109,9 +114,14 @@ RELATED COMMANDS:
                         let free: u64 = parts[2].parse().unwrap_or(0);
                         let total: u64 = parts[3].parse().unwrap_or(1);
 
-                        let use_pct = if total > 0 { (used as f64 / total as f64 * 100.0) as u8 } else { 0 };
+                        let use_pct = if total > 0 {
+                            (used as f64 / total as f64 * 100.0) as u8
+                        } else {
+                            0
+                        };
 
-                        lines.push(format!("{:<12} {:>10} {:>10} {:>10} {:>5}%",
+                        lines.push(format!(
+                            "{:<12} {:>10} {:>10} {:>10} {:>5}%",
                             format!("{}:", name),
                             format_size(total),
                             format_size(used),
@@ -127,14 +137,17 @@ RELATED COMMANDS:
             }
         } else {
             // Fallback: basic disk info
-            let mut output_lines = vec![format!("{:<12} {:>15} {:>15} {:>15}",
-                "Filesystem", "1K-blocks", "Used", "Available")];
+            let mut output_lines = vec![format!(
+                "{:<12} {:>15} {:>15} {:>15}",
+                "Filesystem", "1K-blocks", "Used", "Available"
+            )];
 
             // Check common drive letters
             for letter in ['C', 'D', 'E', 'F'] {
                 let path = format!("{}:\\", letter);
                 if Path::new(&path).exists() {
-                    output_lines.push(format!("{:<12} {:>15} {:>15} {:>15}",
+                    output_lines.push(format!(
+                        "{:<12} {:>15} {:>15} {:>15}",
                         format!("{}:", letter),
                         "N/A",
                         "N/A",

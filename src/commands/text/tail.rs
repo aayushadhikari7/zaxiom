@@ -1,8 +1,8 @@
 //! tail command - print last N lines
 
+use std::collections::VecDeque;
 use std::fs;
 use std::io::{BufRead, BufReader};
-use std::collections::VecDeque;
 
 use anyhow::Result;
 
@@ -57,14 +57,20 @@ RELATED COMMANDS:
   head     Print first lines
   cat      Print entire file
   wc       Count lines/words
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
         self.execute_with_stdin(args, None, state)
     }
 
-    fn execute_with_stdin(&self, args: &[String], stdin: Option<&str>, state: &mut TerminalState) -> Result<String> {
+    fn execute_with_stdin(
+        &self,
+        args: &[String],
+        stdin: Option<&str>,
+        state: &mut TerminalState,
+    ) -> Result<String> {
         let mut lines = 10usize;
         let mut file_path = None;
 
@@ -73,19 +79,29 @@ RELATED COMMANDS:
             match arg.as_str() {
                 "-n" => {
                     if let Some(n) = iter.next() {
-                        lines = n.parse().map_err(|_| anyhow::anyhow!("tail: invalid line count"))?;
+                        lines = n
+                            .parse()
+                            .map_err(|_| anyhow::anyhow!("tail: invalid line count"))?;
                     }
                 }
                 "-h" | "--help" => {
                     return Ok("Usage: tail [-n lines] [file]\n\
-                        Print last N lines (default: 10)".to_string());
+                        Print last N lines (default: 10)"
+                        .to_string());
                 }
                 _ if arg.starts_with("-n") => {
-                    lines = arg[2..].parse().map_err(|_| anyhow::anyhow!("tail: invalid line count"))?;
+                    lines = arg[2..]
+                        .parse()
+                        .map_err(|_| anyhow::anyhow!("tail: invalid line count"))?;
                 }
-                _ if arg.starts_with('-') && arg.len() > 1 && arg[1..].chars().all(|c| c.is_ascii_digit()) => {
+                _ if arg.starts_with('-')
+                    && arg.len() > 1
+                    && arg[1..].chars().all(|c| c.is_ascii_digit()) =>
+                {
                     // Handle -N shorthand
-                    lines = arg[1..].parse().map_err(|_| anyhow::anyhow!("tail: invalid line count"))?;
+                    lines = arg[1..]
+                        .parse()
+                        .map_err(|_| anyhow::anyhow!("tail: invalid line count"))?;
                 }
                 _ if !arg.starts_with('-') => {
                     file_path = Some(arg.as_str());

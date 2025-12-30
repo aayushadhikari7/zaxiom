@@ -60,7 +60,8 @@ RELATED COMMANDS:
   cat      Create file with content
   stat     View file timestamps
   ls -l    List with timestamps
-"#.to_string()
+"#
+        .to_string()
     }
 
     fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {

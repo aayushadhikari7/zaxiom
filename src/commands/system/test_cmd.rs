@@ -149,9 +149,7 @@ fn is_writable(path: &Path) -> bool {
             .unwrap_or(false)
     } else {
         // Check if parent is writable
-        path.parent()
-            .map(is_writable)
-            .unwrap_or(false)
+        path.parent().map(is_writable).unwrap_or(false)
     }
 }
 

@@ -4,8 +4,8 @@ use std::env;
 
 use anyhow::Result;
 
-use crate::commands::traits::Command;
 use crate::commands::registry::CommandRegistry;
+use crate::commands::traits::Command;
 use crate::terminal::state::TerminalState;
 
 pub struct WhichCommand;
@@ -37,7 +37,10 @@ impl Command for WhichCommand {
         }
 
         // Check git shortcuts
-        let git_shortcuts = ["gs", "gd", "gl", "gp", "gpl", "ga", "gc", "gco", "gb", "gba", "gcb", "grh", "gst", "gstp"];
+        let git_shortcuts = [
+            "gs", "gd", "gl", "gp", "gpl", "ga", "gc", "gco", "gb", "gba", "gcb", "grh", "gst",
+            "gstp",
+        ];
         if git_shortcuts.contains(&command.as_str()) {
             return Ok(format!("{}: zaxiom git shortcut", command));
         }

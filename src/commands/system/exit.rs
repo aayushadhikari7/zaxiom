@@ -21,7 +21,8 @@ impl Command for ExitCommand {
     }
 
     fn execute(&self, args: &[String], _state: &mut TerminalState) -> Result<String> {
-        let code = args.first()
+        let code = args
+            .first()
             .and_then(|s| s.parse::<i32>().ok())
             .unwrap_or(0);
 

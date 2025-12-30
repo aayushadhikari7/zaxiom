@@ -9,7 +9,7 @@ use std::process::Command;
 use anyhow::{Result, anyhow};
 
 use crate::commands::registry::CommandRegistry;
-use crate::commands::ai::handle_ai_chat_with_context;
+use crate::ai::handle_ai_chat_with_context;
 use crate::terminal::state::TerminalState;
 use super::parser::{parse_command_line, ParsedCommand, RedirectType};
 
@@ -322,9 +322,7 @@ impl Executor {
             "gdb" | "lldb" | "pdb" |
             // Multiplexers
             "tmux" | "screen" |
-            // AI/CLI tools that need TTY
-            "claude" | "zammy" |
-            // Other
+            // Databases
             "psql" | "mysql" | "sqlite3" | "redis-cli" | "mongo" | "mongosh"
         )
     }

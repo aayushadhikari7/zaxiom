@@ -55,8 +55,8 @@ pub fn is_supported(extension: &str) -> bool {
 pub fn highlight_code(code: &str, extension: &str) -> Option<Vec<HighlightedLine>> {
     let syntax = SYNTAX_SET.find_syntax_by_extension(extension)?;
 
-    // Use the Monokai theme for a nice dark terminal look
-    let theme = &THEME_SET.themes["base16-monokai.dark"];
+    // Use a dark theme for terminal look
+    let theme = &THEME_SET.themes["base16-ocean.dark"];
     let mut highlighter = HighlightLines::new(syntax, theme);
 
     let mut result = Vec::new();
@@ -93,7 +93,7 @@ fn style_to_segment(style: Style, text: &str) -> HighlightedSegment {
 /// Highlight code and format as ANSI colored string (for terminal output)
 pub fn highlight_to_ansi(code: &str, extension: &str) -> Option<String> {
     let syntax = SYNTAX_SET.find_syntax_by_extension(extension)?;
-    let theme = &THEME_SET.themes["base16-monokai.dark"];
+    let theme = &THEME_SET.themes["base16-ocean.dark"];
     let mut highlighter = HighlightLines::new(syntax, theme);
 
     let mut output = String::new();

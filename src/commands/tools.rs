@@ -165,22 +165,6 @@ impl CommandTrait for DenoCommand {
     }
 }
 
-/// zammy - Custom CLI tool
-pub struct ZammyCommand;
-
-impl CommandTrait for ZammyCommand {
-    fn name(&self) -> &'static str { "zammy" }
-    fn description(&self) -> &'static str { "Custom CLI tool" }
-    fn usage(&self) -> &'static str { "zammy [command] [args...]" }
-
-    fn execute(&self, args: &[String], state: &mut TerminalState) -> Result<String> {
-        // Run with --simple flag since we don't have a TTY
-        let mut full_args = vec!["--simple".to_string()];
-        full_args.extend(args.iter().cloned());
-        run_tool("zammy", &full_args, state.cwd())
-    }
-}
-
 // ============ Python Tools ============
 
 /// python - Python interpreter

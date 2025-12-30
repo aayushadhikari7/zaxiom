@@ -106,6 +106,36 @@ Seamlessly run your development tools:
 | 🐳 | Containers | `docker` `kubectl` `terraform` |
 | 🔀 | Version Control | `git` `gh` `ssh` |
 
+### 🤖 AI Chat
+
+Chat with AI directly from your terminal using the `#` prefix:
+
+```bash
+# explain what a hashmap is
+# --claude write a rust function to reverse a string
+# --gpt help me debug this error
+# --deepseek optimize this code
+```
+
+**10 Providers Supported:**
+
+| Provider | Flag | Default Model | Environment Variable |
+|----------|------|---------------|---------------------|
+| Ollama | `--ollama` | llama3.2 | *(local, no key)* |
+| Groq | `--groq` | llama-3.3-70b-versatile | `GROQ_API_KEY` |
+| OpenAI | `--gpt` | gpt-5.2 | `OPENAI_API_KEY` |
+| Anthropic | `--claude` | claude-sonnet-4-5 | `ANTHROPIC_API_KEY` |
+| Google Gemini | `--gemini` | gemini-2.5-flash | `GEMINI_API_KEY` |
+| DeepSeek | `--deepseek` | deepseek-chat (V3.2) | `DEEPSEEK_API_KEY` |
+| Mistral | `--mistral` | mistral-large-latest | `MISTRAL_API_KEY` |
+| xAI Grok | `--grok` | grok-2-latest | `XAI_API_KEY` |
+| Cohere | `--cohere` | command-r-plus | `COHERE_API_KEY` |
+| Perplexity | `--pplx` | llama-3.1-sonar-large | `PERPLEXITY_API_KEY` |
+
+**Easy Key Setup:** When you use a provider without a key configured, Zaxiom shows setup instructions with the signup URL and how to configure your key.
+
+Set your preferred provider: `export AI_PROVIDER=openai`
+
 ---
 
 ## ⌨️ Keyboard Shortcuts
@@ -157,6 +187,7 @@ Enable kawaii mode for extra flair: `theme --kawaii` ✨
 zaxiom/
 ├── src/
 │   ├── app.rs           # Main application and UI
+│   ├── ai/              # Multi-provider AI integration
 │   ├── pty/             # PTY session, terminal grid, ANSI parsing
 │   ├── terminal/        # Buffer, history, autocomplete, splits
 │   ├── shell/           # Parser and executor

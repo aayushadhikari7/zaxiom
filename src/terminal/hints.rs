@@ -444,7 +444,7 @@ mod tests {
         let text = "Error at src/main.rs:42:10 and warning at lib.py:100";
         let refs = extract_line_refs(text);
         assert_eq!(refs.len(), 2);
-        assert_eq!(refs[0], ("src/main".to_string(), 42, Some(10)));
+        assert_eq!(refs[0], ("src/main.rs".to_string(), 42, Some(10)));
     }
 
     #[test]

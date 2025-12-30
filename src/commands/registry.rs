@@ -21,10 +21,10 @@ use super::hash::{Md5sumCommand, Sha1sumCommand, Sha224sumCommand, Sha256sumComm
 use super::compress::{TarCommand, ZipCommand, UnzipCommand, GzipCommand, GunzipCommand};
 use super::fun::{FortuneCommand, CowsayCommand, CoffeeCommand, MatrixCommand, PetCommand};
 use super::shell::{AliasCommand, EnvCommand, ExportCommand, SleepCommand, WatchCommand, SeqCommand, YesCommand, TrueCommand, FalseCommand, ExprCommand, BcCommand, TeeCommand, TimeoutCommand, TypeCommand, CommandCommand, PushdCommand, PopdCommand, DirsCommand};
-use super::ai::OllamaCommand;
+use super::ai::{AiCommand, OllamaCommand};
 use super::tools::{
     // Node.js
-    NpmCommand, NpxCommand, YarnCommand, PnpmCommand, BunCommand, NodeCommand, DenoCommand, ZammyCommand,
+    NpmCommand, NpxCommand, YarnCommand, PnpmCommand, BunCommand, NodeCommand, DenoCommand,
     // Python
     PythonCommand, Python3Command, PipCommand, Pip3Command, UvCommand, PoetryCommand,
     // Rust
@@ -228,6 +228,7 @@ impl CommandRegistry {
         commands.insert("pet", Arc::new(PetCommand));
 
         // AI commands
+        commands.insert("ai", Arc::new(AiCommand));
         commands.insert("ollama", Arc::new(OllamaCommand));
 
         // ============ External Dev Tools ============
@@ -240,7 +241,6 @@ impl CommandRegistry {
         commands.insert("bun", Arc::new(BunCommand));
         commands.insert("node", Arc::new(NodeCommand));
         commands.insert("deno", Arc::new(DenoCommand));
-        commands.insert("zammy", Arc::new(ZammyCommand));
 
         // Python ecosystem
         commands.insert("python", Arc::new(PythonCommand));

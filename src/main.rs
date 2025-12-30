@@ -5,6 +5,7 @@
 //!
 //! The terminal should adapt to the developer — not the other way around.
 
+mod ai;
 mod app;
 mod commands;
 mod config;
@@ -48,6 +49,9 @@ fn load_icon() -> Arc<egui::IconData> {
 }
 
 fn main() -> eframe::Result<()> {
+    // Initialize environment (load .env file, create if needed)
+    config::env::init_env();
+
     let icon = load_icon();
 
     let viewport = egui::ViewportBuilder::default()

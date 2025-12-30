@@ -28,9 +28,31 @@ pub struct Config {
     #[serde(default)]
     pub terminal: TerminalConfig,
 
+    #[serde(default)]
+    pub ai: AiConfig,
+
     /// Kawaii mode - cuter UI elements when enabled
     #[serde(default)]
     pub kawaii_mode: bool,
+}
+
+/// AI provider configuration
+#[derive(Debug, Deserialize, Serialize)]
+pub struct AiConfig {
+    /// Default provider: "groq", "anthropic", "openai", "gemini", "ollama"
+    pub default_provider: Option<String>,
+
+    /// Default model override (uses provider's default if not set)
+    pub default_model: Option<String>,
+}
+
+impl Default for AiConfig {
+    fn default() -> Self {
+        Self {
+            default_provider: None, // Will fall back to Groq
+            default_model: None,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]

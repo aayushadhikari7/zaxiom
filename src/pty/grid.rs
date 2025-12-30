@@ -196,7 +196,8 @@ impl TerminalGrid {
                         self.cursor_col = next_tab.min(self.cols - 1);
                     }
                     0x0a => {
-                        // Line feed
+                        // Line feed - also do carriage return for newline behavior
+                        self.cursor_col = 0;
                         self.line_feed();
                     }
                     0x0d => {

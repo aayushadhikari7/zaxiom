@@ -42,7 +42,7 @@ const STARTUP_BANNER: &str = r#"
     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
 
         ╭──────────────────────────────────────────╮
-        │  ♡  Welcome to Zaxiom v0.2.0~            │
+        │  ♡  Welcome to Zaxiom v0.3.0~            │
         │      Linux vibes on Windows! (◕‿◕)♡     │
         │                                          │
         │  Your kawaii robot companion is here! →  │

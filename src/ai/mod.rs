@@ -134,10 +134,17 @@ pub fn get_default_provider() -> Box<dyn AiProvider> {
 
 /// Get provider from config
 fn get_config_provider() -> Option<Box<dyn AiProvider>> {
-    // Check AI_PROVIDER env var
+    // Check AI_PROVIDER env var first (takes priority)
     if let Ok(provider_name) = std::env::var("AI_PROVIDER") {
         return get_provider(&provider_name);
     }
+
+    // Check config file
+    let config = crate::config::settings::Config::load();
+    if let Some(provider_name) = &config.ai.default_provider {
+        return get_provider(provider_name);
+    }
+
     None
 }
 

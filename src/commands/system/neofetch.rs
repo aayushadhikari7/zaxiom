@@ -99,7 +99,7 @@ RELATED COMMANDS:
     ⏱️  Uptime    {}h {}m
     💻 CPU       {} ({} cores)
     🧠 Memory    {} MB / {} MB
-    🦎 Terminal  Zaxiom 0.2.0
+    🦎 Terminal  Zaxiom 0.3.0
     🦀 Built     with Rust + egui
 
     ██████████████████████████████

@@ -25,6 +25,12 @@ format = "{cwd} {git_branch} → "
 scrollback_lines = 10000
 history_size = 1000
 
+[ai]
+# Default provider: ollama, groq, openai, anthropic, gemini, mistral, deepseek, xai, cohere, perplexity
+default_provider = "ollama"
+# Optional: override default model for each provider
+# default_model = "llama3.2"
+
 [aliases.commands]
 ll = "ls -la"
 la = "ls -a"

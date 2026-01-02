@@ -67,43 +67,36 @@ impl PtySession {
         let pair = pty_system.openpty(size).context("Failed to open PTY")?;
 
         // Build the command to spawn
-        // Try to resolve the full path to the executable for better TTY handling
+        // Run commands directly via cmd.exe /c for proper PATH resolution and TTY handling
         let cmd = {
             #[cfg(windows)]
             {
-                // On Windows, try to find the actual executable
-                // For .cmd/.bat files (like npm packages), we need special handling
-                let resolved = Self::resolve_executable(program);
-
-                match resolved {
-                    Some((exe, wrapper_args)) => {
-                        // Found the actual executable
-                        let mut cmd = CommandBuilder::new(&exe);
-                        for arg in &wrapper_args {
-                            cmd.arg(arg);
-                        }
-                        for arg in args {
-                            cmd.arg(arg);
-                        }
-                        cmd.cwd(cwd);
-                        cmd
-                    }
-                    None => {
-                        // Fallback: use PowerShell to run the command
-                        let mut full_cmd = program.to_string();
-                        for arg in args {
-                            let escaped = arg.replace("'", "''");
-                            full_cmd.push_str(&format!(" '{}'", escaped));
-                        }
-                        let mut cmd = CommandBuilder::new("powershell.exe");
-                        cmd.arg("-NoLogo");
-                        cmd.arg("-NoProfile");
-                        cmd.arg("-Command");
-                        cmd.arg(format!("& {{ {} }}", full_cmd));
-                        cmd.cwd(cwd);
-                        cmd
+                // Use cmd.exe /c to run the command - this:
+                // 1. Properly resolves PATH (handles .exe, .cmd, .bat, etc.)
+                // 2. Inherits the ConPTY properly for TTY detection
+                // 3. Is fast (no extra process spawning for 'where' lookup)
+                let mut full_command = program.to_string();
+                for arg in args {
+                    // Quote arguments that contain spaces
+                    if arg.contains(' ') || arg.contains('"') {
+                        full_command.push_str(&format!(" \"{}\"", arg.replace('"', "\\\"")));
+                    } else {
+                        full_command.push_str(&format!(" {}", arg));
                     }
                 }
+
+                let mut cmd = CommandBuilder::new("cmd.exe");
+                cmd.arg("/c");
+                cmd.arg(&full_command);
+
+                // Set environment variables for proper TTY detection
+                cmd.env("TERM", "xterm-256color");
+                cmd.env("COLORTERM", "truecolor");
+                cmd.env("FORCE_COLOR", "1");
+                cmd.env("WT_SESSION", "1");
+
+                cmd.cwd(cwd);
+                cmd
             }
 
             #[cfg(not(windows))]
@@ -112,6 +105,8 @@ impl PtySession {
                 for arg in args {
                     cmd.arg(arg);
                 }
+                cmd.env("TERM", "xterm-256color");
+                cmd.env("COLORTERM", "truecolor");
                 cmd.cwd(cwd);
                 cmd
             }
@@ -252,73 +247,6 @@ impl PtySession {
         self.child.kill().context("Failed to kill child process")
     }
 
-    /// Resolve a command to its actual executable
-    /// For npm packages (.cmd files), extracts the node.exe + script path
-    /// Returns (executable, args_to_prepend) or None if can't resolve
-    #[cfg(windows)]
-    fn resolve_executable(program: &str) -> Option<(String, Vec<String>)> {
-        use std::process::Command;
-
-        // Try to find the command using 'where'
-        let output = Command::new("where").arg(program).output().ok()?;
-
-        if !output.status.success() {
-            return None;
-        }
-
-        let paths = String::from_utf8_lossy(&output.stdout);
-        let first_path = paths.lines().next()?.trim();
-
-        // If it's a .cmd or .bat file, parse it to find the actual executable
-        if first_path.ends_with(".cmd") || first_path.ends_with(".bat") {
-            let cmd_dir = std::path::Path::new(first_path).parent()?;
-
-            // Read the batch file and look for the node invocation
-            if let Ok(contents) = std::fs::read_to_string(first_path) {
-                // npm packages typically have a pattern like:
-                // "%_prog%" "%dp0%\node_modules\package\dist\index.js" %*
-                // The %dp0% is the directory of the batch file
-
-                for line in contents.lines() {
-                    // Look for lines that contain a path to node_modules
-                    if line.contains("node_modules") {
-                        // Find the script path pattern: either %dp0%\... or just node_modules\...
-                        // Pattern: "%dp0%\node_modules\pkg\dist\index.js"
-
-                        // Try to extract the path between quotes after %dp0%
-                        if let Some(dp0_idx) = line.find("%dp0%") {
-                            let after_dp0 = &line[dp0_idx + 5..]; // Skip "%dp0%"
-                                                                  // Skip leading backslash if present
-                            let after_dp0 = after_dp0.strip_prefix('\\').unwrap_or(after_dp0);
-
-                            // Find the end of the path (quote, space before %*, or end of line)
-                            let end = after_dp0
-                                .find('"')
-                                .or_else(|| after_dp0.find(" %"))
-                                .unwrap_or(after_dp0.len());
-                            let script_rel = &after_dp0[..end];
-
-                            // Construct full path
-                            let script_path = cmd_dir.join(script_rel);
-                            if script_path.exists() {
-                                return Some((
-                                    "node".to_string(),
-                                    vec![script_path.to_string_lossy().to_string()],
-                                ));
-                            }
-                        }
-                    }
-                }
-            }
-            // Couldn't parse .cmd file - return None to fall back to PowerShell
-            None
-        } else if first_path.ends_with(".exe") {
-            // Direct executable - use it directly
-            Some((first_path.to_string(), vec![]))
-        } else {
-            None
-        }
-    }
 }
 
 impl Drop for PtySession {

@@ -2,9 +2,15 @@
 
 use arboard::Clipboard;
 use eframe::egui;
+use regex::Regex;
 use std::collections::HashMap;
+use std::sync::LazyLock;
 
 use crate::commands::files::EditorState;
+
+// Pre-compiled regexes for history expansion (performance optimization)
+static HISTORY_NEG_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"!-(\d+)").unwrap());
+static HISTORY_POS_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"!(\d+)").unwrap());
 use crate::config::settings::Config;
 use crate::config::theme::{Theme, ThemeName};
 use crate::mascot::Mascot;
@@ -45,7 +51,7 @@ const STARTUP_BANNER: &str = r#"
     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
 
         ╭──────────────────────────────────────────╮
-        │  ♡  Welcome to Zaxiom v0.3.1~            │
+        │  ♡  Welcome to Zaxiom v0.3.2~            │
         │      Linux vibes on Windows! (◕‿◕)♡     │
         │                                          │
         │  Your kawaii robot companion is here! →  │
@@ -741,26 +747,22 @@ impl ZaxiomApp {
         }
 
         // !-n expands to nth-from-last command (e.g., !-1 = last, !-2 = second to last)
-        if let Ok(re_neg) = regex::Regex::new(r"!-(\d+)") {
-            let result_clone = result.clone();
-            for cap in re_neg.captures_iter(&result_clone) {
-                if let Ok(n) = cap[1].parse::<usize>() {
-                    if n > 0 && n <= history_commands.len() {
-                        let idx = history_commands.len() - n;
-                        result = result.replace(&cap[0], &history_commands[idx]);
-                    }
+        let result_clone = result.clone();
+        for cap in HISTORY_NEG_REGEX.captures_iter(&result_clone) {
+            if let Ok(n) = cap[1].parse::<usize>() {
+                if n > 0 && n <= history_commands.len() {
+                    let idx = history_commands.len() - n;
+                    result = result.replace(&cap[0], &history_commands[idx]);
                 }
             }
         }
 
         // !n expands to nth command (1-indexed)
-        if let Ok(re_pos) = regex::Regex::new(r"!(\d+)") {
-            let result_clone = result.clone();
-            for cap in re_pos.captures_iter(&result_clone) {
-                if let Ok(n) = cap[1].parse::<usize>() {
-                    if n > 0 && n <= history_commands.len() {
-                        result = result.replace(&cap[0], &history_commands[n - 1]);
-                    }
+        let result_clone = result.clone();
+        for cap in HISTORY_POS_REGEX.captures_iter(&result_clone) {
+            if let Ok(n) = cap[1].parse::<usize>() {
+                if n > 0 && n <= history_commands.len() {
+                    result = result.replace(&cap[0], &history_commands[n - 1]);
                 }
             }
         }
@@ -805,24 +807,6 @@ impl ZaxiomApp {
             // Execute based on routing
             let history = pane.history.recent_commands(10);
             let success = match target {
-                ExecutionTarget::External => {
-                    // Execute as external command (no PTY, no visible window)
-                    let cwd = pane.state.cwd().to_path_buf();
-                    match self.executor.execute_external(command, &cwd) {
-                        Ok(output) => {
-                            if !output.is_empty() {
-                                for line in output.lines() {
-                                    pane.buffer.push_line(line);
-                                }
-                            }
-                            true
-                        }
-                        Err(e) => {
-                            pane.buffer.push_error(&format!("{}", e));
-                            false
-                        }
-                    }
-                }
                 ExecutionTarget::PtyRaw => {
                     // Parse command to get program and args
                     let parts: Vec<&str> = command.split_whitespace().collect();

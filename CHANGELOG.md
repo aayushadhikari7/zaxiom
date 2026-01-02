@@ -2,6 +2,21 @@
 
 All notable changes to Zaxiom will be documented in this file.
 
+## [0.3.2] - 2026-01-02
+
+### Added
+- Full TTY support for all external CLI tools (aider, gh, etc.)
+- AI Assistants category in README external tools section
+
+### Fixed
+- External commands now properly inherit ConPTY for TTY detection
+- Removed slow `where` command lookup - commands run instantly via `cmd.exe /c`
+- Environment variables set for TTY detection: TERM, COLORTERM, FORCE_COLOR, WT_SESSION
+
+### Changed
+- All external commands route through PTY for proper terminal emulation
+- Pre-compiled history expansion regexes for better performance
+
 ## [0.3.1] - 2025-12-30
 
 ### Added
@@ -64,6 +79,7 @@ All notable changes to Zaxiom will be documented in this file.
 - Hints mode for extracting URLs and paths
 - Split panes and tabs
 
+[0.3.2]: https://github.com/aayushadhikari7/zaxiom/releases/tag/v0.3.2
 [0.3.1]: https://github.com/aayushadhikari7/zaxiom/releases/tag/v0.3.1
 [0.3.0]: https://github.com/aayushadhikari7/zaxiom/releases/tag/v0.3.0
 [0.2.0]: https://github.com/aayushadhikari7/zaxiom/releases/tag/v0.2.0

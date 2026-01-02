@@ -98,7 +98,7 @@ All your favorite Unix commands, implemented in Rust for speed:
 
 ### 🔧 External Tool Support
 
-Seamlessly run your development tools:
+Seamlessly run your development tools with full TTY support:
 
 | | Category | Tools |
 |--|----------|-------|
@@ -107,6 +107,7 @@ Seamlessly run your development tools:
 | 🐍 | Python | `python` `pip` `uv` `poetry` |
 | 🐳 | Containers | `docker` `kubectl` `terraform` |
 | 🔀 | Version Control | `git` `gh` `ssh` |
+| 🤖 | AI Assistants | `aider` `gh copilot` |
 
 ### 🤖 AI Chat
 
